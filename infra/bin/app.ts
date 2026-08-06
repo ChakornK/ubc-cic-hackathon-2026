@@ -12,7 +12,7 @@ function requireEnv(name: string): string {
 const BEDROCK_MODEL_ID_PATTERN = /^[a-z][a-z0-9.-]+[a-z0-9]$/;
 
 function resolveBedrockModelId(): string {
-  const id = process.env.BEDROCK_MODEL_ID ?? "anthropic.claude-haiku-4-5-20251001-v1";
+  const id = requireEnv("BEDROCK_MODEL_ID");
   if (!BEDROCK_MODEL_ID_PATTERN.test(id)) {
     throw new Error(
       `Invalid BEDROCK_MODEL_ID "${id}". Must be a bare model ID (e.g. "anthropic.claude-haiku-4-5-20251001-v1"), not a cross-region profile or versioned ARN.`,
