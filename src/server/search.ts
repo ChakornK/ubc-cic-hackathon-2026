@@ -9,7 +9,7 @@ let client: Client | undefined;
 export function getOpenSearch(): Client {
   client ??= new Client({
     ...AwsSigv4Signer({
-      region: process.env.AWS_REGION ?? "us-west-2",
+      region: process.env.AWS_REGION ?? "us-east-1",
       service: "es",
       getCredentials: fromNodeProviderChain(),
     }),
