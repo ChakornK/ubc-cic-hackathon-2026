@@ -17,6 +17,10 @@ export interface CampusAiStackProps extends StackProps {
   bedrockModelId: string;
   /** IAM principal ARN allowed to ingest data into OpenSearch (developer). */
   ingestPrincipalArn: string;
+  /** OAuth callback URL (the app's public URL, e.g. CloudFront distribution). */
+  callbackUrl: string;
+  /** Cognito hosted UI domain prefix. Must be globally unique. */
+  cognitoDomainPrefix: string;
   /** Skip the Next.js build during synth (for tests). */
   skipBuild?: boolean;
 }
@@ -50,7 +54,7 @@ export class CampusAiStack extends Stack {
       },
     });
 
-    const domainPrefix = process.env.COGNITO_DOMAIN_PREFIX ?? "campus-ai-assistant";
+    const domainPrefix = props.cognitoDomainPrefix;
     this.userPool.addDomain("HostedUi", {
       cognitoDomain: { domainPrefix },
     });
@@ -82,14 +86,14 @@ export class CampusAiStack extends Stack {
     });
 
     // App client — created before Nextjs so client ID is available as an env var
-    // without circular deps. Callback URLs updated post-deploy (see README).
+    // without circular deps.
     this.userPoolClient = this.userPool.addClient("AppClient", {
       supportedIdentityProviders: [cognito.UserPoolClientIdentityProvider.GOOGLE],
       oAuth: {
         flows: { authorizationCodeGrant: true },
         scopes: [cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
-        callbackUrls: ["https://localhost:3000/"],
-        logoutUrls: ["https://localhost:3000/"],
+        callbackUrls: [props.callbackUrl],
+        logoutUrls: [props.callbackUrl],
       },
     });
     this.userPoolClient.node.addDependency(googleIdp);

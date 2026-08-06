@@ -32,6 +32,8 @@ const DEFAULT_PROPS = {
   googleClientSecret: "test-google-secret",
   bedrockModelId: "anthropic.claude-sonnet-4-20250514",
   ingestPrincipalArn: "arn:aws:iam::123456789012:role/IngestRole",
+  callbackUrl: "https://example.cloudfront.net/",
+  cognitoDomainPrefix: "test-campus-ai",
   skipBuild: true,
 };
 

@@ -14,5 +14,7 @@ new CampusAiStack(app, "CampusAiAssistant", {
   googleClientSecret: requireEnv("GOOGLE_CLIENT_SECRET"),
   bedrockModelId: process.env.BEDROCK_MODEL_ID ?? "anthropic.claude-haiku-4-5-20251001-v1",
   ingestPrincipalArn: requireEnv("INGEST_PRINCIPAL_ARN"),
+  callbackUrl: requireEnv("CALLBACK_URL"),
+  cognitoDomainPrefix: process.env.COGNITO_DOMAIN_PREFIX ?? "campus-ai-assistant",
   skipBuild: process.env.SKIP_BUILD === "true",
 });
