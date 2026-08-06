@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import type { ChatMessage, Profile, SessionSummary, ToolCall } from "../core/types";
 import { messageSk, MSG_MARKER, sessionSk, userPk } from "./keys";
 
@@ -57,8 +57,7 @@ export async function getSessionMessages(sub: string, sessionId: string): Promis
   return items.map((item) => ({ role: item.role as ChatMessage["role"], content: item.content as string }));
 }
 
-/** Persists one user + assistant exchange and upserts the session metadata (5.1). */
-// ponytail: read-modify-write on messageCount, no transaction — fine for one user per session
+/** Persists one user + assistant exchange and atomically increments the session counter. */
 export async function appendExchange(
   sub: string,
   sessionId: string,
@@ -68,41 +67,46 @@ export async function appendExchange(
 ): Promise<void> {
   const pk = userPk(sub);
   const now = new Date().toISOString();
-  const meta = await ddb().send(new GetCommand({ TableName: table(), Key: { PK: pk, SK: sessionSk(sessionId) } }));
-  const seq = (meta.Item?.messageCount as number | undefined) ?? 0;
 
-  await ddb().send(
-    new PutCommand({
+  // Atomically reserve two sequence slots. The returned messageCount is the
+  // value *after* the ADD, so the two new messages occupy (count - 2) and (count - 1).
+  const update = await ddb().send(
+    new UpdateCommand({
       TableName: table(),
-      Item: { PK: pk, SK: messageSk(sessionId, seq), role: "user", content: userMessage, createdAt: now },
-    }),
-  );
-  await ddb().send(
-    new PutCommand({
-      TableName: table(),
-      Item: {
-        PK: pk,
-        SK: messageSk(sessionId, seq + 1),
-        role: "assistant",
-        content: assistantMessage,
-        toolCalls,
-        createdAt: now,
+      Key: { PK: pk, SK: sessionSk(sessionId) },
+      UpdateExpression:
+        "ADD messageCount :inc SET updatedAt = :now, createdAt = if_not_exists(createdAt, :now), title = if_not_exists(title, :title)",
+      ExpressionAttributeValues: {
+        ":inc": 2,
+        ":now": now,
+        ":title": userMessage.slice(0, 80),
       },
+      ReturnValues: "ALL_NEW",
     }),
   );
-  await ddb().send(
-    new PutCommand({
-      TableName: table(),
-      Item: {
-        PK: pk,
-        SK: sessionSk(sessionId),
-        title: (meta.Item?.title as string | undefined) ?? userMessage.slice(0, 80),
-        createdAt: (meta.Item?.createdAt as string | undefined) ?? now,
-        updatedAt: now,
-        messageCount: seq + 2,
-      },
-    }),
-  );
+  const seq = ((update.Attributes?.messageCount as number) ?? 2) - 2;
+
+  await Promise.all([
+    ddb().send(
+      new PutCommand({
+        TableName: table(),
+        Item: { PK: pk, SK: messageSk(sessionId, seq), role: "user", content: userMessage, createdAt: now },
+      }),
+    ),
+    ddb().send(
+      new PutCommand({
+        TableName: table(),
+        Item: {
+          PK: pk,
+          SK: messageSk(sessionId, seq + 1),
+          role: "assistant",
+          content: assistantMessage,
+          toolCalls,
+          createdAt: now,
+        },
+      }),
+    ),
+  ]);
 }
 
 export async function getProfile(sub: string): Promise<Profile> {
