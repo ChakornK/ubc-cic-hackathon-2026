@@ -4,14 +4,14 @@
 
 ## Overview
 
-Build bottom-up in one repository holding a single Next.js 15 app (browser UI + `app/api/*` route handlers + `src/server/*` logic) plus an `infra/` CDK workspace: pure core logic first (formatter, validation, agent loop — all property-tested against mocks), then the dataset-module registry and the three initial modules, then persistence, then the route handlers and auth middleware that wire it together, then CDK (deploying the app to Lambda via `cdk-nextjs`/OpenNext), ingest CLI, and the browser UI. Every piece is integrated by the route handlers/registry — no orphaned code.
+Build bottom-up in one repository holding a single Next.js 16 app (browser UI + `app/api/*` route handlers + `src/server/*` logic) plus an `infra/` CDK workspace: pure core logic first (formatter, validation, agent loop — all property-tested against mocks), then the dataset-module registry and the three initial modules, then persistence, then the route handlers and auth middleware that wire it together, then CDK (deploying the app to Lambda via `cdk-nextjs`/OpenNext), ingest CLI, and the browser UI. Every piece is integrated by the route handlers/registry — no orphaned code.
 
 ## Tasks
 
 - [ ] 1. Project setup
-  - [ ] 1.1 Scaffold the project
-    - Next.js 15 (App Router, React 19) at the repo root with `src/server/` for backend logic; npm workspace `infra/` for CDK; `tsconfig` targeting ES2025; Node 24 engines field
-    - vitest 3 + fast-check 4 configured for `src/server` and `infra`
+  - [x] 1.1 Scaffold the project
+    - Next.js 16 (App Router, React 19) at the repo root with `src/server/` for backend logic; npm workspace `infra/` for CDK; `tsconfig` targeting ES2025; Node 24 engines field
+    - vitest 4 + fast-check 4 configured for `src/server` and `infra`
     - _Requirements: 8.3_
   - [ ] 1.2 Define core types and interfaces
     - `src/server/core/types.ts`: `DatasetModule`, `IndexDef`, `ToolDef`, `GeoArtifact`, `ChatRequest`, `ChatMessage`, `ChatResponse`, `SessionSummary`, `AgentResult`, `ConverseFn`
@@ -159,8 +159,14 @@ Build bottom-up in one repository holding a single Next.js 15 app (browser UI + 
     { "id": 0, "tasks": ["1.1"] },
     { "id": 1, "tasks": ["1.2"] },
     { "id": 2, "tasks": ["2.1", "2.3", "5.1", "6.1", "10.1", "11.1"] },
-    { "id": 3, "tasks": ["2.2", "2.4", "3.1", "5.2", "5.4", "5.5", "6.2", "6.3", "10.2", "11.2"] },
-    { "id": 4, "tasks": ["3.2", "3.3", "5.3", "5.6", "5.7", "6.4", "9.1", "11.3", "11.4"] },
+    {
+      "id": 3,
+      "tasks": ["2.2", "2.4", "3.1", "5.2", "5.4", "5.5", "6.2", "6.3", "10.2", "11.2"]
+    },
+    {
+      "id": 4,
+      "tasks": ["3.2", "3.3", "5.3", "5.6", "5.7", "6.4", "9.1", "11.3", "11.4"]
+    },
     { "id": 5, "tasks": ["3.4", "3.5", "3.6", "7.1", "11.5"] },
     { "id": 6, "tasks": ["7.2", "12.1", "12.2"] }
   ]

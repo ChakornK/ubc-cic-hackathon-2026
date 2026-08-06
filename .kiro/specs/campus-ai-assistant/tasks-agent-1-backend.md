@@ -8,8 +8,8 @@
 ## Tasks
 
 - [ ] 1. Project setup
-  - [ ] 1.1 Scaffold the project **(do this first — Agent 2 is blocked on it)**
-    - Next.js 15 (App Router, React 19) at the repo root with `src/server/` for backend logic; npm workspace `infra/` (empty placeholder for Agent 3); `tsconfig` targeting ES2025; Node 24 engines field; vitest 3 + fast-check 4
+  - [x] 1.1 Scaffold the project **(done — Agent 2 is unblocked)**
+    - Next.js 16 (App Router, React 19) at the repo root with `src/server/` for backend logic; npm workspace `infra/` (empty placeholder for Agent 3); `tsconfig` targeting ES2025; Node 24 engines field; vitest 4 + fast-check 4
     - _Requirements: 8.3_
   - [ ] 1.2 Define core types and interfaces
     - `src/server/core/types.ts`: `DatasetModule`, `IndexDef`, `ToolDef`, `GeoArtifact`, `ChatRequest`, `ChatMessage`, `ChatResponse`, `SessionSummary`, `AgentResult`, `ConverseFn` — response types must match `api-spec.md`
@@ -119,7 +119,10 @@
     { "id": 0, "tasks": ["1.1"] },
     { "id": 1, "tasks": ["1.2"] },
     { "id": 2, "tasks": ["2.1", "2.3", "5.1", "6.1"] },
-    { "id": 3, "tasks": ["2.2", "2.4", "3.1", "5.2", "5.4", "5.5", "6.2", "6.3"] },
+    {
+      "id": 3,
+      "tasks": ["2.2", "2.4", "3.1", "5.2", "5.4", "5.5", "6.2", "6.3"]
+    },
     { "id": 4, "tasks": ["3.2", "3.3", "5.3", "5.6", "5.7", "6.4", "8.1"] },
     { "id": 5, "tasks": ["3.4", "3.5", "3.6", "7.1"] },
     { "id": 6, "tasks": ["7.2"] }

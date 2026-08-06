@@ -8,7 +8,7 @@ Merging front and back into one project also removes a latency risk: API Gateway
 
 The data source is the existing **Unified-UBC-Data** repository (`C:\Users\Max\Documents\AI Projects\Unified-UBC-Data`, ~556 MB): real UBC institutional data in plain JSON/CSV/GeoJSON with a `catalog.json` table index and a `QUERYING.md` join reference. The full `data/` tree is synced to the Data_Bucket; the ingest script then indexes only the tables the four tools query. Notably, section times in the source are already seconds-after-midnight integers, and the academic-calendar course table already carries `prerequisite`/`corequisite` fields parsed out of the description prose.
 
-The whole stack is TypeScript on current tooling: AWS CDK v2 for infrastructure, a **Node.js 24** Lambda for the backend, and **Next.js 15 (App Router) / React 19** with **deck.gl v9** for the frontend. One toolchain, shared types between Lambda and frontend, and `fast-check` v4 for property-based tests of the pure logic (agent loop control, time formatting, request validation, filter semantics).
+The whole stack is TypeScript on current tooling: AWS CDK v2 for infrastructure, a **Node.js 24** Lambda for the backend, and **Next.js 16 (App Router) / React 19** with **deck.gl v9** for the frontend. One toolchain, shared types between Lambda and frontend, and `fast-check` v4 for property-based tests of the pure logic (agent loop control, time formatting, request validation, filter semantics).
 
 The backend's data layer is organized as **dataset modules**: each data domain (courses, tuition, buildings/walking) is one self-contained module implementing a common interface that declares its OpenSearch indices, its agent tools, and its map artifacts. The ingest script, the tool registry, the `/geo/*` endpoint, and the frontend's tool-result renderers are all driven by the module registry — adding a new data source (events, study spaces, admissions, ...) means writing one module file and registering it, with no changes to the agent loop, API, or ingest plumbing.
 
@@ -66,12 +66,12 @@ graph TD
 
 ```typescript
 interface ChatApi {
-  chat(sessionId: string, messages: ChatMessage[]): Promise<ChatResponse>
-  listSessions(): Promise<SessionSummary[]>
-  getSession(id: string): Promise<ChatMessage[]>
-  getProfile(): Promise<Profile>
-  putProfile(p: Profile): Promise<void>
-  getGeo(name: 'buildings' | 'walking-routes'): Promise<GeoJSON.FeatureCollection>
+  chat(sessionId: string, messages: ChatMessage[]): Promise<ChatResponse>;
+  listSessions(): Promise<SessionSummary[]>;
+  getSession(id: string): Promise<ChatMessage[]>;
+  getProfile(): Promise<Profile>;
+  putProfile(p: Profile): Promise<void>;
+  getGeo(name: "buildings" | "walking-routes"): Promise<GeoJSON.FeatureCollection>;
 }
 ```
 
@@ -88,13 +88,13 @@ interface ChatApi {
 
 **Purpose**: Authenticated HTTP surface inside the same app.
 
-| Method | Route handler | Purpose |
-|---|---|---|
-| POST | `app/api/chat/route.ts` | Agent_Loop |
-| GET | `app/api/sessions/route.ts` | list sessions for caller |
-| GET | `app/api/sessions/[id]/route.ts` | session history for caller |
-| GET, PUT | `app/api/profile/route.ts` | read/write profile |
-| GET | `app/api/geo/[name]/route.ts` | GeoJSON from Data_Bucket |
+| Method   | Route handler                    | Purpose                    |
+| -------- | -------------------------------- | -------------------------- |
+| POST     | `app/api/chat/route.ts`          | Agent_Loop                 |
+| GET      | `app/api/sessions/route.ts`      | list sessions for caller   |
+| GET      | `app/api/sessions/[id]/route.ts` | session history for caller |
+| GET, PUT | `app/api/profile/route.ts`       | read/write profile         |
+| GET      | `app/api/geo/[name]/route.ts`    | GeoJSON from Data_Bucket   |
 
 Every handler runs through a shared `requireUser(request)` helper: it verifies the `Authorization` bearer token against the Cognito user pool with `aws-jwt-verify` (issuer, audience, expiry; JWKS cached) and returns the claims, or a 401 response for missing/invalid tokens (1.2). Identity is derived exclusively from the verified token's `sub` (1.3) — never from the body. No CORS needed: the API is same-origin with the pages.
 
@@ -104,15 +104,15 @@ Every handler runs through a shared `requireUser(request)` helper: it verifies t
 
 ```typescript
 interface AgentResult {
-  message: string                     // final assistant text
-  tool_calls: { name: string; input: unknown; result?: unknown }[]  // result included for frontend renderers
-  warning?: string                    // present iff Iteration_Limit reached
+  message: string; // final assistant text
+  tool_calls: { name: string; input: unknown; result?: unknown }[]; // result included for frontend renderers
+  warning?: string; // present iff Iteration_Limit reached
 }
 
 async function runAgentLoop(
   messages: ConverseMessage[],
-  deps: { converse: ConverseFn; tools: ToolRegistry }
-): Promise<AgentResult>
+  deps: { converse: ConverseFn; tools: ToolRegistry },
+): Promise<AgentResult>;
 ```
 
 **Behavior** (Requirements 2.2–2.7):
@@ -134,26 +134,29 @@ The Bedrock client, tool registry, and store are injected so the loop is unit/pr
 
 ```typescript
 interface DatasetModule {
-  name: string
-  indices: IndexDef[]          // ingest: what this module loads into OpenSearch
-  tools: ToolDef[]             // agent: what this module lets the model do
-  geo?: GeoArtifact[]          // map: what this module lets the frontend draw
+  name: string;
+  indices: IndexDef[]; // ingest: what this module loads into OpenSearch
+  tools: ToolDef[]; // agent: what this module lets the model do
+  geo?: GeoArtifact[]; // map: what this module lets the frontend draw
 }
 
 interface IndexDef {
-  index: string                                   // OpenSearch index name
-  mappings: Record<string, unknown>
-  read(s3: S3Reader): AsyncIterable<unknown>      // source table(s) -> raw records
-  transform(raw: unknown): { _id: string; doc: unknown } | null  // deterministic _id; null = skip row
-  derive?(s3: S3Writer): Promise<void>            // optional derived artifacts (e.g. walking_distances)
+  index: string; // OpenSearch index name
+  mappings: Record<string, unknown>;
+  read(s3: S3Reader): AsyncIterable<unknown>; // source table(s) -> raw records
+  transform(raw: unknown): { _id: string; doc: unknown } | null; // deterministic _id; null = skip row
+  derive?(s3: S3Writer): Promise<void>; // optional derived artifacts (e.g. walking_distances)
 }
 
 interface ToolDef {
-  spec: ToolSpec               // Converse toolSpec: name, description, JSON input schema (3.5)
-  execute(input: Record<string, unknown>, os: OsClient): Promise<unknown>
+  spec: ToolSpec; // Converse toolSpec: name, description, JSON input schema (3.5)
+  execute(input: Record<string, unknown>, os: OsClient): Promise<unknown>;
 }
 
-interface GeoArtifact { name: string; s3Key: string }   // exposed as GET /api/geo/{name}
+interface GeoArtifact {
+  name: string;
+  s3Key: string;
+} // exposed as GET /api/geo/{name}
 ```
 
 `modules/index.ts` exports the registry: `export const modules: DatasetModule[] = [courses, tuition, buildings]`. Everything downstream derives from it:
@@ -166,20 +169,23 @@ interface GeoArtifact { name: string; s3Key: string }   // exposed as GET /api/g
 Adding a data source (e.g. `events` from `data/events/`, or `spaces` from `data/learning-spaces/`) is one new module file + one registry entry; the agent loop, router, ingest runner, and IAM are untouched.
 
 ```typescript
-type ToolFn = ToolDef['execute']
+type ToolFn = ToolDef["execute"];
 
-async function executeTool(modules: DatasetModule[], name: string, input: unknown):
-  Promise<{ json: unknown } | { json: { status: 'error'; message: string } }>
+async function executeTool(
+  modules: DatasetModule[],
+  name: string,
+  input: unknown,
+): Promise<{ json: unknown } | { json: { status: "error"; message: string } }>;
 ```
 
 **Initial tools** (each `spec` has typed properties, descriptions, `required` list — 3.5):
 
-| Tool | Input | Backing query |
-|---|---|---|
-| `search_courses` | `query` (req), `subject`, `credits`, `term`, `has_no_prereqs`, `limit` (default 20) | OpenSearch `multi_match` on title/description/code + `filter` clauses; `has_no_prereqs=true` → prerequisite field missing **or** empty string (3.1) |
-| `get_course` | `course_code` (req) | term query on `courses` by code; returns full record incl. prerequisites/corequisites as a JSON string (3.2) |
-| `get_tuition` | `program_slug`, `student_type`, `cohort_year` (all req) | term query on `tuition`; returns per-credit CAD rate (3.3) |
-| `walking_distance` | `from_building`, `to_building` (both req) | term query on `walking_distances` (symmetric: try both orderings); returns meters + minutes (3.4) |
+| Tool               | Input                                                                               | Backing query                                                                                                                                       |
+| ------------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `search_courses`   | `query` (req), `subject`, `credits`, `term`, `has_no_prereqs`, `limit` (default 20) | OpenSearch `multi_match` on title/description/code + `filter` clauses; `has_no_prereqs=true` → prerequisite field missing **or** empty string (3.1) |
+| `get_course`       | `course_code` (req)                                                                 | term query on `courses` by code; returns full record incl. prerequisites/corequisites as a JSON string (3.2)                                        |
+| `get_tuition`      | `program_slug`, `student_type`, `cohort_year` (all req)                             | term query on `tuition`; returns per-credit CAD rate (3.3)                                                                                          |
+| `walking_distance` | `from_building`, `to_building` (both req)                                           | term query on `walking_distances` (symmetric: try both orderings); returns meters + minutes (3.4)                                                   |
 
 Section times in `search_courses`/`get_course` results are run through the Time_Formatter before being returned to the model (3.7).
 
@@ -188,7 +194,7 @@ Section times in `search_courses`/`get_course` results are run through the Time_
 **Purpose**: `55800 → "15:30"`.
 
 ```typescript
-function formatSeconds(s: number): string  // zero-padded 24h HH:MM
+function formatSeconds(s: number): string; // zero-padded 24h HH:MM
 ```
 
 One pure function: `String(Math.floor(s / 3600)).padStart(2, '0') + ':' + String(Math.floor((s % 3600) / 60)).padStart(2, '0')`. Input domain `[0, 86399]`; out-of-range input returns the raw number as a string rather than throwing (a bad data row must not kill a tool result).
@@ -205,12 +211,12 @@ Single table, on-demand billing. Ownership is structural: every key starts with 
 
 **Step 2 — index**: `npm run ingest` iterates the dataset-module registry and runs each module's `IndexDef`s — read from the Data_Bucket, transform, bulk-index (mappings created if absent). The ingest runner itself is dataset-agnostic; the three initial modules define:
 
-| Index | Source | Transform |
-|---|---|---|
-| `courses` | `academic-calendar/vancouver/courses.json` (9,491 catalogue rows: code, title, description, credits, parsed `prerequisite`/`corequisite`) + `courses/sections.json` (35,403 offerings: term, `field_days`, `field_start_time`/`field_end_time` seconds, instructor, status) | Dedupe catalogue on course code; attach each course's sections via the code join documented in `QUERYING.md`; carry times through as `start_seconds`/`end_seconds` |
-| `tuition` | `finances/tuition.json` (1,876 melted rows) | Keep rows with `unit === 'per_credit'` and a numeric `amount`; derive `program_slug` from `program`; keep `student_type`, `cohort_year`, `cohort_rule` |
-| `buildings` | `geospatial/ubcv/locations/geojson/ubcv_buildings.geojson` (449 features) | `BLDG_CODE`, `NAME`, centroid lat/lon computed from the footprint polygon |
-| `walking_distances` | derived from `buildings` centroids | All pairs: haversine × 1.3 detour factor → meters; minutes = meters / 80, rounded up. Also written back to S3 as `derived/walking_distances.json` so the bucket holds the dataset (4.1) |
+| Index               | Source                                                                                                                                                                                                                                                                      | Transform                                                                                                                                                                               |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `courses`           | `academic-calendar/vancouver/courses.json` (9,491 catalogue rows: code, title, description, credits, parsed `prerequisite`/`corequisite`) + `courses/sections.json` (35,403 offerings: term, `field_days`, `field_start_time`/`field_end_time` seconds, instructor, status) | Dedupe catalogue on course code; attach each course's sections via the code join documented in `QUERYING.md`; carry times through as `start_seconds`/`end_seconds`                      |
+| `tuition`           | `finances/tuition.json` (1,876 melted rows)                                                                                                                                                                                                                                 | Keep rows with `unit === 'per_credit'` and a numeric `amount`; derive `program_slug` from `program`; keep `student_type`, `cohort_year`, `cohort_rule`                                  |
+| `buildings`         | `geospatial/ubcv/locations/geojson/ubcv_buildings.geojson` (449 features)                                                                                                                                                                                                   | `BLDG_CODE`, `NAME`, centroid lat/lon computed from the footprint polygon                                                                                                               |
+| `walking_distances` | derived from `buildings` centroids                                                                                                                                                                                                                                          | All pairs: haversine × 1.3 detour factor → meters; minutes = meters / 80, rounded up. Also written back to S3 as `derived/walking_distances.json` so the bucket holds the dataset (4.1) |
 
 **Step 3 — derived GeoJSON for the map**: module `derive()` hooks write derived artifacts — the buildings module writes `derived/walking-routes.geojson` (`ubcv_routes.geojson` filtered to `PEDESTRIAN_ACCESS === 'Y'`, properties stripped to geometry only, shrinking the 5 MB source below Lambda response limits) and `derived/walking_distances.json`.
 
@@ -231,11 +237,11 @@ README documents deploy, ingest, Google OAuth setup, and a sample two-tool quest
 
 ### DynamoDB (single table)
 
-| Item | PK | SK | Attributes |
-|---|---|---|---|
-| Session | `USER#<sub>` | `SESSION#<sessionId>` | `title` (first user message, ≤80 chars), `createdAt`, `updatedAt`, `messageCount` |
+| Item    | PK           | SK                              | Attributes                                                                                                                        |
+| ------- | ------------ | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Session | `USER#<sub>` | `SESSION#<sessionId>`           | `title` (first user message, ≤80 chars), `createdAt`, `updatedAt`, `messageCount`                                                 |
 | Message | `USER#<sub>` | `SESSION#<sessionId>#MSG#<seq>` | `role`, `content`, `toolCalls?`, `createdAt`; `seq` zero-padded to 6 digits so lexicographic SK order = chronological order (5.3) |
-| Profile | `USER#<sub>` | `PROFILE` | `preferences` map, `email`, `updatedAt` (5.5) |
+| Profile | `USER#<sub>` | `PROFILE`                       | `preferences` map, `email`, `updatedAt` (5.5)                                                                                     |
 
 - Session list = Query `PK = USER#sub AND begins_with(SK, 'SESSION#')` filtered to metadata items (5.2).
 - History = Query `begins_with(SK, 'SESSION#<id>#MSG#')` (5.3).
@@ -246,26 +252,47 @@ README documents deploy, ingest, Google OAuth setup, and a sample two-tool quest
 ```typescript
 // courses — from academic-calendar catalogue + courses/sections offerings
 interface CourseDoc {
-  code: string            // e.g. "AANB_V 515" (source: field_course_code)
-  subject: string; number: string; title: string
-  description: string; credits: number | null   // parsed from field_course_credit "(3)"
-  prerequisite: string | null                    // pre-parsed by the source dataset
-  corequisite: string | null
-  sections: { section: string; term: string; days: string[]   // ["t","th"]
-              start_seconds: number | null; end_seconds: number | null  // seconds after midnight
-              instructor?: string; status?: string }[]
+  code: string; // e.g. "AANB_V 515" (source: field_course_code)
+  subject: string;
+  number: string;
+  title: string;
+  description: string;
+  credits: number | null; // parsed from field_course_credit "(3)"
+  prerequisite: string | null; // pre-parsed by the source dataset
+  corequisite: string | null;
+  sections: {
+    section: string;
+    term: string;
+    days: string[]; // ["t","th"]
+    start_seconds: number | null;
+    end_seconds: number | null; // seconds after midnight
+    instructor?: string;
+    status?: string;
+  }[];
 }
 // tuition — per-credit rows only, slug derived at ingest
-interface TuitionDoc { program: string; program_slug: string
-                       student_type: 'domestic' | 'international'
-                       cohort_year: number | null; cohort_rule: 'exactly' | 'or_later' | null
-                       per_credit_cad: number }
+interface TuitionDoc {
+  program: string;
+  program_slug: string;
+  student_type: "domestic" | "international";
+  cohort_year: number | null;
+  cohort_rule: "exactly" | "or_later" | null;
+  per_credit_cad: number;
+}
 // buildings — from ubcv_buildings.geojson
-interface BuildingDoc { code: string   // BLDG_CODE, e.g. "BUCH"
-                        name: string; lat: number; lon: number }  // footprint centroid
+interface BuildingDoc {
+  code: string; // BLDG_CODE, e.g. "BUCH"
+  name: string;
+  lat: number;
+  lon: number;
+} // footprint centroid
 // walking_distances — derived at ingest from building centroids
-interface WalkingDistanceDoc { from: string; to: string   // building codes, from < to
-                               meters: number; minutes: number }
+interface WalkingDistanceDoc {
+  from: string;
+  to: string; // building codes, from < to
+  meters: number;
+  minutes: number;
+}
 ```
 
 **Validation rules**: `0 <= start_seconds < end_seconds <= 86399` when present; `per_credit_cad >= 0`; `from < to` and `from !== to`; centroid within UBC Vancouver bounding box.
@@ -279,10 +306,24 @@ interface WalkingDistanceDoc { from: string; to: string   // building codes, fro
 ### API shapes
 
 ```typescript
-interface ChatRequest  { session_id: string; messages: ChatMessage[] }
-interface ChatMessage  { role: 'user' | 'assistant'; content: string }
-interface ChatResponse { message: string; tool_calls: { name: string; input: unknown; result?: unknown }[]; warning?: string }
-interface SessionSummary { session_id: string; title: string; updatedAt: string }
+interface ChatRequest {
+  session_id: string;
+  messages: ChatMessage[];
+}
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+interface ChatResponse {
+  message: string;
+  tool_calls: { name: string; input: unknown; result?: unknown }[];
+  warning?: string;
+}
+interface SessionSummary {
+  session_id: string;
+  title: string;
+  updatedAt: string;
+}
 ```
 
 ## Correctness Properties
@@ -342,21 +383,27 @@ For any dataset record, `docId(record)` is stable across calls (idempotent re-in
 ## Error Handling
 
 ### Scenario 1: Missing/invalid token
+
 **Condition**: Request without a valid Cognito token. **Response**: `requireUser` returns 401 before any handler logic runs (1.2). **Recovery**: Frontend redirects to sign-in.
 
 ### Scenario 2: Malformed chat request
+
 **Condition**: Non-JSON body, missing `messages`, or empty array. **Response**: 400 with `{ error: <description> }` (2.8). **Recovery**: Frontend shows the error; user retries.
 
 ### Scenario 3: Tool failure or no results
+
 **Condition**: OpenSearch error, unknown tool, or zero hits. **Response**: `toolResult` with `status: "error"` + message; loop continues and the model explains the gap to the user (3.6). **Recovery**: None needed — contained by design.
 
 ### Scenario 4: Iteration limit
+
 **Condition**: 8 Converse calls without `end_turn`. **Response**: 200 with best-effort text and `warning` field (2.5). **Recovery**: Frontend renders the warning inline.
 
 ### Scenario 5: Unhandled error
+
 **Condition**: Bedrock throttling, DynamoDB failure, bugs. **Response**: Top-level try/catch returns 500 with a JSON error body (2.9); details go to CloudWatch, not the client. **Recovery**: Frontend error banner + retry (6.5).
 
 ### Scenario 6: Frontend request failure
+
 **Condition**: Network error or 5xx. **Response**: Error message with retry that resends the same message; the in-flight guard prevents duplicate submissions (6.2, 6.5).
 
 ## Testing Strategy
@@ -398,10 +445,11 @@ After deploy + sync + ingest: a script signs in (or uses a test JWT), sends the 
 
 ## Dependencies
 
-| Area | Packages |
-|---|---|
-| Runtime | Node.js 24 (Lambda `NODEJS_24_X`, local dev, ingest script); ES2025 target |
-| Infra | `aws-cdk-lib` v2 (latest), `constructs`, `cdk-nextjs` (OpenNext) |
-| App — server side | `@aws-sdk/client-bedrock-runtime`, `@aws-sdk/client-dynamodb` + `@aws-sdk/lib-dynamodb`, `@aws-sdk/client-s3` (all SDK v3), `@opensearch-project/opensearch` (+ `AwsSigv4Signer`), `aws-jwt-verify` |
-| App — browser side | `next` 15 (App Router), `react` 19, `react-oidc-context`, `deck.gl` v9, `maplibre-gl` |
-| Testing | `vitest` 3, `fast-check` 4, `aws-cdk-lib/assertions` |
+| Area               | Packages                                                                                                                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runtime            | Node.js 24 (Lambda `NODEJS_24_X`, local dev, ingest script); ES2025 target                                                                                                                          |
+| Infra              | `aws-cdk-lib` v2 (latest), `constructs`, `cdk-nextjs` (OpenNext)                                                                                                                                    |
+| App — server side  | `@aws-sdk/client-bedrock-runtime`, `@aws-sdk/client-dynamodb` + `@aws-sdk/lib-dynamodb`, `@aws-sdk/client-s3` (all SDK v3), `@opensearch-project/opensearch` (+ `AwsSigv4Signer`), `aws-jwt-verify` |
+| App — browser side | `next` 16 (App Router), `react` 19, `react-oidc-context`, `deck.gl` v9, `maplibre-gl`                                                                                                               |
+| Testing            | `vitest` 4, `fast-check` 4, `aws-cdk-lib/assertions`                                                                                                                                                |
+| Tooling            | TypeScript 7, Biome 2 (lint only — formatter disabled), Prettier 3 (formatting)                                                                                                                     |

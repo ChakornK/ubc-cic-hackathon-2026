@@ -13,43 +13,43 @@ The contract between the browser UI and the `app/api/*` route handlers. **This d
 { "error": "human-readable description" }
 ```
 
-| Status | Meaning |
-|---|---|
-| 400 | Malformed request (bad JSON, missing/empty `messages`, invalid body) |
-| 401 | Missing, invalid, or expired token |
-| 404 | Resource does not exist **or is not owned by the caller** (indistinguishable by design) |
-| 500 | Unhandled server error (details in CloudWatch, never in the body) |
+| Status | Meaning                                                                                 |
+| ------ | --------------------------------------------------------------------------------------- |
+| 400    | Malformed request (bad JSON, missing/empty `messages`, invalid body)                    |
+| 401    | Missing, invalid, or expired token                                                      |
+| 404    | Resource does not exist **or is not owned by the caller** (indistinguishable by design) |
+| 500    | Unhandled server error (details in CloudWatch, never in the body)                       |
 
 ## Shared types
 
 ```typescript
 interface ChatMessage {
-  role: 'user' | 'assistant'
-  content: string
+  role: "user" | "assistant";
+  content: string;
 }
 
 interface ToolCall {
-  name: string                       // e.g. "walking_distance"
-  input: Record<string, unknown>     // the model-supplied tool input
-  result?: unknown                   // the tool's output, when available — renderers use this
+  name: string; // e.g. "walking_distance"
+  input: Record<string, unknown>; // the model-supplied tool input
+  result?: unknown; // the tool's output, when available — renderers use this
 }
 
 interface ChatResponse {
-  message: string                    // final assistant text
-  tool_calls: ToolCall[]             // ordered; empty array if no tools were used
-  warning?: string                   // present iff the 8-call iteration limit was hit
+  message: string; // final assistant text
+  tool_calls: ToolCall[]; // ordered; empty array if no tools were used
+  warning?: string; // present iff the 8-call iteration limit was hit
 }
 
 interface SessionSummary {
-  session_id: string
-  title: string                      // first user message, ≤80 chars
-  updatedAt: string                  // ISO 8601
+  session_id: string;
+  title: string; // first user message, ≤80 chars
+  updatedAt: string; // ISO 8601
 }
 
 interface Profile {
-  preferences: Record<string, string>
-  email?: string
-  updatedAt?: string                 // set by server, ignored on PUT
+  preferences: Record<string, string>;
+  email?: string;
+  updatedAt?: string; // set by server, ignored on PUT
 }
 ```
 
@@ -64,9 +64,7 @@ Run one chat exchange through the agent.
 ```json
 {
   "session_id": "c1a2b3d4-...",
-  "messages": [
-    { "role": "user", "content": "How long is the walk from IKB to ICCS?" }
-  ]
+  "messages": [{ "role": "user", "content": "How long is the walk from IKB to ICCS?" }]
 }
 ```
 
@@ -98,7 +96,11 @@ Run one chat exchange through the agent.
 
 ```json
 [
-  { "session_id": "c1a2...", "title": "How long is the walk from IKB to ICCS?", "updatedAt": "2026-08-06T18:20:11Z" }
+  {
+    "session_id": "c1a2...",
+    "title": "How long is the walk from IKB to ICCS?",
+    "updatedAt": "2026-08-06T18:20:11Z"
+  }
 ]
 ```
 
@@ -138,11 +140,11 @@ Run one chat exchange through the agent.
 
 The frontend maps `ToolCall.name` to an optional renderer; unknown names fall back to a generic badge. Current tools:
 
-| `name` | `input` | `result` |
-|---|---|---|
-| `search_courses` | `{ query, subject?, credits?, term?, has_no_prereqs?, limit? }` | `{ courses: CourseDoc[] }` — sections carry `start_time`/`end_time` as `"HH:MM"` strings |
-| `get_course` | `{ course_code }` | one full `CourseDoc` incl. `prerequisite`/`corequisite` |
-| `get_tuition` | `{ program_slug, student_type, cohort_year }` | `{ program, program_slug, student_type, cohort_year, per_credit_cad }` |
-| `walking_distance` | `{ from_building, to_building }` | `{ from, to, meters, minutes }` |
+| `name`             | `input`                                                         | `result`                                                                                 |
+| ------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `search_courses`   | `{ query, subject?, credits?, term?, has_no_prereqs?, limit? }` | `{ courses: CourseDoc[] }` — sections carry `start_time`/`end_time` as `"HH:MM"` strings |
+| `get_course`       | `{ course_code }`                                               | one full `CourseDoc` incl. `prerequisite`/`corequisite`                                  |
+| `get_tuition`      | `{ program_slug, student_type, cohort_year }`                   | `{ program, program_slug, student_type, cohort_year, per_credit_cad }`                   |
+| `walking_distance` | `{ from_building, to_building }`                                | `{ from, to, meters, minutes }`                                                          |
 
 Failed tool calls have `result: { "status": "error", "message": "..." }` — renderers should treat that as "no visualization".
