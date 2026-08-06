@@ -1,12 +1,18 @@
 import { App } from "aws-cdk-lib";
 import { CampusAiStack } from "../lib/campus-ai-stack.js";
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required environment variable: ${name}`);
+  return value;
+}
+
 const app = new App();
 
 new CampusAiStack(app, "CampusAiAssistant", {
-  googleClientId: app.node.tryGetContext("googleClientId") ?? "PLACEHOLDER",
-  googleClientSecret: app.node.tryGetContext("googleClientSecret") ?? "PLACEHOLDER",
-  bedrockModelId: app.node.tryGetContext("bedrockModelId") ?? "anthropic.claude-sonnet-4-20250514",
-  ingestPrincipalArn: app.node.tryGetContext("ingestPrincipalArn") ?? "arn:aws:iam::123456789012:root",
-  skipBuild: app.node.tryGetContext("skipBuild") === "true",
+  googleClientId: requireEnv("GOOGLE_CLIENT_ID"),
+  googleClientSecret: requireEnv("GOOGLE_CLIENT_SECRET"),
+  bedrockModelId: process.env.BEDROCK_MODEL_ID ?? "anthropic.claude-sonnet-4-20250514",
+  ingestPrincipalArn: requireEnv("INGEST_PRINCIPAL_ARN"),
+  skipBuild: process.env.SKIP_BUILD === "true",
 });

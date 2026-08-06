@@ -35,23 +35,24 @@ Install dependencies at the repository root:
 npm install
 ```
 
-Deploy the stack with CDK context values:
+Deploy the stack with environment variables:
 
 ```bash
 cd infra
-npx cdk deploy \
-  -c googleClientId=YOUR_GOOGLE_CLIENT_ID \
-  -c googleClientSecret=YOUR_GOOGLE_CLIENT_SECRET \
-  -c bedrockModelId=anthropic.claude-sonnet-4-20250514 \
-  -c ingestPrincipalArn=arn:aws:iam::ACCOUNT:user/dev
+GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID \
+GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET \
+BEDROCK_MODEL_ID=anthropic.claude-sonnet-4-20250514 \
+INGEST_PRINCIPAL_ARN=arn:aws:iam::ACCOUNT:user/dev \
+npx cdk deploy
 ```
 
-| Context Value        | Description                                                          |
-| -------------------- | -------------------------------------------------------------------- |
-| `googleClientId`     | OAuth 2.0 Client ID from Google Cloud Console                        |
-| `googleClientSecret` | OAuth 2.0 Client Secret                                              |
-| `bedrockModelId`     | Bedrock model identifier (e.g. `anthropic.claude-sonnet-4-20250514`) |
-| `ingestPrincipalArn` | IAM principal ARN granted permission to run the ingestion script     |
+| Environment Variable   | Required | Description                                                              |
+| ---------------------- | -------- | ------------------------------------------------------------------------ |
+| `GOOGLE_CLIENT_ID`     | Yes      | OAuth 2.0 Client ID from Google Cloud Console                            |
+| `GOOGLE_CLIENT_SECRET` | Yes      | OAuth 2.0 Client Secret                                                  |
+| `BEDROCK_MODEL_ID`     | No       | Bedrock model identifier (default: `anthropic.claude-sonnet-4-20250514`) |
+| `INGEST_PRINCIPAL_ARN` | Yes      | IAM principal ARN granted permission to run the ingestion script         |
+| `SKIP_BUILD`           | No       | Set to `true` to skip the Next.js build during synth                     |
 
 After the first deploy, update the Google OAuth console with the CloudFront callback URL printed in the stack outputs.
 
