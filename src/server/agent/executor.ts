@@ -1,10 +1,8 @@
+import { isToolError, type ToolErrorResult } from "@/src/shared/types";
 import type { DatasetModule, OsClient } from "../core/types";
 
-export type ToolErrorResult = { status: "error"; message: string };
-
-export function isToolError(result: unknown): result is ToolErrorResult {
-  return typeof result === "object" && result !== null && (result as Record<string, unknown>).status === "error";
-}
+export type { ToolErrorResult };
+export { isToolError };
 
 /** Dispatches a tool call across the module registry. Thrown errors, unknown
  *  tools, and empty results all become `{ status: 'error', message }` — the

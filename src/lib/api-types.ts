@@ -1,53 +1,19 @@
 // Shared request/response types for the /api/* contract.
-// Source of truth: .kiro/specs/campus-ai-assistant/api-spec.md — do not drift from it.
-// When the backend lands its own types under src/server/, this module re-exports them instead.
+// Source of truth: src/shared/types.ts — re-exported here for convenience.
 
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
-
-export interface ToolCall {
-  name: string;
-  input: Record<string, unknown>;
-  result?: unknown;
-}
-
-export interface ChatResponse {
-  message: string;
-  tool_calls: ToolCall[];
-  /** Present iff the 8-call iteration limit was hit. */
-  warning?: string;
-}
-
-export interface SessionSummary {
-  session_id: string;
-  /** First user message, ≤80 chars. */
-  title: string;
-  /** ISO 8601. */
-  updatedAt: string;
-}
-
-export interface Profile {
-  preferences: Record<string, string>;
-  email?: string;
-  updatedAt?: string;
-}
-
-/** Failed tool calls carry this as `result`; renderers treat it as "no visualization". */
-export interface ToolErrorResult {
-  status: "error";
-  message: string;
-}
-
-export function isToolError(result: unknown): result is ToolErrorResult {
-  return (
-    typeof result === "object" &&
-    result !== null &&
-    (result as { status?: unknown }).status === "error" &&
-    typeof (result as { message?: unknown }).message === "string"
-  );
-}
+export {
+  type ChatMessage,
+  type ChatResponse,
+  type LngLat,
+  type Profile,
+  type SessionSummary,
+  type ToolCall,
+  type ToolErrorResult,
+  isToolError,
+  haversineMeters,
+  WALK_SPEED_M_PER_MIN,
+  ESTIMATE_DETOUR,
+} from "@/src/shared/types";
 
 // ---- Tool result payloads (api-spec.md "Tool call reference") ----
 
@@ -62,11 +28,12 @@ export interface CourseDoc {
   prerequisite: string | null;
   corequisite: string | null;
   sections: CourseSection[];
+  total_sections?: number;
 }
 
 export interface CourseSection {
   section: string;
-  term: string;
+  term: string | null;
   days: string[];
   start_time: string | null;
   end_time: string | null;
@@ -83,7 +50,19 @@ export interface TuitionResult {
   program_slug: string;
   student_type: "domestic" | "international";
   cohort_year: number;
-  per_credit_cad: number;
+  unit?: string;
+  amount_cad?: number;
+  per_credit_cad?: number;
+  instalments?: number;
+  applies_to?: string | null;
+  rate_type?: string | null;
+  other_rates?: {
+    applies_to: string | null;
+    rate_type: string | null;
+    unit: string;
+    amount_cad: number;
+    instalments?: number;
+  }[];
 }
 
 export interface WalkingDistanceResult {
@@ -91,11 +70,21 @@ export interface WalkingDistanceResult {
   to: string;
   meters: number;
   minutes: number;
+  method?: "network" | "estimate";
 }
 
 export interface WalkingDistanceInput {
   from_building: string;
   to_building: string;
+}
+
+export interface RouteResponse {
+  from: string;
+  to: string;
+  meters: number;
+  minutes: number;
+  method: "network" | "estimate";
+  polyline: import("@/src/shared/types").LngLat[];
 }
 
 export type GeoName = "buildings" | "walking-routes";

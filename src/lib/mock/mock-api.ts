@@ -13,6 +13,8 @@
 import type { ChatApi } from "@/src/lib/api";
 import {
   ApiError,
+  ESTIMATE_DETOUR,
+  WALK_SPEED_M_PER_MIN,
   type ChatMessage,
   type ChatResponse,
   type CourseDoc,
@@ -39,9 +41,6 @@ export interface MockApiOptions {
 }
 
 const STORAGE_KEY = "campus.mock.sessions.v1";
-
-const PATH_FACTOR = 1.3;
-const WALK_METERS_PER_MINUTE = 80;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -135,7 +134,22 @@ function persist(sessions: Map<string, StoredSession>): void {
 const COURSE_CODE_RE = /\b([a-z]{2,4})\s*[_ ]?\s*(\d{3})\b/i;
 
 function detectBuildings(text: string): [string, string] | null {
-  const codes = ["ICCS", "IKB", "NEST", "BUCH", "ESB", "MATH", "ANGU", "LSK", "WOOD", "HEBB", "FSC", "CHBE", "ALRD", "KAIS"];
+  const codes = [
+    "ICCS",
+    "IKB",
+    "NEST",
+    "BUCH",
+    "ESB",
+    "MATH",
+    "ANGU",
+    "LSK",
+    "WOOD",
+    "HEBB",
+    "FSC",
+    "CHBE",
+    "ALRD",
+    "KAIS",
+  ];
   const names: Record<string, string> = {
     BARBER: "IKB",
     BUCHANAN: "BUCH",
@@ -177,8 +191,8 @@ function walkingDistanceCall(from: string, to: string): ToolCall {
       result: { status: "error", message: `Unknown building: ${a ? to : from}` },
     };
   }
-  const meters = Math.round((haversineMeters(a, b) * PATH_FACTOR) / 10) * 10;
-  const minutes = Math.max(1, Math.round(meters / WALK_METERS_PER_MINUTE));
+  const meters = Math.round((haversineMeters(a, b) * ESTIMATE_DETOUR) / 10) * 10;
+  const minutes = Math.max(1, Math.round(meters / WALK_SPEED_M_PER_MIN));
   return {
     name: "walking_distance",
     input: { from_building: from, to_building: to },
@@ -213,7 +227,11 @@ function respondToChat(text: string): ChatResponse {
         ". Try narrowing by subject or term and I can go deeper.",
       tool_calls: [
         { name: "search_courses", input: { query: "all courses", limit: 20 }, result: { courses } },
-        { name: "search_courses", input: { query: "all courses", subject: "CPSC" }, result: { courses: courses.slice(0, 2) } },
+        {
+          name: "search_courses",
+          input: { query: "all courses", subject: "CPSC" },
+          result: { courses: courses.slice(0, 2) },
+        },
       ],
       warning: "Iteration limit reached: the agent stopped after 8 model calls; the answer may be incomplete.",
     };
@@ -247,7 +265,7 @@ function respondToChat(text: string): ChatResponse {
           t.program_slug === (arts ? "bachelor-of-arts" : "bachelor-of-science"),
       ) ?? MOCK_TUITION[0];
     return {
-      message: `${row.program} students (${row.student_type}, ${row.cohort_year} cohort) pay $${row.per_credit_cad.toFixed(2)} CAD per credit — a standard 4-credit course is about $${(row.per_credit_cad * 4).toFixed(2)}. Rate from the get_tuition table.`,
+      message: `${row.program} students (${row.student_type}, ${row.cohort_year} cohort) pay $${row.per_credit_cad!.toFixed(2)} CAD per credit — a standard 4-credit course is about $${(row.per_credit_cad! * 4).toFixed(2)}. Rate from the get_tuition table.`,
       tool_calls: [
         {
           name: "get_tuition",
@@ -340,7 +358,11 @@ export function createMockApi({ getToken, latencyMs = 1400, seed = true }: MockA
         summary: { session_id: sessionId, title: truncateTitle(last.content), updatedAt: new Date().toISOString() },
         messages: [],
       };
-      stored.messages = [...stored.messages, { role: "user", content: last.content }, { role: "assistant", content: response.message }];
+      stored.messages = [
+        ...stored.messages,
+        { role: "user", content: last.content },
+        { role: "assistant", content: response.message },
+      ];
       stored.summary = { ...stored.summary, updatedAt: new Date().toISOString() };
       sessions.set(sessionId, stored);
       persist(sessions);

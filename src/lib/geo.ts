@@ -1,8 +1,10 @@
 // Pure geometry helpers for the campus map: centroids, bounds, and building lookup.
 
+import { haversineMeters, type LngLat } from "@/src/shared/types";
 import type { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from "geojson";
 
-export type LngLat = [number, number];
+export type { LngLat };
+export { haversineMeters };
 
 export interface BuildingFeatureProperties {
   BLDG_CODE?: string;
@@ -97,16 +99,4 @@ export function featuresBounds(features: BuildingFeature[]): Bounds | null {
   }
   if (!Number.isFinite(west)) return null;
   return { west, south, east, north };
-}
-
-/** Great-circle distance in meters. */
-export function haversineMeters(a: LngLat, b: LngLat): number {
-  const R = 6371000;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(b[1] - a[1]);
-  const dLng = toRad(b[0] - a[0]);
-  const sinLat = Math.sin(dLat / 2);
-  const sinLng = Math.sin(dLng / 2);
-  const h = sinLat * sinLat + Math.cos(toRad(a[1])) * Math.cos(toRad(b[1])) * sinLng * sinLng;
-  return 2 * R * Math.asin(Math.sqrt(h));
 }

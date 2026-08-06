@@ -1,14 +1,14 @@
+import { haversineMetersObj } from "@/src/shared/types";
 import { describe, expect, it } from "vitest";
-import { haversineMeters } from "./modules/buildings";
-import { buildGraph, type LonLat, routeOnGraph, shortestPath } from "./routing";
+import { buildGraph, routeOnGraph, shortestPath, type LngLat } from "./routing";
 
 // A small L-shaped network near UBC: A --- B --- C, plus a disconnected segment.
 //   A (-123.2500, 49.2600) — B (-123.2500, 49.2650) — C (-123.2450, 49.2650)
-const line = (coords: LonLat[]) => ({ type: "Feature", geometry: { type: "LineString", coordinates: coords } });
-const A: LonLat = [-123.25, 49.26];
-const B: LonLat = [-123.25, 49.265];
-const C: LonLat = [-123.245, 49.265];
-const ISLAND: LonLat[] = [
+const line = (coords: LngLat[]) => ({ type: "Feature", geometry: { type: "LineString", coordinates: coords } });
+const A: LngLat = [-123.25, 49.26];
+const B: LngLat = [-123.25, 49.265];
+const C: LngLat = [-123.245, 49.265];
+const ISLAND: LngLat[] = [
   [-123.2, 49.2],
   [-123.201, 49.2],
 ];
@@ -29,10 +29,10 @@ describe("routing graph", () => {
     expect(result.method).toBe("network");
     // network distance = A->B + B->C legs, strictly longer than the diagonal
     const legs =
-      haversineMeters({ lat: A[1], lon: A[0] }, { lat: B[1], lon: B[0] }) +
-      haversineMeters({ lat: B[1], lon: B[0] }, { lat: C[1], lon: C[0] });
+      haversineMetersObj({ lat: A[1], lon: A[0] }, { lat: B[1], lon: B[0] }) +
+      haversineMetersObj({ lat: B[1], lon: B[0] }, { lat: C[1], lon: C[0] });
     expect(result.meters).toBe(Math.round(legs));
-    expect(result.meters).toBeGreaterThan(haversineMeters(from, to));
+    expect(result.meters).toBeGreaterThan(haversineMetersObj(from, to));
     // polyline runs building -> snapped path -> building
     expect(result.polyline[0]).toEqual([from.lon, from.lat]);
     expect(result.polyline.at(-1)).toEqual([to.lon, to.lat]);
@@ -44,8 +44,8 @@ describe("routing graph", () => {
     const graph = buildGraph(features);
     const off = { lat: 49.26, lon: -123.2508 }; // ~60m west of A
     const result = routeOnGraph(graph, off, { lat: B[1], lon: B[0] });
-    const gap = haversineMeters(off, { lat: A[1], lon: A[0] });
-    const leg = haversineMeters({ lat: A[1], lon: A[0] }, { lat: B[1], lon: B[0] });
+    const gap = haversineMetersObj(off, { lat: A[1], lon: A[0] });
+    const leg = haversineMetersObj({ lat: A[1], lon: A[0] }, { lat: B[1], lon: B[0] });
     expect(result.meters).toBe(Math.round(gap + leg));
   });
 
@@ -55,7 +55,7 @@ describe("routing graph", () => {
     const island = { lat: ISLAND[0][1], lon: ISLAND[0][0] };
     const result = routeOnGraph(graph, from, island);
     expect(result.method).toBe("estimate");
-    expect(result.meters).toBe(Math.round(haversineMeters(from, island) * 1.3));
+    expect(result.meters).toBe(Math.round(haversineMetersObj(from, island) * 1.3));
     expect(result.polyline).toHaveLength(2);
   });
 

@@ -34,14 +34,6 @@ export function centroid(geometry: Feature): { lat: number; lon: number } {
   return { lat: latSum / n, lon: lonSum / n };
 }
 
-export function haversineMeters(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(b.lat - a.lat);
-  const dLon = toRad(b.lon - a.lon);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon / 2) ** 2;
-  return 2 * 6371000 * Math.asin(Math.sqrt(h));
-}
-
 export function transformBuilding(f: Feature): { _id: string; doc: BuildingDoc } | null {
   const code = f?.properties?.BLDG_CODE;
   if (!code) return null;

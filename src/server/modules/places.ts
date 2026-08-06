@@ -1,5 +1,6 @@
+import { ESTIMATE_DETOUR, haversineMetersObj, WALK_SPEED_M_PER_MIN } from "@/src/shared/types";
 import type { DatasetModule, OsClient } from "../core/types";
-import { haversineMeters, resolveBuilding, type BuildingDoc } from "./buildings";
+import { resolveBuilding, type BuildingDoc } from "./buildings";
 
 export interface PoiDoc {
   id: string;
@@ -48,8 +49,8 @@ export function nearestFirst<T extends { lat: number; lon: number }>(
 ): (T & { walk_meters: number; walk_minutes: number })[] {
   return items
     .map((item) => {
-      const walk_meters = Math.round(haversineMeters(from, item) * 1.3);
-      return { ...item, walk_meters, walk_minutes: Math.ceil(walk_meters / 80) };
+      const walk_meters = Math.round(haversineMetersObj(from, item) * ESTIMATE_DETOUR);
+      return { ...item, walk_meters, walk_minutes: Math.ceil(walk_meters / WALK_SPEED_M_PER_MIN) };
     })
     .sort((a, b) => a.walk_meters - b.walk_meters);
 }
