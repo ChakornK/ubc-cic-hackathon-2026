@@ -15,6 +15,7 @@
     "lint": "biome lint .",
     "test": "vitest run --passWithNoTests",
     "sync-data": "node --env-file=.env scripts/sync-data.mjs",
+    "prep-grades": "node scripts/prep-grades.mjs",
     "ingest": "tsx scripts/ingest.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
