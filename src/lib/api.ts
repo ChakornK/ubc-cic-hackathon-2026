@@ -15,8 +15,19 @@ import { createMockApi } from "@/src/lib/mock/mock-api";
 import type { FeatureCollection } from "geojson";
 
 export interface ChatApi {
-  /** POST /api/chat — one exchange; `messages` is the full conversation so far. */
-  chat(sessionId: string, messages: ChatMessage[]): Promise<ChatResponse>;
+  /** POST /api/chat — streams NDJSON events; calls onDelta for text, returns final ChatResponse. */
+  chat(
+    sessionId: string,
+    messages: ChatMessage[],
+    callbacks?: {
+      onDelta?: (text: string) => void;
+      onTextClear?: () => void;
+      onThinking?: (text: string) => void;
+      onToolStart?: (name: string, input: Record<string, unknown>) => void;
+      onToolEnd?: (name: string, result: unknown) => void;
+      onTurnStart?: () => void;
+    },
+  ): Promise<ChatResponse>;
   /** GET /api/sessions — caller's sessions, most recently updated first. */
   listSessions(): Promise<SessionSummary[]>;
   /** GET /api/sessions/{id} — messages in chronological order; 404 if not the caller's. */
@@ -76,12 +87,85 @@ function createHttpApi({ getToken, onUnauthorized, baseUrl = "/api" }: ChatApiOp
     return (await response.json()) as T;
   }
 
+  async function chatStream(
+    sessionId: string,
+    messages: ChatMessage[],
+    callbacks?: {
+      onDelta?: (text: string) => void;
+      onTextClear?: () => void;
+      onThinking?: (text: string) => void;
+      onToolStart?: (name: string, input: Record<string, unknown>) => void;
+      onToolEnd?: (name: string, result: unknown) => void;
+      onTurnStart?: () => void;
+    },
+  ): Promise<ChatResponse> {
+    const token = await getToken();
+    if (!token) {
+      onUnauthorized?.();
+      throw new ApiError(401, "Not signed in");
+    }
+    const response = await fetch(`${baseUrl}/chat`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ session_id: sessionId, messages }),
+    });
+    if (!response.ok) {
+      const error = await parseError(response);
+      if (error.status === 401) onUnauthorized?.();
+      throw error;
+    }
+    if (!response.body) throw new ApiError(500, "No response body");
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let result: ChatResponse | null = null;
+
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const event = JSON.parse(line);
+          if (event.type === "text" && callbacks?.onDelta) {
+            callbacks.onDelta(event.delta);
+          } else if (event.type === "text_clear" && callbacks?.onTextClear) {
+            callbacks.onTextClear();
+          } else if (event.type === "thinking" && callbacks?.onThinking) {
+            callbacks.onThinking(event.delta);
+          } else if (event.type === "tool_start" && callbacks?.onToolStart) {
+            callbacks.onToolStart(event.name, event.input);
+          } else if (event.type === "tool_end" && callbacks?.onToolEnd) {
+            callbacks.onToolEnd(event.name, event.result);
+          } else if (event.type === "turn_start" && callbacks?.onTurnStart) {
+            callbacks.onTurnStart();
+          } else if (event.type === "done") {
+            result = { message: event.message, tool_calls: event.tool_calls, warning: event.warning };
+          } else if (event.type === "error") {
+            throw new ApiError(500, event.message);
+          }
+        } catch (e) {
+          if (e instanceof ApiError) throw e;
+          // skip malformed lines
+        }
+      }
+    }
+
+    if (!result) throw new ApiError(500, "Stream ended without a done event");
+    return result;
+  }
+
   return {
-    chat: (sessionId, messages) =>
-      request<ChatResponse>("/chat", {
-        method: "POST",
-        body: JSON.stringify({ session_id: sessionId, messages }),
-      }),
+    chat: chatStream,
     listSessions: () => request<SessionSummary[]>("/sessions"),
     getSession: (id) => request<ChatMessage[]>(`/sessions/${encodeURIComponent(id)}`),
     getProfile: () => request<Profile>("/profile"),

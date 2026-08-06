@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ConverseMessage } from "@/src/server/core/types";
 
 const verify = vi.fn();
 vi.mock("aws-jwt-verify", () => ({
@@ -17,7 +16,16 @@ vi.mock("@/src/server/sessions/store", () => ({
 }));
 
 const converse = vi.fn();
-vi.mock("@/src/server/bedrock", () => ({ converse: (...args: unknown[]) => converse(...args) }));
+vi.mock("@/src/server/bedrock", () => ({
+  converse: (...args: unknown[]) => converse(...args),
+  converseStream: vi.fn(),
+}));
+
+const streamAgent = vi.fn();
+vi.mock("@/src/server/agent/stream", () => ({
+  streamAgent: (...args: unknown[]) => streamAgent(...args),
+}));
+
 vi.mock("@/src/server/search", () => ({ getOsClient: () => ({}) }));
 
 const { POST: chatPost } = await import("./chat/route");
@@ -34,6 +42,7 @@ const req = (init: RequestInit & { auth?: boolean } = {}) =>
 beforeEach(() => {
   verify.mockReset().mockResolvedValue({ sub: "u1", email: "u@example.com" });
   converse.mockReset();
+  streamAgent.mockReset();
 });
 
 describe("auth (7.2)", () => {
@@ -50,6 +59,14 @@ describe("auth (7.2)", () => {
   });
 });
 
+async function readStream(res: Response): Promise<unknown[]> {
+  const text = await res.text();
+  return text
+    .split("\n")
+    .filter((l) => l.trim())
+    .map((l) => JSON.parse(l));
+}
+
 describe("POST /api/chat", () => {
   it("400 on non-JSON body", async () => {
     const res = await chatPost(req({ method: "POST", body: "not json" }));
@@ -64,9 +81,11 @@ describe("POST /api/chat", () => {
     }
   });
 
-  it("200 with the agent result on a valid request", async () => {
-    const message: ConverseMessage = { role: "assistant", content: [{ text: "hello" }] };
-    converse.mockResolvedValue({ stopReason: "end_turn", message });
+  it("200 with streamed agent result on a valid request", async () => {
+    streamAgent.mockImplementation(async function* () {
+      yield { type: "text", delta: "hello" };
+      yield { type: "done", message: "hello", tool_calls: [] };
+    });
     const res = await chatPost(
       req({
         method: "POST",
@@ -74,18 +93,25 @@ describe("POST /api/chat", () => {
       }),
     );
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ message: "hello", tool_calls: [] });
+    const events = await readStream(res);
+    expect(events).toContainEqual({ type: "text", delta: "hello" });
+    expect(events).toContainEqual({ type: "done", message: "hello", tool_calls: [] });
   });
 
-  it("500 path returns a JSON error body (2.9)", async () => {
-    converse.mockRejectedValue(new Error("bedrock down"));
+  it("stream emits error event on unhandled failure (2.9)", async () => {
+    streamAgent.mockReturnValue({
+      [Symbol.asyncIterator]() {
+        return { next: () => Promise.reject(new Error("bedrock down")) };
+      },
+    });
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     const res = await chatPost(
       req({ method: "POST", body: JSON.stringify({ messages: [{ role: "user", content: "hi" }] }) }),
     );
     consoleError.mockRestore();
-    expect(res.status).toBe(500);
-    expect(await res.json()).toEqual({ error: "Internal server error" });
+    expect(res.status).toBe(200);
+    const events = await readStream(res);
+    expect(events).toContainEqual({ type: "error", message: "bedrock down" });
   });
 });
 

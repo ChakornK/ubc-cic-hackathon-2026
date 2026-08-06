@@ -1,0 +1,3 @@
+[submodule "Unified-UBC-Data"]
+	path = Unified-UBC-Data
+	url = https://github.com/maxlbchung/Unified-UBC-Data.git

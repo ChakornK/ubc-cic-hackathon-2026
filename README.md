@@ -49,7 +49,7 @@ npx cdk deploy
 | `INGEST_PRINCIPAL_ARN`  | Yes      | IAM principal ARN granted permission to run the ingestion script             |
 | `CALLBACK_URL`          | Yes      | OAuth callback URL (your CloudFront URL, e.g. `https://xyz.cloudfront.net/`) |
 | `COGNITO_DOMAIN_PREFIX` | Yes      | Cognito hosted UI domain prefix (must be globally unique)                    |
-| `BEDROCK_MODEL_ID`      | No       | Bedrock model identifier (default: `anthropic.claude-haiku-4-5-20251001-v1`) |
+| `BEDROCK_MODEL_ID`      | Yes      | Bedrock model identifier (e.g. `anthropic.claude-haiku-4-5-20251001-v1`)     |
 | `SKIP_BUILD`            | No       | Set to `true` to skip the Next.js build during synth                         |
 
 On first deploy, set `CALLBACK_URL=http://localhost:3000/`. After deploy completes, update it to the CloudFront URL from stack outputs and redeploy.

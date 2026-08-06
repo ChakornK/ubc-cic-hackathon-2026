@@ -3,10 +3,15 @@
 // Chat panel (task 3.1): history load, optimistic send with in-flight lock,
 // error banner with retry resending the same message, inline iteration warning,
 // and highlight publication for the map via the walking_distance renderer.
-
-import { useChatShell } from "@/src/components/chat/chat-shell-context";
 import { ChatInput, type ChatInputHandle } from "@/src/components/chat/chat-input";
-import { AssistantMessage, TypingIndicator, UserMessage, type DisplayMessage } from "@/src/components/chat/message";
+import { useChatShell } from "@/src/components/chat/chat-shell-context";
+import {
+  AssistantMessage,
+  TypingIndicator,
+  UserMessage,
+  type DisplayMessage,
+  type InterstitialBlock,
+} from "@/src/components/chat/message";
 import { Icon } from "@/src/components/icons";
 import { useApi } from "@/src/components/providers";
 import { ApiError, type ChatMessage } from "@/src/lib/api-types";
@@ -81,7 +86,15 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
       .getSession(sessionId)
       .then((history) => {
         if (cancelled) return;
-        setMessages(history.map((m) => ({ id: nextId(), role: m.role, content: m.content })));
+        setMessages(
+          history.map((m) => ({
+            id: nextId(),
+            role: m.role,
+            content: m.content,
+            toolCalls: m.toolCalls,
+            interstitial: m.interstitial,
+          })),
+        );
         setHistoryState("ready");
       })
       .catch((error: unknown) => {
@@ -127,29 +140,80 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
     (conversation: ChatMessage[]) => {
       setSending(true);
       setSendError(null);
+
+      // Add a placeholder assistant message for streaming text
+      const streamId = nextId();
+      setMessages((current) => [...current, { id: streamId, role: "assistant", content: "", interstitial: [] }]);
+
+      let streamedText = "";
+      const interstitialBlocks: InterstitialBlock[] = [];
+
+      const updateMessage = (updates: Partial<DisplayMessage>) => {
+        setMessages((current) => current.map((m) => (m.id === streamId ? { ...m, ...updates } : m)));
+      };
+
       api
-        .chat(sessionId, conversation)
+        .chat(sessionId, conversation, {
+          onThinking(delta) {
+            if (!alive.current) return;
+            // Append to the last thinking block only if it's immediately preceding (no tool calls in between)
+            const last = interstitialBlocks[interstitialBlocks.length - 1];
+            if (last?.type === "thinking") {
+              last.content += delta;
+            } else {
+              interstitialBlocks.push({ type: "thinking", content: delta });
+            }
+            updateMessage({ interstitial: [...interstitialBlocks] });
+          },
+          onToolStart(name, input) {
+            if (!alive.current) return;
+            interstitialBlocks.push({ type: "tool_call", content: name, input, result: undefined });
+            updateMessage({ interstitial: [...interstitialBlocks] });
+          },
+          onToolEnd(name, result) {
+            if (!alive.current) return;
+            // Find the last tool_call block with this name that has no result
+            for (let i = interstitialBlocks.length - 1; i >= 0; i--) {
+              if (
+                interstitialBlocks[i].type === "tool_call" &&
+                interstitialBlocks[i].content === name &&
+                interstitialBlocks[i].result === undefined
+              ) {
+                interstitialBlocks[i] = { ...interstitialBlocks[i], result };
+                break;
+              }
+            }
+            updateMessage({ interstitial: [...interstitialBlocks] });
+          },
+          onTextClear() {
+            if (!alive.current) return;
+            streamedText = "";
+            updateMessage({ content: "" });
+          },
+          onDelta(delta) {
+            if (!alive.current) return;
+            streamedText += delta;
+            updateMessage({ content: streamedText });
+          },
+        })
         .then((response) => {
           if (!alive.current) return;
           pendingRetry.current = null;
-          setMessages((current) => [
-            ...current,
-            {
-              id: nextId(),
-              role: "assistant",
-              content: response.message,
-              toolCalls: response.tool_calls,
-              warning: response.warning,
-            },
-          ]);
-          // The walking_distance renderer emits the new highlight; if the latest
-          // response has none, the previous route no longer reflects the answer.
+          // Replace placeholder with final message including tool calls and warning
+          updateMessage({
+            content: response.message,
+            toolCalls: response.tool_calls,
+            warning: response.warning,
+            interstitial: interstitialBlocks.length > 0 ? [...interstitialBlocks] : undefined,
+          });
           if (!response.tool_calls.some((call) => extractWalkingHighlight(call))) setHighlight(null);
           setAnnouncement("New response from assistant");
           refreshSessions();
         })
         .catch((error: unknown) => {
           if (!alive.current) return;
+          // Remove the placeholder on error
+          setMessages((current) => current.filter((m) => m.id !== streamId));
           pendingRetry.current = { conversation };
           const message =
             error instanceof ApiError && error.status !== 500
@@ -192,12 +256,12 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
   return (
     <section
       aria-label="Conversation"
-      className="flex min-h-0 w-full flex-col overflow-hidden rounded-xl border border-border-subtle bg-surface shadow-sm"
+      className="border-border-subtle bg-surface flex min-h-0 w-full flex-col overflow-hidden rounded-xl border shadow-sm"
     >
       {/* Chat header */}
-      <div className="flex shrink-0 items-center justify-between border-b border-border-subtle bg-surface-bright px-4 py-3">
+      <div className="border-border-subtle bg-surface-bright flex shrink-0 items-center justify-between border-b px-4 py-3">
         <div className="min-w-0">
-          <h1 className="truncate text-base font-medium text-on-surface">{sessionTitle}</h1>
+          <h1 className="text-on-surface truncate text-base font-medium">{sessionTitle}</h1>
           <p className="text-body-sm text-muted">Active session</p>
         </div>
       </div>
@@ -206,20 +270,20 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto p-4">
         {historyState === "loading" && (
           <output aria-label="Loading conversation" className="flex flex-col gap-4">
-            <div className="h-12 w-3/5 animate-pulse self-end rounded-[16px_16px_4px_16px] bg-surface-container" />
-            <div className="h-20 w-4/5 animate-pulse rounded-[16px_16px_16px_4px] bg-surface-container" />
+            <div className="bg-surface-container h-12 w-3/5 animate-pulse self-end rounded-[16px_16px_4px_16px]" />
+            <div className="bg-surface-container h-20 w-4/5 animate-pulse rounded-[16px_16px_16px_4px]" />
           </output>
         )}
 
         {historyState === "failed" && (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
             <Icon name="alert" size={48} className="text-error" />
-            <p className="text-xl font-medium text-on-surface">Couldn&apos;t load this conversation</p>
+            <p className="text-on-surface text-xl font-medium">Couldn&apos;t load this conversation</p>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setHistoryNonce((n) => n + 1)}
-                className="flex h-9 items-center gap-1.5 rounded-lg bg-surface-container-low px-4 text-sm font-medium text-on-surface shadow-sm transition-all duration-150 hover:bg-surface-container active:scale-95"
+                className="bg-surface-container-low text-on-surface hover:bg-surface-container flex h-9 items-center gap-1.5 rounded-lg px-4 text-sm font-medium shadow-sm transition-all duration-150 active:scale-95"
               >
                 <Icon name="refresh2" size={16} />
                 Try again
@@ -227,7 +291,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
               <button
                 type="button"
                 onClick={() => router.push(`/chat/${crypto.randomUUID()}`)}
-                className="flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-medium text-on-primary shadow-glow transition-all duration-150 hover:scale-[1.02] active:scale-95"
+                className="bg-primary text-on-primary shadow-glow flex h-9 items-center gap-1.5 rounded-lg px-4 text-sm font-medium transition-all duration-150 hover:scale-[1.02] active:scale-95"
               >
                 Start new chat
               </button>
@@ -238,8 +302,8 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         {historyState === "ready" && messages.length === 0 && !sending && (
           <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
             <Icon name="chat1" size={48} className="text-outline" />
-            <h2 className="text-xl font-medium text-on-surface">Ask me about UBC</h2>
-            <p className="max-w-70 text-sm leading-relaxed text-on-surface-variant">
+            <h2 className="text-on-surface text-xl font-medium">Ask me about UBC</h2>
+            <p className="text-on-surface-variant max-w-70 text-sm leading-relaxed">
               I can help with courses, prerequisites, tuition costs, and walking routes between campus buildings.
             </p>
             <div className="mt-3 flex flex-wrap justify-center gap-2">
@@ -248,7 +312,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                   key={suggestion}
                   type="button"
                   onClick={() => send(suggestion)}
-                  className="rounded-full border border-primary px-3 py-1.5 text-xs font-medium text-primary transition-colors duration-150 hover:bg-accent-subtle active:scale-95"
+                  className="border-primary text-primary hover:bg-accent-subtle rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 active:scale-95"
                 >
                   {suggestion}
                 </button>
@@ -262,21 +326,26 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
             {messages.map((message) =>
               message.role === "user" ? (
                 <UserMessage key={message.id} message={message} />
-              ) : (
+              ) : message.content || message.toolCalls || (message.interstitial && message.interstitial.length > 0) ? (
                 <AssistantMessage key={message.id} message={message} isLatest={message.id === latestAssistantId} />
-              ),
+              ) : null,
             )}
-            {sending && <TypingIndicator slow={slowResponse} />}
+            {sending &&
+              (!messages.length ||
+                messages[messages.length - 1]?.role !== "assistant" ||
+                (!messages[messages.length - 1]?.content && !messages[messages.length - 1]?.interstitial?.length)) && (
+                <TypingIndicator slow={slowResponse} />
+              )}
             {sendError && (
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-error/30 bg-error-container/40 px-4 py-3">
-                <p className="flex items-center gap-2 text-sm text-on-surface">
-                  <Icon name="alert" size={16} className="shrink-0 text-error" />
+              <div className="border-error/30 bg-error-container/40 flex items-center justify-between gap-3 rounded-xl border px-4 py-3">
+                <p className="text-on-surface flex items-center gap-2 text-sm">
+                  <Icon name="alert" size={16} className="text-error shrink-0" />
                   {sendError}
                 </p>
                 <button
                   type="button"
                   onClick={retry}
-                  className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg bg-surface px-3 text-sm font-medium text-on-surface shadow-sm transition-all duration-150 hover:bg-surface-container-low active:scale-95"
+                  className="bg-surface text-on-surface hover:bg-surface-container-low flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium shadow-sm transition-all duration-150 active:scale-95"
                 >
                   <Icon name="refresh2" size={14} />
                   Retry
