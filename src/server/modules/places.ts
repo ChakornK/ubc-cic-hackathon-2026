@@ -1,5 +1,5 @@
 import type { DatasetModule, OsClient } from "../core/types";
-import { type BuildingDoc, haversineMeters, resolveBuilding } from "./buildings";
+import { haversineMeters, resolveBuilding, type BuildingDoc } from "./buildings";
 
 export interface PoiDoc {
   id: string;
@@ -61,19 +61,21 @@ export async function searchNearable<T extends { lat: number; lon: number }>(
   filter: Record<string, unknown>[],
   nearBuilding: unknown,
   limit: number,
-): Promise<{ results: T[]; near?: BuildingDoc }> {
+): Promise<{ results: T[]; near?: BuildingDoc; truncated_before_sort?: boolean }> {
+  const NEAR_FETCH_CAP = 500;
   const res = await os.search({
     index,
     body: {
       query: { bool: { must: must.length > 0 ? must : [{ match_all: {} }], filter } },
-      size: nearBuilding ? 500 : limit, // fetch all candidates, sort by walk in JS
+      size: nearBuilding ? NEAR_FETCH_CAP : limit,
     },
   });
   let results = res.body.hits.hits.map((h) => h._source as T);
   if (!nearBuilding) return { results };
+  const truncated_before_sort = results.length >= NEAR_FETCH_CAP;
   const near = await resolveBuilding(os, String(nearBuilding));
   results = nearestFirst(results, near).slice(0, limit);
-  return { results, near };
+  return { results, near, ...(truncated_before_sort ? { truncated_before_sort } : {}) };
 }
 
 export const places: DatasetModule = {
@@ -133,9 +135,20 @@ export const places: DatasetModule = {
         const filter: Record<string, unknown>[] = [];
         if (input.service_type) filter.push({ term: { service_type: String(input.service_type) } });
         const limit = Math.min(Number(input.limit) || 10, 30);
-        const { results, near } = await searchNearable<PoiDoc>(os, "poi", must, filter, input.near_building, limit);
+        const { results, near, truncated_before_sort } = await searchNearable<PoiDoc>(
+          os,
+          "poi",
+          must,
+          filter,
+          input.near_building,
+          limit,
+        );
         if (results.length === 0) throw new Error(`No places matched "${input.query ?? input.service_type ?? ""}"`);
-        return { ...(near ? { near_building: near.code } : {}), places: results };
+        return {
+          ...(near ? { near_building: near.code } : {}),
+          ...(truncated_before_sort ? { note: "Many matches exist; nearest results may be approximate." } : {}),
+          places: results,
+        };
       },
     },
   ],

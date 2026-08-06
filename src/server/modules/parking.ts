@@ -112,7 +112,7 @@ export const parking: DatasetModule = {
         const filter: Record<string, unknown>[] = [];
         if (input.ev_charging) filter.push({ term: { ev_charging: true } });
         const limit = Math.min(Number(input.limit) || 5, 20);
-        const { results, near } = await searchNearable<ParkingDoc>(
+        const { results, near, truncated_before_sort } = await searchNearable<ParkingDoc>(
           os,
           "parking",
           must,
@@ -121,7 +121,11 @@ export const parking: DatasetModule = {
           limit,
         );
         if (results.length === 0) throw new Error(`No parking facilities matched`);
-        return { ...(near ? { near_building: near.code } : {}), parking: results };
+        return {
+          ...(near ? { near_building: near.code } : {}),
+          ...(truncated_before_sort ? { note: "Many matches exist; nearest results may be approximate." } : {}),
+          parking: results,
+        };
       },
     },
   ],
