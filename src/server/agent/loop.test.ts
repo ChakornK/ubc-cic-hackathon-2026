@@ -75,7 +75,7 @@ const modules: DatasetModule[] = [
 
 const userMessages = [{ role: "user" as const, content: "q" }];
 
-describe("Agent_Loop", () => {
+describe("agent loop", () => {
   // Feature: campus-ai-assistant, Property 2: Agent loop terminates with the correct call count
   it("Property 2: makes exactly min(firstEndTurn+1, 8) converse calls; warning iff no end_turn", async () => {
     await fc.assert(

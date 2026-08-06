@@ -2,7 +2,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { formatSeconds } from "./time";
 
-describe("Time_Formatter", () => {
+describe("time formatter", () => {
   // Feature: campus-ai-assistant, Property 1: Time formatting is correct and zero-padded
   it("Property 1: formats any in-range second count as HH:MM that round-trips to the minute", () => {
     fc.assert(
