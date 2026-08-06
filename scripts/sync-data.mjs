@@ -9,7 +9,7 @@ if (!bucket) {
   process.exit(1);
 }
 
-const src = process.env.UBC_DATA_DIR ?? fileURLToPath(new URL("../../Unified-UBC-Data/data", import.meta.url));
+const src = process.env.UBC_DATA_DIR ?? fileURLToPath(new URL("../Unified-UBC-Data/data", import.meta.url));
 if (!existsSync(src)) {
   console.error(`Source data dir not found: ${src} (set UBC_DATA_DIR to the Unified-UBC-Data data/ folder)`);
   process.exit(1);
