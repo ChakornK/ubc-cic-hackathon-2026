@@ -77,11 +77,12 @@ export const converse: ConverseFn = async ({ messages, system, toolSpecs }) => {
 // --- Streaming support ---
 
 export type ConverseStreamEvent =
+  | { type: "thinking"; delta: string }
   | { type: "text"; delta: string }
   | { type: "tool_use"; toolUseId: string; name: string; input: Record<string, unknown> }
   | { type: "stop"; reason: string };
 
-/** Streaming Converse call; yields events as they arrive from Bedrock. */
+/** Streaming Converse call with extended thinking enabled; yields events as they arrive. */
 export async function* converseStream(req: {
   messages: ConverseMessage[];
   system: string;
@@ -93,27 +94,42 @@ export async function* converseStream(req: {
       messages: req.messages.map(toSdkMessage),
       system: [{ text: req.system }],
       toolConfig: { tools: req.toolSpecs.map(toSdkTool) },
+      additionalModelRequestFields: {
+        thinking: { type: "enabled", budget_tokens: 4096 },
+      },
+      inferenceConfig: { maxTokens: 16384 },
     }),
   );
 
   if (!res.stream) return;
 
-  // Accumulate tool use blocks (input arrives as JSON chunks)
   let currentToolUseId = "";
   let currentToolName = "";
   let currentToolInput = "";
 
   for await (const event of res.stream) {
-    if (event.contentBlockDelta?.delta?.text) {
-      yield { type: "text", delta: event.contentBlockDelta.delta.text };
-    } else if (event.contentBlockStart?.start?.toolUse) {
+    if (event.contentBlockStart?.start?.toolUse) {
       const tu = event.contentBlockStart.start.toolUse;
       currentToolUseId = tu.toolUseId ?? "";
       currentToolName = tu.name ?? "";
       currentToolInput = "";
-    } else if (event.contentBlockDelta?.delta?.toolUse?.input) {
-      currentToolInput += event.contentBlockDelta.delta.toolUse.input;
-    } else if (event.contentBlockStop && currentToolUseId) {
+    }
+
+    if (event.contentBlockDelta?.delta) {
+      const delta = event.contentBlockDelta.delta;
+      if ("reasoningContent" in delta && (delta as Record<string, unknown>).reasoningContent) {
+        const rc = (delta as Record<string, { text?: string }>).reasoningContent;
+        if (rc.text) {
+          yield { type: "thinking", delta: rc.text };
+        }
+      } else if (delta.text) {
+        yield { type: "text", delta: delta.text };
+      } else if (delta.toolUse?.input) {
+        currentToolInput += delta.toolUse.input;
+      }
+    }
+
+    if (event.contentBlockStop && currentToolUseId) {
       let input: Record<string, unknown> = {};
       try {
         input = JSON.parse(currentToolInput || "{}");
@@ -124,7 +140,9 @@ export async function* converseStream(req: {
       currentToolUseId = "";
       currentToolName = "";
       currentToolInput = "";
-    } else if (event.messageStop?.stopReason) {
+    }
+
+    if (event.messageStop?.stopReason) {
       yield { type: "stop", reason: event.messageStop.stopReason };
     }
   }

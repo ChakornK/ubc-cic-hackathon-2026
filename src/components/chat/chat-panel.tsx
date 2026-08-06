@@ -5,7 +5,13 @@
 // and highlight publication for the map via the walking_distance renderer.
 import { ChatInput, type ChatInputHandle } from "@/src/components/chat/chat-input";
 import { useChatShell } from "@/src/components/chat/chat-shell-context";
-import { AssistantMessage, TypingIndicator, UserMessage, type DisplayMessage } from "@/src/components/chat/message";
+import {
+  AssistantMessage,
+  TypingIndicator,
+  UserMessage,
+  type DisplayMessage,
+  type InterstitialBlock,
+} from "@/src/components/chat/message";
 import { Icon } from "@/src/components/icons";
 import { useApi } from "@/src/components/providers";
 import { ApiError, type ChatMessage } from "@/src/lib/api-types";
@@ -129,27 +135,70 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
 
       // Add a placeholder assistant message for streaming text
       const streamId = nextId();
-      setMessages((current) => [...current, { id: streamId, role: "assistant", content: "" }]);
+      setMessages((current) => [...current, { id: streamId, role: "assistant", content: "", interstitial: [] }]);
 
       let streamedText = "";
+      const interstitialBlocks: InterstitialBlock[] = [];
+      let forceNewThinking = false;
+
+      const updateMessage = (updates: Partial<DisplayMessage>) => {
+        setMessages((current) => current.map((m) => (m.id === streamId ? { ...m, ...updates } : m)));
+      };
 
       api
-        .chat(sessionId, conversation, (delta) => {
-          if (!alive.current) return;
-          streamedText += delta;
-          setMessages((current) => current.map((m) => (m.id === streamId ? { ...m, content: streamedText } : m)));
+        .chat(sessionId, conversation, {
+          onThinking(delta) {
+            if (!alive.current) return;
+            // Accumulate thinking into the last thinking block, or create a new one
+            const last = interstitialBlocks[interstitialBlocks.length - 1];
+            if (last?.type === "thinking" && !forceNewThinking) {
+              last.content += delta;
+            } else {
+              interstitialBlocks.push({ type: "thinking", content: delta });
+              forceNewThinking = false;
+            }
+            updateMessage({ interstitial: [...interstitialBlocks] });
+          },
+          onToolStart(name, input) {
+            if (!alive.current) return;
+            interstitialBlocks.push({ type: "tool_call", content: name, input, result: undefined });
+            updateMessage({ interstitial: [...interstitialBlocks] });
+          },
+          onToolEnd(name, result) {
+            if (!alive.current) return;
+            // Find the last tool_call block with this name that has no result
+            for (let i = interstitialBlocks.length - 1; i >= 0; i--) {
+              if (
+                interstitialBlocks[i].type === "tool_call" &&
+                interstitialBlocks[i].content === name &&
+                interstitialBlocks[i].result === undefined
+              ) {
+                interstitialBlocks[i] = { ...interstitialBlocks[i], result };
+                break;
+              }
+            }
+            updateMessage({ interstitial: [...interstitialBlocks] });
+          },
+          onTurnStart() {
+            if (!alive.current) return;
+            forceNewThinking = true;
+          },
+          onDelta(delta) {
+            if (!alive.current) return;
+            streamedText += delta;
+            updateMessage({ content: streamedText });
+          },
         })
         .then((response) => {
           if (!alive.current) return;
           pendingRetry.current = null;
           // Replace placeholder with final message including tool calls and warning
-          setMessages((current) =>
-            current.map((m) =>
-              m.id === streamId
-                ? { ...m, content: response.message, toolCalls: response.tool_calls, warning: response.warning }
-                : m,
-            ),
-          );
+          updateMessage({
+            content: response.message,
+            toolCalls: response.tool_calls,
+            warning: response.warning,
+            interstitial: interstitialBlocks.length > 0 ? [...interstitialBlocks] : undefined,
+          });
           if (!response.tool_calls.some((call) => extractWalkingHighlight(call))) setHighlight(null);
           setAnnouncement("New response from assistant");
           refreshSessions();
@@ -270,15 +319,16 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
             {messages.map((message) =>
               message.role === "user" ? (
                 <UserMessage key={message.id} message={message} />
-              ) : message.content || message.toolCalls ? (
+              ) : message.content || message.toolCalls || (message.interstitial && message.interstitial.length > 0) ? (
                 <AssistantMessage key={message.id} message={message} isLatest={message.id === latestAssistantId} />
               ) : null,
             )}
             {sending &&
               (!messages.length ||
                 messages[messages.length - 1]?.role !== "assistant" ||
-                !messages[messages.length - 1]?.content) && <TypingIndicator slow={slowResponse} />}
-            {sending && messages[messages.length - 1]?.role !== "assistant" && <TypingIndicator slow={slowResponse} />}
+                (!messages[messages.length - 1]?.content && !messages[messages.length - 1]?.interstitial?.length)) && (
+                <TypingIndicator slow={slowResponse} />
+              )}
             {sendError && (
               <div className="border-error/30 bg-error-container/40 flex items-center justify-between gap-3 rounded-xl border px-4 py-3">
                 <p className="text-on-surface flex items-center gap-2 text-sm">
