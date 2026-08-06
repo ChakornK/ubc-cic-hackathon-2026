@@ -20,6 +20,30 @@ export interface RouteResult {
 export interface Graph {
   coords: LonLat[]; // node id -> coordinate
   adj: { to: number; w: number }[][]; // node id -> edges
+  grid: SpatialGrid;
+}
+
+/** Grid-based spatial index for O(1) nearest-node lookups over small areas. */
+interface SpatialGrid {
+  cells: Map<string, number[]>;
+  cellSize: number; // degrees per cell
+}
+
+const CELL_SIZE = 0.002; // ~220m per cell at 49N latitude
+
+function gridKey(lon: number, lat: number): string {
+  return `${Math.floor(lon / CELL_SIZE)},${Math.floor(lat / CELL_SIZE)}`;
+}
+
+function buildSpatialGrid(coords: LonLat[]): SpatialGrid {
+  const cells = new Map<string, number[]>();
+  for (let i = 0; i < coords.length; i++) {
+    const k = gridKey(coords[i][0], coords[i][1]);
+    const bucket = cells.get(k);
+    if (bucket) bucket.push(i);
+    else cells.set(k, [i]);
+  }
+  return { cells, cellSize: CELL_SIZE };
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: raw GeoJSON features
@@ -47,7 +71,8 @@ export function buildGraph(features: Feature[]): Graph {
   for (const f of features) {
     const g = f?.geometry;
     if (!g) continue;
-    const lines: LonLat[][] = g.type === "LineString" ? [g.coordinates] : g.type === "MultiLineString" ? g.coordinates : [];
+    const lines: LonLat[][] =
+      g.type === "LineString" ? [g.coordinates] : g.type === "MultiLineString" ? g.coordinates : [];
     for (const line of lines) {
       for (let i = 1; i < line.length; i++) {
         const a = nodeOf(line[i - 1]);
@@ -58,14 +83,44 @@ export function buildGraph(features: Feature[]): Graph {
       }
     }
   }
-  return { coords, adj };
+  return { coords, adj, grid: buildSpatialGrid(coords) };
 }
 
+/** Finds the closest graph node using the spatial grid. Checks a 3x3 cell
+ *  neighborhood first; expands the search radius if no node is found nearby. */
 export function nearestNode(graph: Graph, p: { lat: number; lon: number }): number {
+  const { grid, coords } = graph;
+  const cx = Math.floor(p.lon / grid.cellSize);
+  const cy = Math.floor(p.lat / grid.cellSize);
+
   let best = -1;
   let bestDist = Infinity;
-  for (let i = 0; i < graph.coords.length; i++) {
-    const d = haversineMeters(p, toPoint(graph.coords[i]));
+
+  const scan = (radius: number) => {
+    for (let dx = -radius; dx <= radius; dx++) {
+      for (let dy = -radius; dy <= radius; dy++) {
+        const bucket = grid.cells.get(`${cx + dx},${cy + dy}`);
+        if (!bucket) continue;
+        for (const i of bucket) {
+          const d = haversineMeters(p, toPoint(coords[i]));
+          if (d < bestDist) {
+            bestDist = d;
+            best = i;
+          }
+        }
+      }
+    }
+  };
+
+  // Start with the immediate neighborhood (3x3 = ~660m radius at 49N)
+  scan(1);
+  if (best !== -1) return best;
+  // Expand if the graph is sparse in this area
+  scan(3);
+  if (best !== -1) return best;
+  // Full fallback (should never happen on a connected campus graph)
+  for (let i = 0; i < coords.length; i++) {
+    const d = haversineMeters(p, toPoint(coords[i]));
     if (d < bestDist) {
       bestDist = d;
       best = i;
