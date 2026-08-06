@@ -32,8 +32,6 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@anthropic-ai/bedrock-sdk": "^0.32.0",
-    "@aws-sdk/client-bedrock": "^3.1104.0",
     "@biomejs/biome": "^2.5.7",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@tailwindcss/postcss": "^4",
