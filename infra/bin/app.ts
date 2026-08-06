@@ -12,7 +12,7 @@ const app = new App();
 new CampusAiStack(app, "CampusAiAssistant", {
   googleClientId: requireEnv("GOOGLE_CLIENT_ID"),
   googleClientSecret: requireEnv("GOOGLE_CLIENT_SECRET"),
-  bedrockModelId: process.env.BEDROCK_MODEL_ID ?? "anthropic.claude-sonnet-4-20250514",
+  bedrockModelId: process.env.BEDROCK_MODEL_ID ?? "anthropic.claude-haiku-4-5-20251001-v1",
   ingestPrincipalArn: requireEnv("INGEST_PRINCIPAL_ARN"),
   skipBuild: process.env.SKIP_BUILD === "true",
 });
