@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import { formatSeconds } from "../core/time";
-import { pairwiseDistances, transformBuilding } from "./buildings";
+import { transformBuilding } from "./buildings";
 import { hasNoPrereqs } from "./courses";
 import { modules } from "./index";
 import { transformTuition } from "./tuition";
@@ -51,18 +51,6 @@ describe("ingest document IDs", () => {
       }),
       { numRuns: 200 },
     );
-  });
-
-  it("walking-distance pair IDs are ordered and unique", () => {
-    const pairs = pairwiseDistances([
-      { code: "B", name: "b", lat: 49.26, lon: -123.25 },
-      { code: "A", name: "a", lat: 49.261, lon: -123.251 },
-      { code: "C", name: "c", lat: 49.262, lon: -123.249 },
-    ]);
-    expect(pairs).toHaveLength(3);
-    for (const p of pairs) expect(p.from < p.to).toBe(true);
-    const ids = pairs.map((p) => `${p.from}#${p.to}`);
-    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("building transform keys by BLDG_CODE and skips codeless features", () => {

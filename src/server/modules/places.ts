@@ -38,7 +38,9 @@ export function transformPoi(f: Feature): { _id: string; doc: PoiDoc } | null {
 }
 
 /** Straight-line walk estimate to each item, nearest first — same detour
- *  factor and speed as the walking_distances derivation. */
+ *  factor and speed as the routing fallback (src/server/routing.ts). Ranking
+ *  stays on haversine deliberately; only walking_distance/api-route use the
+ *  path network. */
 // ponytail: haversine over ≤500 docs sorted in JS, no geo_point mapping; move to OpenSearch geo queries if datasets grow
 export function nearestFirst<T extends { lat: number; lon: number }>(
   items: T[],
