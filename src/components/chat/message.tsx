@@ -63,9 +63,56 @@ function ThinkingBlock({ content }: { content: string }) {
   );
 }
 
+/** Humanize a tool call into a short readable label. */
+function humanizeToolCall(name: string, input?: Record<string, unknown>): string {
+  const q = input?.query as string | undefined;
+  const slug = (key: string) => (input?.[key] as string | undefined) ?? "";
+  switch (name) {
+    case "search_courses":
+      return q ? `Searched courses for "${q}"` : "Searched courses";
+    case "get_course":
+      return `Looking up ${slug("course_code") || "course"}`;
+    case "get_tuition":
+      return `Checking tuition for ${slug("program_slug") || "program"}`;
+    case "walking_distance":
+      return `Calculating walk from ${slug("from_building")} to ${slug("to_building")}`;
+    case "find_building":
+      return `Finding building ${slug("query") || slug("code") || ""}`.trim();
+    case "search_programs":
+      return q ? `Searched programs for "${q}"` : "Searched programs";
+    case "get_admission_requirements":
+      return `Checking admission requirements`;
+    case "get_key_dates":
+      return "Looking up key dates";
+    case "get_cost_estimate":
+      return `Estimating costs for ${slug("program_slug") || "program"}`;
+    case "get_living_costs":
+      return "Looking up living costs";
+    case "search_student_fees":
+      return q ? `Searched fees for "${q}"` : "Searched student fees";
+    case "search_events":
+      return q ? `Searched events for "${q}"` : "Searched events";
+    case "search_ubc_pages":
+      return q ? `Searched UBC pages for "${q}"` : "Searched UBC pages";
+    case "find_parking":
+      return "Finding parking";
+    case "find_places":
+      return q ? `Searched places for "${q}"` : "Searched places";
+    case "search_study_spaces":
+      return "Searching study spaces";
+    case "find_free_rooms":
+      return "Finding free rooms";
+    case "get_room_schedule":
+      return `Checking room schedule`;
+    default:
+      return name.replace(/_/g, " ");
+  }
+}
+
 function ToolCallBlock({ name, input, result }: { name: string; input?: Record<string, unknown>; result?: unknown }) {
   const [open, setOpen] = useState(false);
   const isLoading = result === undefined;
+  const label = humanizeToolCall(name, input);
   return (
     <details
       open={open}
@@ -74,20 +121,13 @@ function ToolCallBlock({ name, input, result }: { name: string; input?: Record<s
     >
       <summary className="text-on-surface-variant flex cursor-pointer items-center gap-2 px-3 py-2 text-xs font-medium select-none">
         <Icon name="search" size={14} className="text-primary shrink-0" />
-        <span className="font-mono">{name}</span>
-        {input && Object.keys(input).length > 0 && (
-          <span className="text-muted">
-            (
-            {Object.entries(input)
-              .map(([k, v]) => `${k}=${JSON.stringify(v)}`)
-              .join(", ")}
-            )
-          </span>
-        )}
+        <span className="truncate">{label}</span>
         {isLoading && (
-          <span className="border-primary ml-auto size-3 animate-spin rounded-full border-2 border-t-transparent" />
+          <span className="border-primary ml-auto size-3 shrink-0 animate-spin rounded-full border-2 border-t-transparent" />
         )}
-        {!isLoading && <Icon name="down" size={12} className="ml-auto transition-transform group-open:rotate-180" />}
+        {!isLoading && (
+          <Icon name="down" size={12} className="ml-auto shrink-0 transition-transform group-open:rotate-180" />
+        )}
       </summary>
       {open && result !== undefined && (
         <div className="border-border-subtle border-t px-3 py-2">
