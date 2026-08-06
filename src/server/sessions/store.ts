@@ -54,7 +54,11 @@ export async function getSessionMessages(sub: string, sessionId: string): Promis
     );
     if (!meta.Item) return null;
   }
-  return items.map((item) => ({ role: item.role as ChatMessage["role"], content: item.content as string }));
+  return items.map((item) => ({
+    role: item.role as ChatMessage["role"],
+    content: item.content as string,
+    ...(Array.isArray(item.toolCalls) && item.toolCalls.length > 0 ? { tool_calls: item.toolCalls as ToolCall[] } : {}),
+  }));
 }
 
 /** Persists one user + assistant exchange and atomically increments the session counter. */

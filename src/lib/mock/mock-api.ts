@@ -133,7 +133,7 @@ function persist(sessions: Map<string, StoredSession>): void {
 
 const COURSE_CODE_RE = /\b([a-z]{2,4})\s*[_ ]?\s*(\d{3})\b/i;
 
-function detectBuildings(text: string): [string, string] | null {
+function detectBuildingMentions(text: string): string[] {
   const codes = [
     "ICCS",
     "IKB",
@@ -174,7 +174,11 @@ function detectBuildings(text: string): [string, string] | null {
     const index = upper.indexOf(name);
     if (index >= 0 && !found.has(code)) found.set(code, index);
   }
-  const ordered = [...found.entries()].sort((a, b) => a[1] - b[1]).map(([code]) => code);
+  return [...found.entries()].sort((a, b) => a[1] - b[1]).map(([code]) => code);
+}
+
+function detectBuildings(text: string): [string, string] | null {
+  const ordered = detectBuildingMentions(text);
   if (ordered.length >= 2) return [ordered[0], ordered[1]];
   return null;
 }
@@ -235,6 +239,30 @@ function respondToChat(text: string): ChatResponse {
       ],
       warning: "Iteration limit reached: the agent stopped after 8 model calls; the answer may be incomplete.",
     };
+  }
+
+  // "Where is X" (exactly one building mentioned) → find_building: the map
+  // highlights the footprint and flies to it.
+  if (/\b(where is|where's|find|locate|show me)\b/.test(lower) && !/\b(courses?|class|tuition|credits?)\b/.test(lower)) {
+    const mentions = detectBuildingMentions(text);
+    if (mentions.length === 1) {
+      const code = mentions[0];
+      const feature = findBuilding(mockBuildingsGeoJson, code);
+      const center = feature ? featureCentroid(feature) : null;
+      if (feature && center) {
+        const name = String(feature.properties?.NAME ?? code);
+        return {
+          message: `${name} (${code}) is highlighted on the map — location resolved with the find_building tool.`,
+          tool_calls: [
+            {
+              name: "find_building",
+              input: { query: code },
+              result: { code, name, lat: center[1], lon: center[0] },
+            },
+          ],
+        };
+      }
+    }
   }
 
   const buildings = /\b(walk|far|distance|route|get from|minutes? from)\b/.test(lower) ? detectBuildings(text) : null;
@@ -371,7 +399,11 @@ export function createMockApi({ getToken, latencyMs = 1400, seed = true }: MockA
       stored.messages = [
         ...stored.messages,
         { role: "user", content: last.content },
-        { role: "assistant", content: response.message },
+        {
+          role: "assistant",
+          content: response.message,
+          ...(response.tool_calls.length > 0 ? { tool_calls: response.tool_calls } : {}),
+        },
       ];
       stored.summary = { ...stored.summary, updatedAt: new Date().toISOString() };
       sessions.set(sessionId, stored);
@@ -410,6 +442,55 @@ export function createMockApi({ getToken, latencyMs = 1400, seed = true }: MockA
       if (name === "buildings") return structuredClone(mockBuildingsGeoJson) as FeatureCollection;
       if (name === "walking-routes") return structuredClone(mockWalkingRoutesGeoJson) as FeatureCollection;
       throw new ApiError(404, `Unknown geo dataset: ${name}`);
+    },
+
+    async getBuildingDetails(code) {
+      await requireToken();
+      await sleep(latencyMs / 4);
+      const feature = findBuilding(mockBuildingsGeoJson, code);
+      if (!feature) throw new ApiError(404, `Unknown building: "${code}"`);
+      const bldg = String(feature.properties?.BLDG_CODE ?? code);
+      const name = String(feature.properties?.NAME ?? bldg);
+      // Static plausible fixtures; photos omitted so the placeholder slot shows.
+      return {
+        code: bldg,
+        name,
+        rooms: [
+          { name: `${bldg} 101`, capacity: 120, floor: 1, layout: "Rows", furniture: "Fixed Tablets", photo: null, link: null },
+          { name: `${bldg} 202`, capacity: 40, floor: 2, layout: "Moveable Tables", furniture: "Moveable Chairs", photo: null, link: null },
+          { name: `${bldg} 305`, capacity: 8, floor: 3, layout: "Study Room", furniture: "Table & Chairs", photo: null, link: null },
+        ],
+        pois: [
+          { name: "Campus Coffee", service_type: "cafe", url: "https://food.ubc.ca/", photo: null, hours: "M-F: 8 am - 4 pm", contact: null },
+          { name: `${name} Services Desk`, service_type: "campus_services", url: null, photo: null, hours: "M-F: 9 am - 5 pm", contact: "Phone: (604) 822-0000" },
+        ],
+        availability: {
+          as_of: new Date().toISOString(),
+          rooms: [
+            { title: `${bldg} Study Room A`, capacity: 6, url: "https://libcal.library.ubc.ca/", thumbnail: null, freeNow: true, freeUntil: "17:00", nextFree: null },
+            { title: `${bldg} Study Room B`, capacity: 10, url: "https://libcal.library.ubc.ca/", thumbnail: null, freeNow: false, freeUntil: null, nextFree: "15:30" },
+          ],
+        },
+      };
+    },
+
+    async getRoute(from, to) {
+      await requireToken();
+      await sleep(latencyMs / 4);
+      const fromFeature = findBuilding(mockBuildingsGeoJson, from);
+      const toFeature = findBuilding(mockBuildingsGeoJson, to);
+      const a = fromFeature ? featureCentroid(fromFeature) : null;
+      const b = toFeature ? featureCentroid(toFeature) : null;
+      if (!a || !b) throw new ApiError(404, `Unknown building: ${a ? to : from}`);
+      const meters = Math.round(haversineMeters(a, b) * ESTIMATE_DETOUR);
+      return {
+        from: String(fromFeature?.properties?.BLDG_CODE ?? from),
+        to: String(toFeature?.properties?.BLDG_CODE ?? to),
+        meters,
+        minutes: Math.max(1, Math.round(meters / WALK_SPEED_M_PER_MIN)),
+        method: "estimate",
+        polyline: [a, b],
+      };
     },
   };
 }

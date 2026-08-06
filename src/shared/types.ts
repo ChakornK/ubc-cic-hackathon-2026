@@ -4,6 +4,8 @@
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  /** Persisted with assistant messages so history reloads keep the tool cards. */
+  tool_calls?: ToolCall[];
 }
 
 export interface ToolCall {

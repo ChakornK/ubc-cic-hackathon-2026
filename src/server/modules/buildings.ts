@@ -1,9 +1,13 @@
+import type { FeatureCollection } from "geojson";
 import type { DatasetModule, OsClient } from "../core/types";
 import { route } from "../routing";
+import { dataBucket } from "../s3";
 
 export interface BuildingDoc {
   code: string;
   name: string;
+  /** Acronym aliases (e.g. "IKB" for Irving K. Barber) — colloquial codes that aren't the official BLDG_CODE. */
+  aliases: string[];
   lat: number;
   lon: number;
 }
@@ -13,7 +17,9 @@ type Feature = Record<string, any>;
 
 const BUILDINGS_KEY = "geospatial/ubcv/locations/geojson/ubcv_buildings.geojson";
 const ROUTES_KEY = "geospatial/ubcv/transportation/geojson/ubcv_routes.geojson";
+const ENTRANCES_KEY = "geospatial/ubcv/locations/geojson/ubcv_building_entraces.geojson"; // (sic — dataset typo)
 const WALKING_ROUTES_KEY = "derived/walking-routes.geojson";
+export const BUILDING_ENTRANCES_KEY = "derived/building-entrances.json";
 
 /** Average of all footprint vertices — good enough for walking estimates. */
 export function centroid(geometry: Feature): { lat: number; lon: number } {
@@ -34,19 +40,65 @@ export function centroid(geometry: Feature): { lat: number; lon: number } {
   return { lat: latSum / n, lon: lonSum / n };
 }
 
+/** Initial-letter prefixes (length ≥ 2) of each name — how people abbreviate
+ *  buildings colloquially: "Irving K. Barber Learning Centre" → IK, IKB, IKBL, IKBLC. */
+export function acronymAliases(...names: (string | null | undefined)[]): string[] {
+  const out = new Set<string>();
+  for (const name of names) {
+    if (!name) continue;
+    const initials = name
+      .split(/[^A-Za-z]+/)
+      .map((word) => word[0] ?? "")
+      .join("")
+      .toUpperCase();
+    for (let n = 2; n <= initials.length; n++) out.add(initials.slice(0, n));
+  }
+  return [...out];
+}
+
 export function transformBuilding(f: Feature): { _id: string; doc: BuildingDoc } | null {
   const code = f?.properties?.BLDG_CODE;
   if (!code) return null;
   const { lat, lon } = centroid(f.geometry);
-  return { _id: code, doc: { code, name: f.properties.NAME ?? code, lat, lon } };
+  const name = f.properties.NAME ?? code;
+  return { _id: code, doc: { code, name, aliases: acronymAliases(name, f.properties.SHORTNAME), lat, lon } };
 }
 
+let geoPromise: Promise<FeatureCollection> | undefined;
+let geoLoadedAt = 0;
+const GEO_TTL_MS = 10 * 60 * 1000;
+
+/** Cached raw buildings GeoJSON — footprints for point-in-polygon joins
+ *  (e.g. which POIs sit inside a building). Same TTL pattern as the
+ *  routing graph. */
+export function getBuildingsGeoJson(): Promise<FeatureCollection> {
+  if (geoPromise && Date.now() - geoLoadedAt > GEO_TTL_MS) geoPromise = undefined;
+  geoPromise ??= dataBucket()
+    .getJson(BUILDINGS_KEY)
+    .then((geo) => {
+      geoLoadedAt = Date.now();
+      return geo as FeatureCollection;
+    })
+    .catch((e) => {
+      geoPromise = undefined;
+      throw e;
+    });
+  return geoPromise;
+}
+
+/** Exact code, then acronym alias ("IKB" → IBLC), then fuzzy name search. */
 export async function resolveBuilding(os: OsClient, query: string): Promise<BuildingDoc> {
   const norm = query.trim().toUpperCase();
   try {
     const res = await os.get({ index: "buildings", id: norm });
     return res.body._source as BuildingDoc;
   } catch {
+    const alias = await os.search({
+      index: "buildings",
+      body: { query: { term: { aliases: norm } }, size: 1 },
+    });
+    const aliasHit = alias.body.hits.hits[0];
+    if (aliasHit) return aliasHit._source as BuildingDoc;
     const res = await os.search({
       index: "buildings",
       body: { query: { multi_match: { query, fields: ["code^2", "name"] } }, size: 1 },
@@ -66,6 +118,7 @@ export const buildings: DatasetModule = {
         properties: {
           code: { type: "keyword" },
           name: { type: "text" },
+          aliases: { type: "keyword" },
           lat: { type: "float" },
           lon: { type: "float" },
         },
@@ -84,6 +137,28 @@ export const buildings: DatasetModule = {
             .filter((f) => f.properties?.PEDESTRIAN_ACCESS === "Y")
             .map((f) => ({ type: "Feature", properties: {}, geometry: f.geometry })),
         });
+
+        // building code -> entrance coordinates, joined via BLDG_UID — routing
+        // snaps route endpoints to the nearest entrance pair instead of centroids
+        const [buildingsGeo, entrancesGeo] = await Promise.all([
+          s3.getJson(BUILDINGS_KEY) as Promise<{ features: Feature[] }>,
+          s3.getJson(ENTRANCES_KEY) as Promise<{ features: Feature[] }>,
+        ]);
+        const uidToCode = new Map<string, string>();
+        for (const f of buildingsGeo.features) {
+          if (f.properties?.BLDG_UID && f.properties?.BLDG_CODE) {
+            uidToCode.set(String(f.properties.BLDG_UID), String(f.properties.BLDG_CODE));
+          }
+        }
+        const byCode: Record<string, [number, number][]> = {};
+        for (const f of entrancesGeo.features) {
+          if (f.properties?.STATUS !== "Current" || f.geometry?.type !== "Point") continue;
+          const code = uidToCode.get(String(f.properties?.BLDG_UID ?? ""));
+          if (!code) continue;
+          byCode[code] ??= [];
+          byCode[code].push(f.geometry.coordinates as [number, number]);
+        }
+        await s3.putJson(BUILDING_ENTRANCES_KEY, byCode);
       },
     },
   ],

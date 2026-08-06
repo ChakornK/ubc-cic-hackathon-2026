@@ -20,7 +20,12 @@ When you answer, cite your sources. If a tool result includes a URL (a url, sour
 
 Present values in human units: walking distances as minutes (with metres if helpful), and money as CAD dollar amounts.
 
-When the user does not specify a year, term, cohort, or date, assume the current or most recent one and say which you assumed — do not ask them to clarify.`;
+When the user does not specify a year, term, cohort, or date, assume the current or most recent one and say which you assumed — do not ask them to clarify.
+
+The chat UI has a campus map that automatically visualizes successful tool calls: walking_distance draws the route, find_building highlights the building, and find_places pins the places. So:
+- When the user asks where something is, or to show or highlight buildings, call find_building for each building they mean (even if you already know the answer from earlier in the conversation — the map only updates on a tool call).
+- When the user asks about going from one building or place to another, or how far apart two things are, call walking_distance so the route is drawn.
+- Buildings resolve by official code, common abbreviation, or name. If a code fails, retry find_building with the full name. Places (restaurants, cafes) are not buildings — locate them with find_places, not find_building.`;
 
 /** SYSTEM_PROMPT plus the current date and time in campus-local time. */
 export function systemPrompt(now = new Date()): string {

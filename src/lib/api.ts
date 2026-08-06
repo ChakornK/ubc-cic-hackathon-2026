@@ -5,10 +5,12 @@
 
 import {
   ApiError,
+  type BuildingDetails,
   type ChatMessage,
   type ChatResponse,
   type GeoName,
   type Profile,
+  type RouteResponse,
   type SessionSummary,
 } from "@/src/lib/api-types";
 import { createMockApi } from "@/src/lib/mock/mock-api";
@@ -27,6 +29,10 @@ export interface ChatApi {
   putProfile(profile: Profile): Promise<void>;
   /** GET /api/geo/{name} — GeoJSON FeatureCollection. */
   getGeo(name: GeoName): Promise<FeatureCollection>;
+  /** GET /api/route?from=&to= — walking route with the polyline the map draws. */
+  getRoute(from: string, to: string): Promise<RouteResponse>;
+  /** GET /api/building/{code} — popup details: rooms, POIs, availability. */
+  getBuildingDetails(code: string): Promise<BuildingDetails>;
 }
 
 export interface ChatApiOptions {
@@ -143,6 +149,9 @@ function createHttpApi({ getToken, onUnauthorized, baseUrl = "/api" }: ChatApiOp
     getProfile: () => request<Profile>("/profile"),
     putProfile: (profile) => request<void>("/profile", { method: "PUT", body: JSON.stringify(profile) }),
     getGeo: (name) => request<FeatureCollection>(`/geo/${name}`),
+    getRoute: (from, to) =>
+      request<RouteResponse>(`/route?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+    getBuildingDetails: (code) => request<BuildingDetails>(`/building/${encodeURIComponent(code)}`),
   };
 }
 

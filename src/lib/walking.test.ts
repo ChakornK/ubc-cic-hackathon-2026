@@ -6,7 +6,12 @@
 import type { ToolCall } from "@/src/lib/api-types";
 import { featureCentroid, featuresBounds, findBuilding } from "@/src/lib/geo";
 import { createMockApi } from "@/src/lib/mock/mock-api";
-import { extractWalkingHighlight } from "@/src/lib/walking";
+import {
+  extractBuildingHighlight,
+  extractPlacesHighlight,
+  extractWalkingHighlight,
+  mergeMapHighlights,
+} from "@/src/lib/walking";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
@@ -18,7 +23,7 @@ describe("extractWalkingHighlight", () => {
   };
 
   it("extracts the highlight from a healthy call", () => {
-    expect(extractWalkingHighlight(healthy)).toEqual({ from: "IKB", to: "ICCS", meters: 790, minutes: 10 });
+    expect(extractWalkingHighlight(healthy)).toEqual({ kind: "route", from: "IKB", to: "ICCS", meters: 790, minutes: 10 });
   });
 
   it("returns null for other tools, error results, and malformed payloads", () => {
@@ -28,13 +33,13 @@ describe("extractWalkingHighlight", () => {
     expect(extractWalkingHighlight({ ...healthy, result: undefined })).toBeNull();
   });
 
-  it("keeps the asked direction when the backend result swaps from/to (api-spec's own example)", () => {
+  it("prefers the backend's resolved codes — the input may be a colloquial alias", () => {
     const call: ToolCall = {
       name: "walking_distance",
-      input: { from_building: "IKB", to_building: "ICCS" },
-      result: { from: "ICCS", to: "IKB", meters: 460, minutes: 6 },
+      input: { from_building: "IKB", to_building: "ICCS" }, // IKB is not a real BLDG_CODE
+      result: { from: "IBLC", to: "ICCS", meters: 830, minutes: 11 },
     };
-    expect(extractWalkingHighlight(call)).toEqual({ from: "IKB", to: "ICCS", meters: 460, minutes: 6 });
+    expect(extractWalkingHighlight(call)).toEqual({ kind: "route", from: "IBLC", to: "ICCS", meters: 830, minutes: 11 });
   });
 
   it("falls back to result codes when the input is malformed", () => {
@@ -43,7 +48,7 @@ describe("extractWalkingHighlight", () => {
       input: {},
       result: { from: "NEST", to: "BUCH", meters: 500, minutes: 7 },
     };
-    expect(extractWalkingHighlight(call)).toEqual({ from: "NEST", to: "BUCH", meters: 500, minutes: 7 });
+    expect(extractWalkingHighlight(call)).toEqual({ kind: "route", from: "NEST", to: "BUCH", meters: 500, minutes: 7 });
   });
 
   it("never fabricates a highlight without both endpoints and numeric measures (property)", () => {
@@ -70,6 +75,101 @@ describe("extractWalkingHighlight", () => {
         },
       ),
     );
+  });
+});
+
+describe("extractBuildingHighlight", () => {
+  const healthy: ToolCall = {
+    name: "find_building",
+    input: { query: "life sciences" },
+    result: { code: "LSC", name: "Life Sciences Centre", lat: 49.2626, lon: -123.2453 },
+  };
+
+  it("extracts the highlight from a healthy call", () => {
+    expect(extractBuildingHighlight(healthy)).toEqual({
+      kind: "buildings",
+      buildings: [{ code: "LSC", name: "Life Sciences Centre", lat: 49.2626, lon: -123.2453 }],
+    });
+  });
+
+  it("returns null for other tools, error results, and malformed payloads", () => {
+    expect(extractBuildingHighlight({ ...healthy, name: "walking_distance" })).toBeNull();
+    expect(extractBuildingHighlight({ ...healthy, result: { status: "error", message: "no match" } })).toBeNull();
+    expect(extractBuildingHighlight({ ...healthy, result: { code: "LSC", lat: "49", lon: -123 } })).toBeNull();
+    expect(extractBuildingHighlight({ ...healthy, result: undefined })).toBeNull();
+  });
+
+  it("falls back to the code when the name is missing", () => {
+    const highlight = extractBuildingHighlight({ ...healthy, result: { code: "LSC", lat: 49.26, lon: -123.24 } });
+    expect(highlight?.buildings[0]?.name).toBe("LSC");
+  });
+});
+
+describe("mergeMapHighlights", () => {
+  const building = (code: string): ToolCall => ({
+    name: "find_building",
+    input: { query: code },
+    result: { code, name: code, lat: 49.26, lon: -123.25 },
+  });
+  const walk: ToolCall = {
+    name: "walking_distance",
+    input: { from_building: "IBLC", to_building: "ICCS" },
+    result: { from: "IBLC", to: "ICCS", meters: 830, minutes: 11 },
+  };
+
+  it("merges every looked-up building into one highlight", () => {
+    const merged = mergeMapHighlights([building("NEST"), building("ICCS"), building("NEST")]);
+    expect(merged?.kind).toBe("buildings");
+    if (merged?.kind !== "buildings") throw new Error("expected buildings");
+    expect(merged.buildings.map((b) => b.code)).toEqual(["NEST", "ICCS"]); // deduped
+  });
+
+  it("prefers the route when one was computed (the A → B answer)", () => {
+    const merged = mergeMapHighlights([building("IBLC"), building("ICCS"), walk]);
+    expect(merged?.kind).toBe("route");
+  });
+
+  it("returns null when no call drives the map", () => {
+    expect(mergeMapHighlights([])).toBeNull();
+    expect(
+      mergeMapHighlights([{ name: "walking_distance", input: {}, result: { status: "error", message: "nope" } }]),
+    ).toBeNull();
+  });
+});
+
+describe("extractPlacesHighlight", () => {
+  const healthy: ToolCall = {
+    name: "find_places",
+    input: { service_type: "restaurant", near_building: "SWNG" },
+    result: {
+      near_building: "SWNG",
+      places: [
+        { name: "Mercante", lat: 49.2637, lon: -123.2551, service_type: "restaurant", walk_meters: 152 },
+        { name: "The Point Grill", lat: 49.2611, lon: -123.2557, service_type: "restaurant" },
+      ],
+    },
+  };
+
+  it("extracts pins with the anchor building", () => {
+    const highlight = extractPlacesHighlight(healthy);
+    expect(highlight?.kind).toBe("places");
+    expect(highlight?.near).toBe("SWNG");
+    expect(highlight?.places).toEqual([
+      { name: "Mercante", lat: 49.2637, lon: -123.2551, service_type: "restaurant" },
+      { name: "The Point Grill", lat: 49.2611, lon: -123.2557, service_type: "restaurant" },
+    ]);
+  });
+
+  it("skips malformed entries and returns null when none survive", () => {
+    const partial = extractPlacesHighlight({
+      ...healthy,
+      result: { places: [{ name: "OK", lat: 49, lon: -123 }, { name: "no coords" }, { lat: 49, lon: -123 }] },
+    });
+    expect(partial?.places).toHaveLength(1);
+    expect(partial?.near).toBe("SWNG"); // input fallback
+    expect(extractPlacesHighlight({ ...healthy, result: { places: [] } })).toBeNull();
+    expect(extractPlacesHighlight({ ...healthy, name: "search_courses" })).toBeNull();
+    expect(extractPlacesHighlight({ ...healthy, result: { status: "error", message: "none" } })).toBeNull();
   });
 });
 
@@ -109,10 +209,12 @@ describe("mock-mode journey: chat → highlight → map geometry", () => {
       expect(lat).toBeLessThanOrEqual(bounds.north);
     }
 
-    // 4) Session reload returns the exchange for the sidebar flow.
+    // 4) Session reload returns the exchange for the sidebar flow — including
+    // the tool calls, so switching back to a session keeps its cards.
     const history = await api.getSession(sessionId);
     expect(history[0]).toEqual({ role: "user", content: "How long is the walk from IKB to ICCS?" });
     expect(history[1].role).toBe("assistant");
+    expect(history[1].tool_calls?.map((c) => c.name)).toContain("walking_distance");
   });
 
   it("clears the route when the latest response has no walking_distance call", async () => {
