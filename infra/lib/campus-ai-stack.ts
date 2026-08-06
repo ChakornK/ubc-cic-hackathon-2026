@@ -36,10 +36,10 @@ export class CampusAiStack extends Stack {
   constructor(scope: Construct, id: string, props: CampusAiStackProps) {
     super(scope, id, props);
 
-    // --- Cognito ---
     this.userPool = new cognito.UserPool(this, "UserPool", {
       selfSignUpEnabled: false,
       signInAliases: { email: true },
+      // DESTROY is acceptable — pool holds no user data (Google IdP is source of truth).
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
@@ -59,7 +59,7 @@ export class CampusAiStack extends Stack {
       cognitoDomain: { domainPrefix },
     });
 
-    // --- DynamoDB ---
+    // DESTROY — chat history is ephemeral; switch to RETAIN for prod.
     this.table = new dynamodb.Table(this, "SessionTable", {
       partitionKey: { name: "PK", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "SK", type: dynamodb.AttributeType.STRING },
@@ -67,14 +67,14 @@ export class CampusAiStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    // --- S3 Data Bucket ---
+    // DESTROY — data is re-ingested from S3 source; switch to RETAIN for prod.
     this.dataBucket = new s3.Bucket(this, "DataBucket", {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
-    // --- OpenSearch ---
+    // DESTROY — index is rebuilt by `npm run ingest`; switch to RETAIN for prod.
     this.searchDomain = new opensearch.Domain(this, "SearchDomain", {
       version: opensearch.EngineVersion.OPENSEARCH_2_17,
       capacity: {
