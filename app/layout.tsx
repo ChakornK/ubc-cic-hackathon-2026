@@ -1,15 +1,66 @@
-import type { Metadata } from "next";
+import { AppProviders } from "@/src/components/providers";
+import { storedUserKey } from "@/src/lib/auth-config";
+import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 
+const aspekta = localFont({
+  src: "../src/fonts/AspektaVF.woff2",
+  weight: "100 900",
+  display: "swap",
+  variable: "--font-aspekta",
+});
+
+const commitMono = localFont({
+  src: "../src/fonts/CommitMonoVF.woff2",
+  weight: "400 700",
+  display: "swap",
+  variable: "--font-commit-mono",
+});
+
 export const metadata: Metadata = {
-  title: "Campus AI Assistant",
-  description: "UBC campus AI assistant",
+  title: "UBC Assistant — AI for your campus",
+  description:
+    "Courses, prerequisites, tuition, and walking routes — answered instantly from real UBC data, with routes drawn on a live campus map.",
 };
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8f8f6" },
+    { media: "(prefers-color-scheme: dark)", color: "#121214" },
+  ],
+};
+
+// Runs before first paint: applies the stored (or system) theme, and on the
+// landing route flags a stored sign-in so returning users see the splash
+// instead of a flash of the landing page (UX_SPEC "Already signed in").
+const AUTH_KEY = storedUserKey();
+const BOOTSTRAP =
+  `try{var t=localStorage.getItem("campus.theme");document.documentElement.dataset.theme=(t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches))?"dark":"light"}catch(e){document.documentElement.dataset.theme="light"}` +
+  (AUTH_KEY
+    ? `try{if(location.pathname==="/"&&localStorage.getItem(${JSON.stringify(AUTH_KEY)}))document.documentElement.dataset.authPending=""}catch(e){}`
+    : "");
+
+const DIRECTION_CONTRACT = `impeccable direction contract
+THESIS: one conversational surface that proves its answers — the map lights up with the exact route the assistant just computed; refuses the generic chatbot-in-a-box with decorative sidebar.
+OWN-WORLD: soft neumorphism on warm gray (#F8F8F6) with steel-blue primary (#416375); surfaces float on warm diffuse shadows, inputs recess; Aspekta + Commit Mono for data.
+STORY: a student asks about courses, tuition, or a walk; sees which tool grounded the answer; watches the route draw on the real campus.
+FIRST VIEWPORT: landing — "Know your campus." over a radial accent halo and 3–4% topographic contours; app — sidebar (recessed), chat card, map card side-by-side.
+FORM: established world per DESIGN.md + UX_SPEC.md; precisely specified brief, no concept roll.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={`${aspekta.variable} ${commitMono.variable}`} suppressHydrationWarning>
+      <head>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static pre-paint bootstrap built from build-time env only */}
+        <script dangerouslySetInnerHTML={{ __html: BOOTSTRAP }} />
+      </head>
+      <body>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static build-time direction contract */}
+        <div hidden dangerouslySetInnerHTML={{ __html: `<!-- ${DIRECTION_CONTRACT} -->` }} />
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }

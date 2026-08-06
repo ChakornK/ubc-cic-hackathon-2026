@@ -1,1 +1,304 @@
 @import "tailwindcss";
+
+/*
+ * Design tokens per DESIGN.md — soft neumorphism over a muted pastel palette.
+ * Raw values live on :root and flip on [data-theme="dark"]; @theme inline maps
+ * them to Tailwind utilities so `bg-surface` etc. follow the active theme.
+ *
+ * Deviation from DESIGN.md, per PRODUCT.md's WCAG 2.1 AA commitment: meta text
+ * and placeholders use --muted (≥4.5:1 on all surfaces) instead of Outline /
+ * Outline Variant, which fall short of AA on the light surfaces.
+ */
+
+:root {
+  --background: #f8f8f6;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f4f3f5;
+  --surface-container: #eeeeef;
+  --surface-container-high: #e8e8e9;
+  --surface: #fafafa;
+  --surface-bright: #ffffff;
+
+  --primary: #416375;
+  --primary-container: #7c9eb2;
+  --on-primary: #ffffff;
+  --on-primary-container: #103546;
+  --secondary: #306946;
+  --secondary-container: #b3f1c4;
+  --on-secondary: #ffffff;
+  --on-secondary-container: #00210f;
+  --tertiary: #7a5733;
+  --tertiary-container: #f4e3cf;
+  --on-tertiary-container: #4a3010;
+  --error: #a04747;
+  --error-container: #ffdad6;
+  --on-error-container: #73342c;
+
+  --on-surface: #1a1c1d;
+  --on-surface-variant: #42484c;
+  --muted: #5c6367;
+  --outline: #72787c;
+  --outline-variant: #c2c7cc;
+
+  --border: #e8e8e4;
+  --border-subtle: #f0f0ec;
+
+  --accent-subtle: #eef4f7;
+  --surface-tint: #416375;
+
+  --elevation-sm: 4px 4px 8px rgba(174, 174, 174, 0.12), -2px -2px 6px rgba(255, 255, 255, 0.8);
+  --elevation-md: 6px 6px 14px rgba(174, 174, 174, 0.15), -3px -3px 10px rgba(255, 255, 255, 0.9);
+  --elevation-lg: 8px 8px 20px rgba(174, 174, 174, 0.18), -4px -4px 14px rgba(255, 255, 255, 1);
+  --elevation-inset: inset 2px 2px 5px rgba(174, 174, 174, 0.15), inset -2px -2px 5px rgba(255, 255, 255, 0.7);
+  --elevation-glow: 0 4px 14px rgba(65, 99, 117, 0.3);
+
+  --scrim: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] {
+  --background: #121214;
+  --surface-container-lowest: #0e0e10;
+  --surface-container-low: #1a1a1e;
+  --surface-container: #222226;
+  --surface-container-high: #2c2c30;
+  --surface: #1a1a1e;
+  --surface-bright: #2a2a2e;
+
+  --primary: #a9cbe0;
+  --primary-container: #294b5c;
+  --on-primary: #001e2b;
+  --on-primary-container: #c4e7fd;
+  --secondary: #98d4a9;
+  --secondary-container: #155130;
+  --on-secondary: #00210f;
+  --on-secondary-container: #b3f1c4;
+  --tertiary: #ebbe92;
+  --tertiary-container: #4a3623;
+  --on-tertiary-container: #f7dfc3;
+  --error: #e0a3a3;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+
+  --on-surface: #e3e2e4;
+  --on-surface-variant: #c2c7cc;
+  --muted: #a6adb3;
+  --outline: #8c9297;
+  --outline-variant: #42484c;
+
+  --border: #2a2a2e;
+  --border-subtle: #232327;
+
+  --accent-subtle: #1e2a30;
+  --surface-tint: #a9cbe0;
+
+  --elevation-sm: 4px 4px 8px rgba(0, 0, 0, 0.3), -2px -2px 6px rgba(50, 50, 55, 0.5);
+  --elevation-md: 6px 6px 14px rgba(0, 0, 0, 0.35), -3px -3px 10px rgba(50, 50, 55, 0.4);
+  --elevation-lg: 8px 8px 20px rgba(0, 0, 0, 0.4), -4px -4px 14px rgba(50, 50, 55, 0.3);
+  --elevation-inset: inset 2px 2px 5px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(50, 50, 55, 0.3);
+  --elevation-glow: 0 4px 14px rgba(169, 203, 224, 0.2);
+
+  --scrim: rgba(0, 0, 0, 0.5);
+}
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --font-sans: var(--font-aspekta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-commit-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --color-background: var(--background);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface: var(--surface);
+  --color-surface-bright: var(--surface-bright);
+
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary: var(--on-primary);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary: var(--on-secondary);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-error: var(--error);
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
+
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-muted: var(--muted);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+
+  --color-accent-subtle: var(--accent-subtle);
+  --color-surface-tint: var(--surface-tint);
+  --color-scrim: var(--scrim);
+
+  --shadow-sm: var(--elevation-sm);
+  --shadow-md: var(--elevation-md);
+  --shadow-lg: var(--elevation-lg);
+  --shadow-inset: var(--elevation-inset);
+  --shadow-glow: var(--elevation-glow);
+
+  --text-body-sm: 0.8125rem;
+  --text-body-sm--line-height: 1.5;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* MapLibre injects its own chrome; keep its canvas within our rounded card. */
+.maplibregl-map {
+  font: inherit;
+}
+
+/* ---- Motion vocabulary (DESIGN.md "Motion") ---- */
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scroll-hint {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mock-in {
+  from {
+    opacity: 0;
+    transform: perspective(1200px) rotateX(2deg) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1200px) rotateX(2deg) scale(1);
+  }
+}
+
+.animate-message-in {
+  animation: message-in 200ms ease-out both;
+}
+
+.animate-spin-slow {
+  animation: spin 1s linear infinite;
+}
+
+.animate-scroll-hint {
+  animation: scroll-hint 2s ease-in-out infinite;
+}
+
+/* Landing scroll reveals: hidden until [data-inview] lands. */
+.reveal {
+  opacity: 0;
+}
+
+.reveal[data-inview] {
+  animation: rise-in 500ms ease-out both;
+}
+
+.reveal-mock {
+  opacity: 0;
+}
+
+.reveal-mock[data-inview] {
+  animation: mock-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: the a11y kill-switch must beat inline animation styles */
+    animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: see above */
+    animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: see above */
+    transition-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: see above */
+    scroll-behavior: auto !important;
+  }
+
+  .reveal,
+  .reveal-mock {
+    opacity: 1;
+  }
+}
+
+/* Landing page pre-paint guard: a returning signed-in user sees the splash, not
+   a flash of the landing page, while the client redirects to /chat. */
+html[data-auth-pending] .landing-root {
+  display: none;
+}
+
+html:not([data-auth-pending]) .auth-splash {
+  display: none;
+}
