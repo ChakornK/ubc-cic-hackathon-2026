@@ -7,6 +7,7 @@ import {
   type Tool,
   type ToolResultContentBlock,
 } from "@aws-sdk/client-bedrock-runtime";
+import type { DocumentType } from "@smithy/types";
 import type { ContentBlock, ConverseFn, ConverseMessage, ToolSpec } from "./core/types";
 
 let client: BedrockRuntimeClient | undefined;
@@ -19,7 +20,10 @@ function getClient(): BedrockRuntimeClient {
 /** Converts our flat ContentBlock to the SDK's discriminated union. */
 function toSdkBlock(b: ContentBlock): SdkContentBlock {
   if (b.text != null) return { text: b.text };
-  if (b.toolUse) return { toolUse: { toolUseId: b.toolUse.toolUseId, name: b.toolUse.name, input: b.toolUse.input } };
+  if (b.toolUse)
+    return {
+      toolUse: { toolUseId: b.toolUse.toolUseId, name: b.toolUse.name, input: b.toolUse.input as DocumentType },
+    };
   if (b.toolResult) {
     return {
       toolResult: {
@@ -51,7 +55,13 @@ function fromSdkBlock(b: SdkContentBlock): ContentBlock {
 }
 
 function toSdkTool(spec: ToolSpec): Tool {
-  return { toolSpec: { name: spec.name, description: spec.description, inputSchema: { json: spec.inputSchema.json } } };
+  return {
+    toolSpec: {
+      name: spec.name,
+      description: spec.description,
+      inputSchema: { json: spec.inputSchema.json as DocumentType },
+    },
+  };
 }
 
 /** Non-streaming Converse call; model ID from BEDROCK_MODEL_ID env var. */
@@ -117,8 +127,8 @@ export async function* converseStream(req: {
 
     if (event.contentBlockDelta?.delta) {
       const delta = event.contentBlockDelta.delta;
-      if ("reasoningContent" in delta && (delta as Record<string, unknown>).reasoningContent) {
-        const rc = (delta as Record<string, { text?: string }>).reasoningContent;
+      if ("reasoningContent" in delta && (delta as unknown as Record<string, unknown>).reasoningContent) {
+        const rc = (delta as unknown as Record<string, { text?: string }>).reasoningContent;
         if (rc.text) {
           yield { type: "thinking", delta: rc.text };
         }

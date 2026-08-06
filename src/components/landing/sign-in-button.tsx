@@ -1,9 +1,7 @@
 "use client";
 
-// The landing page's sign-in CTA (hero + closing). Uses Primary rather than
-// UX_SPEC's Primary Container background: white 15px text on #7C9EB2 fails
-// WCAG AA, and DESIGN.md reserves Primary for main actions anyway.
-
+// The landing page's primary sign-in action. The colored face stays accessible
+// while the surrounding light and pressed states make it feel tactile.
 import { useAppAuth } from "@/src/components/auth/app-auth";
 import { useState } from "react";
 
@@ -44,28 +42,28 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
   }
 
   return (
-    <div className={`flex w-full flex-col items-center gap-2 ${wide ? "max-w-80" : "max-w-70"}`}>
+    <div className={`flex w-full flex-col items-center gap-2 ${wide ? "max-w-80" : "max-w-72"}`}>
       <button
         type="button"
         onClick={handleClick}
         disabled={busy}
-        className="flex h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-primary text-[15px] font-medium text-on-primary shadow-glow transition-all duration-150 ease-out hover:scale-[1.02] hover:brightness-110 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-70"
+        className="neu-primary-button bg-primary text-on-primary flex h-12 w-full items-center justify-center gap-2.5 rounded-xl text-[15px] font-medium disabled:pointer-events-none disabled:opacity-60"
       >
         {pending ? (
           <span
-            className="size-4 animate-spin-slow rounded-full border-2 border-on-primary/40 border-t-on-primary"
+            className="animate-spin-slow border-on-primary/40 border-t-on-primary size-4 rounded-full border-2"
             role="status"
             aria-label="Signing in"
           />
         ) : (
-          <span className="flex size-[18px] items-center justify-center rounded-full bg-white">
+          <span className="flex size-6 items-center justify-center rounded-lg bg-white shadow-sm">
             <GoogleMark />
           </span>
         )}
         {pending ? "Signing in…" : "Sign in with Google"}
       </button>
       {configNote && (
-        <p className="text-center text-xs text-on-surface-variant">
+        <p className="neu-inset bg-surface-container-low text-on-surface-variant rounded-lg border px-3 py-2 text-center text-xs">
           Sign-in isn&apos;t configured yet — set <code className="font-mono">NEXT_PUBLIC_COGNITO_*</code> or run with{" "}
           <code className="font-mono">NEXT_PUBLIC_API_MOCK=1</code>.
         </p>

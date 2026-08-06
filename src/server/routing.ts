@@ -224,6 +224,24 @@ export function routeOnGraph(
   };
 }
 
+/** Closest pair between two entrance sets by straight-line distance — the
+ *  doors a person would actually walk between. Null when either side is empty. */
+// ponytail: straight-line pair pick, ~n*m haversines; if a courtyard wall ever misroutes, switch to multi-source Dijkstra over all door pairs
+export function nearestEntrancePair(fromEntrances: LngLat[], toEntrances: LngLat[]): [LngLat, LngLat] | null {
+  let best: [LngLat, LngLat] | null = null;
+  let bestDist = Infinity;
+  for (const a of fromEntrances) {
+    for (const b of toEntrances) {
+      const d = haversineMetersObj(toPoint(a), toPoint(b));
+      if (d < bestDist) {
+        bestDist = d;
+        best = [a, b];
+      }
+    }
+  }
+  return best;
+}
+
 let graphPromise: Promise<Graph> | undefined;
 let graphLoadedAt = 0;
 
@@ -255,9 +273,39 @@ export function getGraph(): Promise<Graph> {
   return graphPromise;
 }
 
+let entrancesPromise: Promise<Record<string, LngLat[]>> | undefined;
+let entrancesLoadedAt = 0;
+
+/** Lazy-loaded building-entrance map (derived/building-entrances.json).
+ *  Resolves to {} when the artifact is missing (pre-ingest) so routing
+ *  falls back to centroids. */
+export function getEntrances(): Promise<Record<string, LngLat[]>> {
+  if (entrancesPromise && Date.now() - entrancesLoadedAt > GRAPH_TTL_MS) {
+    entrancesPromise = undefined;
+  }
+  entrancesPromise ??= dataBucket()
+    .getJson("derived/building-entrances.json")
+    .then((data) => {
+      entrancesLoadedAt = Date.now();
+      return data as Record<string, LngLat[]>;
+    })
+    .catch(() => {
+      entrancesPromise = undefined;
+      return {};
+    });
+  return entrancesPromise;
+}
+
+/** Door-to-door route: endpoints snap to the closest entrance pair between the
+ *  two buildings when entrance data exists for the code; centroid otherwise. */
 export async function route(
-  from: { lat: number; lon: number },
-  to: { lat: number; lon: number },
+  from: { lat: number; lon: number; code?: string },
+  to: { lat: number; lon: number; code?: string },
 ): Promise<RouteResult> {
-  return routeOnGraph(await getGraph(), from, to);
+  const [graph, entrances] = await Promise.all([getGraph(), getEntrances()]);
+  const fromDoors = (from.code && entrances[from.code]) || [[from.lon, from.lat] as LngLat];
+  const toDoors = (to.code && entrances[to.code]) || [[to.lon, to.lat] as LngLat];
+  const pair = nearestEntrancePair(fromDoors, toDoors);
+  if (!pair) return routeOnGraph(graph, from, to);
+  return routeOnGraph(graph, toPoint(pair[0]), toPoint(pair[1]));
 }

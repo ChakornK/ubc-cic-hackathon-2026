@@ -1,13 +1,15 @@
 "use client";
 
-// Message bubbles per DESIGN.md: user right-aligned on Accent Subtle; assistant
-// left-aligned on Surface with avatar row, inline warning, and tool-call views.
+// Tactile message surfaces: user messages stay literal, while assistant
+// responses render safe GitHub-flavored Markdown without allowing raw HTML.
 // Interstitial blocks (thinking + tool calls) render inline before the final text.
 import { ToolCallsView } from "@/src/components/chat/tool-renderers";
 import { Icon } from "@/src/components/icons";
 import type { ToolCall } from "@/src/lib/api-types";
 import type { InterstitialBlock } from "@/src/shared/types";
 import { useState } from "react";
+import Markdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export type { InterstitialBlock };
 
@@ -21,13 +23,46 @@ export interface DisplayMessage {
   interstitial?: InterstitialBlock[];
 }
 
+const markdownComponents: Components = {
+  a: ({ href, title, children }) => {
+    const opensNewTab = typeof href === "string" && /^https?:\/\//i.test(href);
+    return (
+      <a
+        href={href}
+        title={title}
+        target={opensNewTab ? "_blank" : undefined}
+        rel={opensNewTab ? "noreferrer" : undefined}
+      >
+        {children}
+        {opensNewTab && <span className="sr-only"> (opens in a new tab)</span>}
+      </a>
+    );
+  },
+  img: ({ alt }) => <span className="markdown-image-alt">{alt ? `[Image: ${alt}]` : "[Image omitted]"}</span>,
+  table: ({ children }) => (
+    <div className="markdown-table-wrap">
+      <table>{children}</table>
+    </div>
+  ),
+};
+
+function AssistantMarkdown({ content }: { content: string }) {
+  return (
+    <div className="assistant-markdown">
+      <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents} skipHtml>
+        {content}
+      </Markdown>
+    </div>
+  );
+}
+
 export function UserMessage({ message }: { message: DisplayMessage }) {
   return (
     <div className="animate-message-in flex flex-col items-end">
-      <div className="bg-accent-subtle text-on-surface max-w-[80%] rounded-[16px_16px_4px_16px] px-4 py-3 text-sm whitespace-pre-wrap">
+      <div className="neu-raised bg-accent-subtle text-on-surface max-w-[90%] rounded-[16px_16px_5px_16px] border px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap sm:max-w-[80%]">
         {message.content}
       </div>
-      <span className="text-muted mt-1 text-xs">You</span>
+      <span className="text-muted mt-1.5 px-1 text-xs">You</span>
     </div>
   );
 }
@@ -141,14 +176,14 @@ export function AssistantMessage({ message, isLatest }: { message: DisplayMessag
   return (
     <div className="animate-message-in">
       <div className="mb-2 flex items-center gap-2">
-        <span className="bg-primary-container text-on-primary-container flex size-6 items-center justify-center rounded-full text-[11px] font-semibold">
+        <span className="neu-raised bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg border text-[11px] font-semibold">
           U
         </span>
-        <span className="text-muted text-xs">UBC Assistant</span>
+        <span className="text-muted text-xs font-medium">UBC Assistant</span>
       </div>
-      <div className="border-border-subtle bg-surface max-w-[85%] rounded-[16px_16px_16px_4px] border px-4 py-3">
+      <div className="neu-raised bg-surface max-w-[94%] rounded-[16px_16px_16px_5px] border px-4 py-3.5 sm:max-w-[88%]">
         {message.warning && (
-          <div className="bg-tertiary-container text-body-sm text-on-tertiary-container mb-3 flex items-start gap-2 rounded-lg px-3 py-2">
+          <div className="neu-inset bg-tertiary-container text-body-sm text-on-tertiary-container mb-3 flex items-start gap-2 rounded-xl border px-3 py-2">
             <Icon name="alert" size={16} className="mt-0.5 shrink-0" />
             <span>{message.warning}</span>
           </div>
@@ -166,9 +201,7 @@ export function AssistantMessage({ message, isLatest }: { message: DisplayMessag
             )}
           </div>
         )}
-        {message.content && (
-          <p className="text-on-surface text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-        )}
+        {message.content && <AssistantMarkdown content={message.content} />}
         {!interstitial.length && <ToolCallsView calls={tools} isLatest={isLatest} />}
       </div>
     </div>
@@ -177,23 +210,18 @@ export function AssistantMessage({ message, isLatest }: { message: DisplayMessag
 
 export function TypingIndicator({ slow }: { slow: boolean }) {
   return (
-    <div role="status" aria-label="Waiting for the assistant's response">
+    <div role="status" aria-label="The assistant is thinking">
       <div className="mb-2 flex items-center gap-2">
-        <span className="bg-primary-container text-on-primary-container flex size-6 items-center justify-center rounded-full text-[11px] font-semibold">
+        <span className="neu-raised bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg border text-[11px] font-semibold">
           U
         </span>
-        <span className="text-muted text-xs">UBC Assistant</span>
+        <span className="text-muted text-xs font-medium">UBC Assistant</span>
       </div>
-      <div className="border-border-subtle bg-surface inline-flex min-w-15 items-center gap-1.5 rounded-[16px_16px_16px_4px] border px-4 py-3.5">
-        {[0, 1, 2].map((i) => (
-          <span
-            key={i}
-            className="bg-on-surface-variant size-1.5 rounded-full"
-            style={{ animation: `typing-dot 900ms ease-in-out ${i * 150}ms infinite` }}
-          />
-        ))}
+      <div className="neu-raised bg-surface inline-flex items-center gap-3 rounded-[16px_16px_16px_5px] border px-3.5 py-3">
+        <span className="thinking-orb" aria-hidden="true" />
+        <span className="text-on-surface text-sm font-medium">{slow ? "Still working" : "Thinking"}</span>
       </div>
-      {slow && <p className="text-muted mt-2 text-xs">Still working — multi-tool answers can take up to 30 seconds.</p>}
+      {slow && <p className="text-muted mt-2 text-xs">Working across data sources — this can take up to 30 seconds.</p>}
     </div>
   );
 }

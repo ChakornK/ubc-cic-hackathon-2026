@@ -10,6 +10,7 @@ export interface PoiDoc {
   url: string | null;
   contact: string | null;
   hours: string | null; // free text — return verbatim, never parse
+  photo: string | null;
   lat: number;
   lon: number;
 }
@@ -32,6 +33,7 @@ export function transformPoi(f: Feature): { _id: string; doc: PoiDoc } | null {
       url: p.URL ?? null,
       contact: p.CONTACT ?? null,
       hours: p.HOURS ?? null,
+      photo: p.PHOTOURL ?? null,
       lon: coords[0],
       lat: coords[1],
     },
@@ -93,6 +95,7 @@ export const places: DatasetModule = {
           url: { type: "keyword" },
           contact: { type: "text" },
           hours: { type: "text" },
+          photo: { type: "keyword", index: false },
           lat: { type: "float" },
           lon: { type: "float" },
         },
