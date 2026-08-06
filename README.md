@@ -56,6 +56,18 @@ npx cdk deploy
 
 After the first deploy, update the Google OAuth console with the CloudFront callback URL printed in the stack outputs.
 
+After deploy completes, copy the stack outputs into your `.env` file (see `.env.example`):
+
+| Environment Variable   | Source (Stack Output) | Used By                       |
+| ---------------------- | --------------------- | ----------------------------- |
+| `COGNITO_USER_POOL_ID` | `UserPoolId`          | Local dev, token verification |
+| `COGNITO_CLIENT_ID`    | `UserPoolClientId`    | Local dev, token verification |
+| `COGNITO_DOMAIN`       | `CognitoDomain`       | Local dev, OAuth flow         |
+| `OPENSEARCH_ENDPOINT`  | `OpenSearchEndpoint`  | Ingest script, smoke tests    |
+| `TABLE_NAME`           | `TableName`           | Local dev                     |
+| `DATA_BUCKET`          | `DataBucketName`      | Ingest script, sync-data      |
+| `STACK_URL`            | `CloudFrontUrl`       | Smoke tests                   |
+
 ## Data Sync and Ingestion
 
 Sync the Unified-UBC-Data repository's `data/` directory to the S3 Data Bucket:
