@@ -1,5 +1,10 @@
-// Integration smoke test — runs against a deployed stack.
+// Integration smoke test against a deployed stack.
 // Usage: STACK_URL=https://xxx AUTH_TOKEN=yyy npx tsx scripts/smoke.ts
+
+import * as path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const STACK_URL = process.env.STACK_URL?.replace(/\/$/, "");
 const AUTH_TOKEN = process.env.AUTH_TOKEN;
@@ -102,7 +107,7 @@ async function testIngestIdempotency(): Promise<void> {
   const { execSync } = await import("node:child_process");
   try {
     execSync("npm run ingest", {
-      cwd: process.env.PROJECT_ROOT || new URL("..", import.meta.url).pathname,
+      cwd: PROJECT_ROOT,
       stdio: "pipe",
       timeout: 120_000,
     });
