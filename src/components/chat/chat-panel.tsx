@@ -5,11 +5,17 @@
 // and highlight publication for the map via the walking_distance renderer.
 import { ChatInput, type ChatInputHandle } from "@/src/components/chat/chat-input";
 import { useChatShell } from "@/src/components/chat/chat-shell-context";
-import { AssistantMessage, TypingIndicator, UserMessage, type DisplayMessage } from "@/src/components/chat/message";
+import {
+  AssistantMessage,
+  TypingIndicator,
+  UserMessage,
+  type DisplayMessage,
+  type InterstitialBlock,
+} from "@/src/components/chat/message";
 import { Icon } from "@/src/components/icons";
 import { useApi } from "@/src/components/providers";
 import { ApiError, type ChatMessage } from "@/src/lib/api-types";
-import { extractWalkingHighlight } from "@/src/lib/walking";
+import { mergeMapHighlights } from "@/src/lib/walking";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -80,7 +86,18 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
       .getSession(sessionId)
       .then((history) => {
         if (cancelled) return;
-        setMessages(history.map((m) => ({ id: nextId(), role: m.role, content: m.content })));
+        setMessages(
+          history.map((m) => ({
+            id: nextId(),
+            role: m.role,
+            content: m.content,
+            toolCalls: m.toolCalls,
+            interstitial: m.interstitial,
+          })),
+        );
+        // Put this conversation's last map state back on the map.
+        const lastWithCalls = [...history].reverse().find((m) => m.toolCalls?.length);
+        if (lastWithCalls?.toolCalls) setHighlight(mergeMapHighlights(lastWithCalls.toolCalls));
         setHistoryState("ready");
       })
       .catch((error: unknown) => {
@@ -126,24 +143,75 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
     (conversation: ChatMessage[]) => {
       setSending(true);
       setSendError(null);
+
+      // Add a placeholder assistant message for streaming text
+      const streamId = nextId();
+      setMessages((current) => [...current, { id: streamId, role: "assistant", content: "", interstitial: [] }]);
+
+      let streamedText = "";
+      const interstitialBlocks: InterstitialBlock[] = [];
+
+      const updateMessage = (updates: Partial<DisplayMessage>) => {
+        setMessages((current) => current.map((m) => (m.id === streamId ? { ...m, ...updates } : m)));
+      };
+
       api
-        .chat(sessionId, conversation)
+        .chat(sessionId, conversation, {
+          onThinking(delta) {
+            if (!alive.current) return;
+            // Append to the last thinking block only if it's immediately preceding (no tool calls in between)
+            const last = interstitialBlocks[interstitialBlocks.length - 1];
+            if (last?.type === "thinking") {
+              last.content += delta;
+            } else {
+              interstitialBlocks.push({ type: "thinking", content: delta });
+            }
+            updateMessage({ interstitial: [...interstitialBlocks] });
+          },
+          onToolStart(name, input) {
+            if (!alive.current) return;
+            interstitialBlocks.push({ type: "tool_call", content: name, input, result: undefined });
+            updateMessage({ interstitial: [...interstitialBlocks] });
+          },
+          onToolEnd(name, result) {
+            if (!alive.current) return;
+            // Find the last tool_call block with this name that has no result
+            for (let i = interstitialBlocks.length - 1; i >= 0; i--) {
+              if (
+                interstitialBlocks[i].type === "tool_call" &&
+                interstitialBlocks[i].content === name &&
+                interstitialBlocks[i].result === undefined
+              ) {
+                interstitialBlocks[i] = { ...interstitialBlocks[i], result };
+                break;
+              }
+            }
+            updateMessage({ interstitial: [...interstitialBlocks] });
+          },
+          onTextClear() {
+            if (!alive.current) return;
+            streamedText = "";
+            updateMessage({ content: "" });
+          },
+          onDelta(delta) {
+            if (!alive.current) return;
+            streamedText += delta;
+            updateMessage({ content: streamedText });
+          },
+        })
         .then((response) => {
           if (!alive.current) return;
           pendingRetry.current = null;
-          setMessages((current) => [
-            ...current,
-            {
-              id: nextId(),
-              role: "assistant",
-              content: response.message,
-              toolCalls: response.tool_calls,
-              warning: response.warning,
-            },
-          ]);
-          // The walking_distance renderer emits the new highlight; if the latest
-          // response has none, the previous route no longer reflects the answer.
-          if (!response.tool_calls.some((call) => extractWalkingHighlight(call))) setHighlight(null);
+          // Replace placeholder with final message including tool calls and warning
+          updateMessage({
+            content: response.message,
+            toolCalls: response.tool_calls,
+            warning: response.warning,
+            interstitial: interstitialBlocks.length > 0 ? [...interstitialBlocks] : undefined,
+          });
+          // One merged highlight per response (route > places > all buildings);
+          // null clears a stale highlight when the answer has no map content.
+          setHighlight(mergeMapHighlights(response.tool_calls));
           setAnnouncement("New response from assistant");
           refreshSessions();
         })
@@ -270,11 +338,16 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
             {messages.map((message) =>
               message.role === "user" ? (
                 <UserMessage key={message.id} message={message} />
-              ) : (
+              ) : message.content || message.toolCalls || (message.interstitial && message.interstitial.length > 0) ? (
                 <AssistantMessage key={message.id} message={message} isLatest={message.id === latestAssistantId} />
-              ),
+              ) : null,
             )}
-            {sending && <TypingIndicator slow={slowResponse} />}
+            {sending &&
+              (!messages.length ||
+                messages[messages.length - 1]?.role !== "assistant" ||
+                (!messages[messages.length - 1]?.content && !messages[messages.length - 1]?.interstitial?.length)) && (
+                <TypingIndicator slow={slowResponse} />
+              )}
             {sendError && (
               <div className="neu-raised border-error/30 bg-error-container/40 flex flex-col items-start justify-between gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center">
                 <p className="text-on-surface flex items-center gap-2 text-sm">

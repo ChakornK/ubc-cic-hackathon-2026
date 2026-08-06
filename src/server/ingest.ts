@@ -14,6 +14,15 @@ export async function runIngest(modules: DatasetModule[], os: Client, s3: S3Writ
       if (!exists.body) {
         await os.indices.create({ index: idx.index, body: { mappings: idx.mappings } });
         console.log(`${idx.index}: created index`);
+      } else {
+        // Additive: fields added to a module's mappings get their declared type
+        // instead of a dynamic guess. Fields that already exist with another
+        // type are left as-is (putMapping rejects type changes).
+        try {
+          await os.indices.putMapping({ index: idx.index, body: idx.mappings });
+        } catch (e) {
+          console.warn(`${idx.index}: mapping update skipped (${e instanceof Error ? e.message : e})`);
+        }
       }
 
       // biome-ignore lint/suspicious/noExplicitAny: bulk body interleaves action and doc lines

@@ -14,7 +14,7 @@
     "start": "next start",
     "lint": "biome lint .",
     "test": "vitest run --passWithNoTests",
-    "sync-data": "node scripts/sync-data.mjs",
+    "sync-data": "node --env-file=.env scripts/sync-data.mjs",
     "ingest": "tsx scripts/ingest.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
@@ -44,7 +44,9 @@
     "@biomejs/biome": "^2.5.7",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@iconify-json/mingcute": "^1.2.8",
+    "@smithy/types": "^4.16.1",
     "@tailwindcss/postcss": "^4",
+    "@types/aws4": "^1.11.6",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^24",
     "@types/react": "^19",

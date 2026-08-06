@@ -14,8 +14,8 @@ import {
   type TuitionResult,
 } from "@/src/lib/api-types";
 import { formatCad, formatMeters, formatMinutes, summarizeToolInput } from "@/src/lib/format";
-import { extractWalkingHighlight } from "@/src/lib/walking";
-import { useEffect, useMemo } from "react";
+import { extractBuildingHighlight, extractPlacesHighlight, extractWalkingHighlight } from "@/src/lib/walking";
+import { useMemo } from "react";
 
 export interface ToolCallRendererProps {
   call: ToolCall;
@@ -30,6 +30,8 @@ const TOOL_ICONS: Record<string, IconName> = {
   get_course: "book2",
   get_tuition: "currencyDollar",
   walking_distance: "location",
+  find_building: "map",
+  find_places: "location",
 };
 
 // ---- Badges ----
@@ -152,14 +154,11 @@ function TuitionRenderer({ call }: ToolCallRendererProps) {
 
 // ---- walking_distance ----
 
-function WalkingDistanceRenderer({ call, isLatest }: ToolCallRendererProps) {
+// The chat panel publishes the merged highlight per response; renderers only
+// restore their own card's view via "Show on map".
+function WalkingDistanceRenderer({ call }: ToolCallRendererProps) {
   const { setHighlight, showOnMap } = useChatShell();
   const highlight = useMemo(() => extractWalkingHighlight(call), [call]);
-
-  // The renderer emits highlight state for the map; only the latest response drives it.
-  useEffect(() => {
-    if (isLatest && highlight) setHighlight(highlight);
-  }, [isLatest, highlight, setHighlight]);
 
   if (!highlight) return null;
   return (
@@ -175,7 +174,84 @@ function WalkingDistanceRenderer({ call, isLatest }: ToolCallRendererProps) {
       </span>
       <button
         type="button"
-        onClick={showOnMap}
+        // Restores THIS card's route — older cards stay openable after newer answers.
+        onClick={() => {
+          setHighlight(highlight);
+          showOnMap();
+        }}
+        className="border-primary text-primary hover:bg-accent-subtle shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 active:scale-95"
+      >
+        Show on map
+      </button>
+    </div>
+  );
+}
+
+// ---- find_building ----
+
+function FindBuildingRenderer({ call }: ToolCallRendererProps) {
+  const { setHighlight, showOnMap } = useChatShell();
+  const highlight = useMemo(() => extractBuildingHighlight(call), [call]);
+
+  if (!highlight) return null;
+  const building = highlight.buildings[0];
+  return (
+    <div className="bg-surface-container-low mt-2 flex items-center gap-3 rounded-lg p-3">
+      <span className="bg-secondary-container text-on-secondary-container flex size-9 shrink-0 items-center justify-center rounded-lg">
+        <Icon name="map" size={18} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="text-on-surface block text-base font-medium">{building.name}</span>
+        <span className="text-muted block truncate font-mono text-xs">{building.code}</span>
+      </span>
+      <button
+        type="button"
+        // Restores THIS card's building — older cards stay openable after newer answers.
+        onClick={() => {
+          setHighlight(highlight);
+          showOnMap();
+        }}
+        className="border-primary text-primary hover:bg-accent-subtle shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 active:scale-95"
+      >
+        Show on map
+      </button>
+    </div>
+  );
+}
+
+// ---- find_places ----
+
+function FindPlacesRenderer({ call }: ToolCallRendererProps) {
+  const { setHighlight, showOnMap } = useChatShell();
+  const highlight = useMemo(() => extractPlacesHighlight(call), [call]);
+
+  if (!highlight) return null;
+  const preview = highlight.places
+    .slice(0, 3)
+    .map((p) => p.name)
+    .join(", ");
+  return (
+    <div className="bg-surface-container-low mt-2 flex items-center gap-3 rounded-lg p-3">
+      <span className="bg-secondary-container text-on-secondary-container flex size-9 shrink-0 items-center justify-center rounded-lg">
+        <Icon name="location" size={18} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="text-on-surface block text-base font-medium">
+          {highlight.places.length} place{highlight.places.length === 1 ? "" : "s"}
+          {highlight.near ? ` near ${highlight.near}` : ""}
+        </span>
+        <span className="text-muted block truncate text-xs">
+          {preview}
+          {highlight.places.length > 3 ? "…" : ""}
+        </span>
+      </span>
+      <button
+        type="button"
+        // Restores THIS card's pins — older cards stay openable after newer answers.
+        onClick={() => {
+          setHighlight(highlight);
+          showOnMap();
+        }}
         className="border-primary text-primary hover:bg-accent-subtle shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 active:scale-95"
       >
         Show on map
@@ -191,6 +267,8 @@ export const renderers: Record<string, ToolCallRenderer> = {
   get_course: GetCourseRenderer,
   get_tuition: TuitionRenderer,
   walking_distance: WalkingDistanceRenderer,
+  find_building: FindBuildingRenderer,
+  find_places: FindPlacesRenderer,
 };
 
 /** Stable keys for an ordered, append-only call list: name + occurrence count. */

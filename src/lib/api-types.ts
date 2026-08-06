@@ -4,6 +4,7 @@
 export {
   type ChatMessage,
   type ChatResponse,
+  type InterstitialBlock,
   type LngLat,
   type Profile,
   type SessionSummary,
@@ -85,6 +86,46 @@ export interface RouteResponse {
   minutes: number;
   method: "network" | "estimate";
   polyline: import("@/src/shared/types").LngLat[];
+}
+
+// GET /api/building/{code} — per-building popup details (rooms, POIs, availability).
+
+export interface RoomCard {
+  name: string; // e.g. "AERL 120"
+  capacity: number | null;
+  floor: number | null;
+  layout: string | null;
+  furniture: string | null;
+  photo: string | null;
+  link: string | null;
+}
+
+export interface PoiCard {
+  name: string;
+  service_type: string | null;
+  url: string | null;
+  photo: string | null;
+  hours: string | null; // free text — display verbatim
+  contact: string | null;
+}
+
+export interface AvailabilityRoomCard {
+  title: string;
+  capacity: number | null;
+  url: string | null;
+  thumbnail: string | null;
+  freeNow: boolean;
+  freeUntil: string | null; // "HH:MM"
+  nextFree: string | null; // "HH:MM"
+}
+
+export interface BuildingDetails {
+  code: string;
+  name: string;
+  rooms: RoomCard[];
+  pois: PoiCard[];
+  /** Bookable library rooms from the latest snapshot; null when the building has none. */
+  availability: { as_of: string | null; rooms: AvailabilityRoomCard[] } | null;
 }
 
 export type GeoName = "buildings" | "walking-routes";

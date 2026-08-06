@@ -7,16 +7,16 @@
 import { useAppAuth } from "@/src/components/auth/app-auth";
 import { useApi } from "@/src/components/providers";
 import type { SessionSummary } from "@/src/lib/api-types";
-import type { WalkingHighlight } from "@/src/lib/walking";
+import type { MapHighlight, WalkingHighlight } from "@/src/lib/walking";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-export type { WalkingHighlight };
+export type { MapHighlight, WalkingHighlight };
 
 interface ChatShellState {
-  highlight: WalkingHighlight | null;
+  highlight: MapHighlight | null;
   /** Bumped when the user asks to re-focus the route (e.g. "Show on map"). */
   focusNonce: number;
-  setHighlight: (highlight: WalkingHighlight | null) => void;
+  setHighlight: (highlight: MapHighlight | null) => void;
   /** Re-focus the current highlight and reveal the map. */
   showOnMap: () => void;
 
@@ -45,7 +45,7 @@ export function ChatShellProvider({ children }: { children: ReactNode }) {
   const api = useApi();
   const auth = useAppAuth();
 
-  const [highlight, setHighlightState] = useState<WalkingHighlight | null>(null);
+  const [highlight, setHighlightState] = useState<MapHighlight | null>(null);
   const [focusNonce, setFocusNonce] = useState(0);
   const [mapOpen, setMapOpen] = useState(true);
   const [mobileMapOpen, setMobileMapOpen] = useState(false);
@@ -77,7 +77,7 @@ export function ChatShellProvider({ children }: { children: ReactNode }) {
     if (auth.status === "signedIn") refreshSessions();
   }, [auth.status, refreshSessions]);
 
-  const setHighlight = useCallback((next: WalkingHighlight | null) => {
+  const setHighlight = useCallback((next: MapHighlight | null) => {
     setHighlightState(next);
     if (next) setFocusNonce((n) => n + 1);
   }, []);

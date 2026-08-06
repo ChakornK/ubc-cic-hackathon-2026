@@ -1,6 +1,6 @@
 import { haversineMetersObj } from "@/src/shared/types";
 import { describe, expect, it } from "vitest";
-import { buildGraph, routeOnGraph, shortestPath, type LngLat } from "./routing";
+import { buildGraph, nearestEntrancePair, routeOnGraph, shortestPath, type LngLat } from "./routing";
 
 // A small L-shaped network near UBC: A --- B --- C, plus a disconnected segment.
 //   A (-123.2500, 49.2600) — B (-123.2500, 49.2650) — C (-123.2450, 49.2650)
@@ -67,5 +67,21 @@ describe("routing graph", () => {
   it("routes on an empty graph fall back to estimate", () => {
     const result = routeOnGraph(buildGraph([]), { lat: 49.26, lon: -123.25 }, { lat: 49.265, lon: -123.245 });
     expect(result.method).toBe("estimate");
+  });
+});
+
+describe("nearestEntrancePair", () => {
+  it("picks the closest doors between two buildings", () => {
+    // Building 1 doors on its west and east sides; building 2 sits to the east.
+    const west: LngLat = [-123.251, 49.26];
+    const east: LngLat = [-123.25, 49.26];
+    const far: LngLat = [-123.24, 49.26];
+    const near: LngLat = [-123.249, 49.26];
+    expect(nearestEntrancePair([west, east], [far, near])).toEqual([east, near]);
+  });
+
+  it("returns null when either side has no entrances", () => {
+    expect(nearestEntrancePair([], [[-123.25, 49.26]])).toBeNull();
+    expect(nearestEntrancePair([[-123.25, 49.26]], [])).toBeNull();
   });
 });

@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import type { ChatMessage, Profile, SessionSummary, ToolCall } from "../core/types";
+import type { ChatMessage, InterstitialBlock, Profile, SessionSummary, ToolCall } from "../core/types";
 import { messageSk, MSG_MARKER, sessionSk, userPk } from "./keys";
 
 let doc: DynamoDBDocumentClient | undefined;
@@ -54,7 +54,12 @@ export async function getSessionMessages(sub: string, sessionId: string): Promis
     );
     if (!meta.Item) return null;
   }
-  return items.map((item) => ({ role: item.role as ChatMessage["role"], content: item.content as string }));
+  return items.map((item) => {
+    const msg: ChatMessage = { role: item.role as ChatMessage["role"], content: item.content as string };
+    if (item.toolCalls) msg.toolCalls = item.toolCalls as ChatMessage["toolCalls"];
+    if (item.interstitial) msg.interstitial = item.interstitial as ChatMessage["interstitial"];
+    return msg;
+  });
 }
 
 /** Persists one user + assistant exchange and atomically increments the session counter. */
@@ -64,6 +69,7 @@ export async function appendExchange(
   userMessage: string,
   assistantMessage: string,
   toolCalls: ToolCall[],
+  interstitial?: InterstitialBlock[],
 ): Promise<void> {
   const pk = userPk(sub);
   const now = new Date().toISOString();
@@ -102,6 +108,7 @@ export async function appendExchange(
           role: "assistant",
           content: assistantMessage,
           toolCalls,
+          interstitial: interstitial?.length ? interstitial : undefined,
           createdAt: now,
         },
       }),

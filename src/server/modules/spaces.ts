@@ -3,6 +3,7 @@ import type { DatasetModule } from "../core/types";
 export interface StudySpaceDoc {
   id: string;
   title: string;
+  name: string | null; // short label, e.g. "AERL 120"
   building_code: string | null;
   building_name: string | null;
   room_number: string | null;
@@ -10,6 +11,20 @@ export interface StudySpaceDoc {
   space_type: string | null; // "classroom" | "study space"
   furniture: string | null;
   layout: string | null;
+  floor: number | null;
+  photo: string | null; // cover thumbnail (signed URL — may go stale; the preview proxy refreshes from `link`)
+  link: string | null; // Find a Space room page
+}
+
+/** Bookable library room (LibCal catalog) — joins room_availability by eid. */
+export interface LibRoomDoc {
+  eid: number;
+  building_code: string | null;
+  location: string | null;
+  title: string;
+  capacity: number | null;
+  url: string | null;
+  thumbnail: string | null;
 }
 
 export interface AvailabilityDoc {
@@ -32,11 +47,13 @@ type Row = Record<string, any>;
 export function transformStudySpace(row: Row): { _id: string; doc: StudySpaceDoc } | null {
   if (row.id == null || !row.Title) return null;
   const capacity = Number(row.Capacity); // source carries it as a string
+  const floor = Number(row.floor);
   return {
     _id: String(row.id),
     doc: {
       id: String(row.id),
       title: String(row.Title),
+      name: row.Name != null ? String(row.Name) : null,
       building_code: row["Building Code"] ?? null,
       building_name: row["Buildings - Building Name (override)"] ?? row["Buildings - Building Name"] ?? null,
       room_number: row["Room Number"] != null ? String(row["Room Number"]) : null,
@@ -44,6 +61,25 @@ export function transformStudySpace(row: Row): { _id: string; doc: StudySpaceDoc
       space_type: row.space_type ?? null,
       furniture: row.Formatted_Furniture ?? null,
       layout: row.Formatted_Room_Layout_Type ?? null,
+      floor: Number.isFinite(floor) ? floor : null,
+      photo: row.cover_photo_thumbnail_url ?? null,
+      link: row["Room Link"] ?? null,
+    },
+  };
+}
+
+export function transformLibRoom(row: Row): { _id: string; doc: LibRoomDoc } | null {
+  if (row.eid == null || !row.title) return null;
+  return {
+    _id: String(row.eid),
+    doc: {
+      eid: row.eid,
+      building_code: row.building_code ?? null,
+      location: row.location ?? null,
+      title: String(row.title),
+      capacity: typeof row.capacity === "number" ? row.capacity : null,
+      url: row.url ?? null,
+      thumbnail: row.thumbnail ?? null,
     },
   };
 }
@@ -79,6 +115,7 @@ export const spaces: DatasetModule = {
         properties: {
           id: { type: "keyword" },
           title: { type: "text" },
+          name: { type: "text" },
           building_code: { type: "keyword" },
           building_name: { type: "text" },
           room_number: { type: "keyword" },
@@ -86,12 +123,33 @@ export const spaces: DatasetModule = {
           space_type: { type: "keyword" },
           furniture: { type: "text" },
           layout: { type: "text" },
+          floor: { type: "integer" },
+          photo: { type: "keyword", index: false },
+          link: { type: "keyword", index: false },
         },
       },
       async *read(s3) {
         yield* (await s3.getJson("learning-spaces/rooms.json")) as Row[];
       },
       transform: transformStudySpace,
+    },
+    {
+      index: "lib_rooms",
+      mappings: {
+        properties: {
+          eid: { type: "integer" },
+          building_code: { type: "keyword" },
+          location: { type: "text" },
+          title: { type: "text" },
+          capacity: { type: "integer" },
+          url: { type: "keyword", index: false },
+          thumbnail: { type: "keyword", index: false },
+        },
+      },
+      async *read(s3) {
+        yield* (await s3.getJson("room-bookings/rooms.json")) as Row[];
+      },
+      transform: transformLibRoom,
     },
     {
       index: "room_availability",
