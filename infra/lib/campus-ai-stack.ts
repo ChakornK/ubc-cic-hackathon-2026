@@ -87,8 +87,7 @@ export class CampusAiStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    // App client — created before Nextjs so client ID is available as an env var
-    // without circular deps.
+    // Created before Nextjs so client ID resolves without circular deps.
     this.userPoolClient = this.userPool.addClient("AppClient", {
       supportedIdentityProviders: [cognito.UserPoolClientIdentityProvider.GOOGLE],
       oAuth: {
@@ -100,7 +99,6 @@ export class CampusAiStack extends Stack {
     });
     this.userPoolClient.node.addDependency(googleIdp);
 
-    // --- Next.js (OpenNext via cdk-nextjs-standalone) ---
     this.nextjs = new Nextjs(this, "Web", {
       nextjsPath: path.resolve(__dirname, "../.."),
       skipBuild: props.skipBuild ?? false,
@@ -123,7 +121,7 @@ export class CampusAiStack extends Stack {
 
     const serverFn = this.nextjs.serverFunction.lambdaFunction;
 
-    // --- IAM: least-privilege server role (Task 1.2) ---
+    // Least-privilege server role
     serverFn.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["bedrock:InvokeModel"],
@@ -156,7 +154,6 @@ export class CampusAiStack extends Stack {
       }),
     );
 
-    // --- Outputs ---
     new CfnOutput(this, "CloudFrontUrl", { value: this.nextjs.url });
     new CfnOutput(this, "UserPoolId", { value: this.userPool.userPoolId });
     new CfnOutput(this, "UserPoolClientId", {
