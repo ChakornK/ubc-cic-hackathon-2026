@@ -38,13 +38,12 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
     const toolUses: { toolUseId: string; name: string; input: Record<string, unknown> }[] = [];
     let stopReason = "end_turn";
 
-    // Stream thinking and text deltas immediately as they arrive
+    // Stream thinking deltas immediately; buffer text until we know the stop reason
     for await (const event of converseStream({ messages: convo, system: systemPrompt(), toolSpecs })) {
       if (event.type === "thinking") {
         yield { type: "thinking", delta: event.delta };
       } else if (event.type === "text") {
         iterText += event.delta;
-        yield { type: "text", delta: event.delta };
       } else if (event.type === "tool_use") {
         toolUses.push(event);
       } else if (event.type === "stop") {
@@ -52,7 +51,13 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
       }
     }
 
-    if (iterText) fullText = iterText;
+    // Final turn: emit text as the streamed answer. Non-final: emit as thinking.
+    if (stopReason !== "tool_use" && iterText) {
+      yield { type: "text", delta: iterText };
+      fullText = iterText;
+    } else if (iterText) {
+      yield { type: "thinking", delta: iterText };
+    }
 
     // Build the assistant message for conversation history
     const assistantContent: ContentBlock[] = [];
