@@ -75,6 +75,7 @@ export class CampusAiStack extends Stack {
     });
 
     // DESTROY — index is rebuilt by `npm run ingest`; switch to RETAIN for prod.
+    // Single node, no replicas. Add zone awareness + 2 nodes if uptime matters.
     this.searchDomain = new opensearch.Domain(this, "SearchDomain", {
       version: opensearch.EngineVersion.OPENSEARCH_2_17,
       capacity: {
