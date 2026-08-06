@@ -1,9 +1,7 @@
 "use client";
 
-// The pill-shaped, recessed chat input. Enter sends; Shift+Enter adds a line;
-// Cmd/Ctrl+Enter always sends. Submit is disabled while a request is in flight
-// (responses can take 10–30 s) and while the input is empty.
-
+// The recessed chat composer. Enter sends; Shift+Enter adds a line;
+// Cmd/Ctrl+Enter always sends. Submit locks while a request is in flight.
 import { Icon } from "@/src/components/icons";
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
 
@@ -13,10 +11,14 @@ export interface ChatInputHandle {
 
 interface ChatInputProps {
   disabled: boolean;
+  thinking: boolean;
   onSend: (text: string) => void;
 }
 
-export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function ChatInput({ disabled, onSend }, ref) {
+export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function ChatInput(
+  { disabled, thinking, onSend },
+  ref,
+) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -40,7 +42,6 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    // Enter during IME composition commits the candidate, not the message.
     if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
     if (event.metaKey || event.ctrlKey || !event.shiftKey) {
       event.preventDefault();
@@ -49,9 +50,11 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
   }
 
   return (
-    <div className="border-t border-border-subtle bg-surface-bright px-4 py-3">
+    <div className="shrink-0 bg-transparent px-3 pt-2 pb-3 sm:px-4 sm:pb-4">
       <form
-        className="relative"
+        data-thinking={thinking}
+        aria-busy={thinking}
+        className="chat-composer neu-inset bg-surface-container-low focus-within:border-primary relative flex items-end rounded-2xl border p-1.5 transition-[border-color,box-shadow] duration-150"
         onSubmit={(event) => {
           event.preventDefault();
           submit();
@@ -69,18 +72,18 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
           onKeyDown={onKeyDown}
           placeholder="Ask about courses, campus, or academic rules…"
           aria-label="Message the assistant"
-          className="block max-h-24 w-full resize-none rounded-3xl border border-border-subtle bg-surface-container-low py-2.5 pl-4 pr-12 text-sm text-on-surface shadow-inset outline-none transition-all duration-150 placeholder:text-muted focus:border-primary focus:bg-surface-bright focus:shadow-none disabled:opacity-60"
+          className="text-on-surface placeholder:text-muted relative z-10 block max-h-24 min-h-9 min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none disabled:opacity-60"
         />
         <button
           type="submit"
           disabled={!canSend}
           aria-label="Send message"
-          className="absolute bottom-1.5 right-1.5 flex size-8 items-center justify-center rounded-full bg-primary text-on-primary transition-all duration-150 hover:scale-105 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
+          className="neu-primary-button bg-primary text-on-primary relative z-10 flex size-9 shrink-0 items-center justify-center rounded-xl disabled:pointer-events-none disabled:opacity-45"
         >
           <Icon name="arrowUp" size={18} />
         </button>
       </form>
-      <p className="mt-2 text-center text-xs text-muted">AI can make mistakes. Verify important information.</p>
+      <p className="text-muted mt-2 text-center text-xs">AI can make mistakes. Verify important information.</p>
     </div>
   );
 });
