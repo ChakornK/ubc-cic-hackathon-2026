@@ -15,7 +15,14 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: null,
     corequisite: null,
     sections: [
-      { section: "101", term: "2026W1", days: ["t", "th"], start_time: "11:00", end_time: "12:30", instructor: "Sitar, P." },
+      {
+        section: "101",
+        term: "2026W1",
+        days: ["t", "th"],
+        start_time: "11:00",
+        end_time: "12:30",
+        instructor: "Sitar, P.",
+      },
     ],
   },
   {
@@ -29,7 +36,14 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: null,
     corequisite: null,
     sections: [
-      { section: "201", term: "2026W2", days: ["m", "w", "f"], start_time: "12:00", end_time: "13:00", instructor: "Aziz, H." },
+      {
+        section: "201",
+        term: "2026W2",
+        days: ["m", "w", "f"],
+        start_time: "12:00",
+        end_time: "13:00",
+        instructor: "Aziz, H.",
+      },
     ],
   },
   {
@@ -43,8 +57,22 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: null,
     corequisite: null,
     sections: [
-      { section: "101", term: "2026W1", days: ["m", "w", "f"], start_time: "10:00", end_time: "11:00", instructor: "Carter, G." },
-      { section: "102", term: "2026W1", days: ["t", "th"], start_time: "15:30", end_time: "17:00", instructor: "Reid, F." },
+      {
+        section: "101",
+        term: "2026W1",
+        days: ["m", "w", "f"],
+        start_time: "10:00",
+        end_time: "11:00",
+        instructor: "Carter, G.",
+      },
+      {
+        section: "102",
+        term: "2026W1",
+        days: ["t", "th"],
+        start_time: "15:30",
+        end_time: "17:00",
+        instructor: "Reid, F.",
+      },
     ],
   },
   {
@@ -58,7 +86,14 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: "One of CPSC 110, CPSC 107.",
     corequisite: null,
     sections: [
-      { section: "101", term: "2026W1", days: ["m", "w", "f"], start_time: "13:00", end_time: "14:00", instructor: "Nakata, M." },
+      {
+        section: "101",
+        term: "2026W1",
+        days: ["m", "w", "f"],
+        start_time: "13:00",
+        end_time: "14:00",
+        instructor: "Nakata, M.",
+      },
     ],
   },
   {
@@ -72,7 +107,14 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: "All of CPSC 121, CPSC 210.",
     corequisite: null,
     sections: [
-      { section: "203", term: "2026W2", days: ["t", "th"], start_time: "09:30", end_time: "11:00", instructor: "Osei, K." },
+      {
+        section: "203",
+        term: "2026W2",
+        days: ["t", "th"],
+        start_time: "09:30",
+        end_time: "11:00",
+        instructor: "Osei, K.",
+      },
     ],
   },
   {
@@ -86,7 +128,14 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: "One of CPSC 210, CPEN 221 and one of CPSC 121, MATH 220.",
     corequisite: null,
     sections: [
-      { section: "101", term: "2026W1", days: ["m", "w", "f"], start_time: "14:00", end_time: "15:00", instructor: "Volkova, A." },
+      {
+        section: "101",
+        term: "2026W1",
+        days: ["m", "w", "f"],
+        start_time: "14:00",
+        end_time: "15:00",
+        instructor: "Volkova, A.",
+      },
       { section: "201", term: "2026W2", days: ["m", "w", "f"], start_time: "11:00", end_time: "12:00" },
     ],
   },
@@ -101,7 +150,14 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: "One of CPSC 210, CPEN 221 and one of CPSC 213, CPEN 211.",
     corequisite: null,
     sections: [
-      { section: "101", term: "2026W1", days: ["t", "th"], start_time: "12:30", end_time: "14:00", instructor: "Haas, D." },
+      {
+        section: "101",
+        term: "2026W1",
+        days: ["t", "th"],
+        start_time: "12:30",
+        end_time: "14:00",
+        instructor: "Haas, D.",
+      },
     ],
   },
   {
@@ -115,7 +171,14 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: "One of CPSC 221, CPSC 260, EECE 320 and one of MATH 200, MATH 226, MATH 253.",
     corequisite: null,
     sections: [
-      { section: "202", term: "2026W2", days: ["m", "w", "f"], start_time: "09:00", end_time: "10:00", instructor: "Bergmann, T." },
+      {
+        section: "202",
+        term: "2026W2",
+        days: ["m", "w", "f"],
+        start_time: "09:00",
+        end_time: "10:00",
+        instructor: "Bergmann, T.",
+      },
     ],
   },
   {
@@ -129,7 +192,14 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: "One of CPSC 203, CPSC 210, CPEN 221.",
     corequisite: null,
     sections: [
-      { section: "101", term: "2026W1", days: ["t", "th"], start_time: "17:00", end_time: "18:30", instructor: "Molnar, E." },
+      {
+        section: "101",
+        term: "2026W1",
+        days: ["t", "th"],
+        start_time: "17:00",
+        end_time: "18:30",
+        instructor: "Molnar, E.",
+      },
     ],
   },
   {
@@ -143,7 +213,14 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: null,
     corequisite: null,
     sections: [
-      { section: "001", term: "2026W1", days: ["m", "w"], start_time: "16:00", end_time: "17:30", instructor: "Delgado, R." },
+      {
+        section: "001",
+        term: "2026W1",
+        days: ["m", "w"],
+        start_time: "16:00",
+        end_time: "17:30",
+        instructor: "Delgado, R.",
+      },
     ],
   },
   {
@@ -157,7 +234,14 @@ export const MOCK_COURSES: CourseDoc[] = [
     prerequisite: null,
     corequisite: null,
     sections: [
-      { section: "110", term: "2026W1", days: ["m", "w", "f"], start_time: "08:00", end_time: "09:00", instructor: "Iqbal, S." },
+      {
+        section: "110",
+        term: "2026W1",
+        days: ["m", "w", "f"],
+        start_time: "08:00",
+        end_time: "09:00",
+        instructor: "Iqbal, S.",
+      },
     ],
   },
 ];
@@ -168,6 +252,8 @@ export const MOCK_TUITION: TuitionResult[] = [
     program_slug: "bachelor-of-science",
     student_type: "domestic",
     cohort_year: 2026,
+    unit: "per_credit",
+    amount_cad: 202.13,
     per_credit_cad: 202.13,
   },
   {
@@ -175,6 +261,8 @@ export const MOCK_TUITION: TuitionResult[] = [
     program_slug: "bachelor-of-science",
     student_type: "international",
     cohort_year: 2026,
+    unit: "per_credit",
+    amount_cad: 1494.65,
     per_credit_cad: 1494.65,
   },
   {
@@ -182,6 +270,8 @@ export const MOCK_TUITION: TuitionResult[] = [
     program_slug: "bachelor-of-arts",
     student_type: "domestic",
     cohort_year: 2026,
+    unit: "per_credit",
+    amount_cad: 202.13,
     per_credit_cad: 202.13,
   },
   {
@@ -189,6 +279,8 @@ export const MOCK_TUITION: TuitionResult[] = [
     program_slug: "bachelor-of-arts",
     student_type: "international",
     cohort_year: 2026,
+    unit: "per_credit",
+    amount_cad: 1387.52,
     per_credit_cad: 1387.52,
   },
 ];

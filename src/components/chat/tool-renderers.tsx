@@ -4,7 +4,6 @@
 // healthy results also get a visualization from the `renderers` registry. Error
 // results (`status: "error"`) render as badge only. Unknown tools fall back to
 // the generic badge, so a new backend module needs only one renderer here.
-
 import { useChatShell } from "@/src/components/chat/chat-shell-context";
 import { Icon, type IconName } from "@/src/components/icons";
 import {
@@ -75,21 +74,21 @@ function sectionLine(course: CourseDoc): string | null {
 function CourseCard({ course, detailed = false }: { course: CourseDoc; detailed?: boolean }) {
   const times = sectionLine(course);
   return (
-    <article className="rounded-lg bg-surface-container-low p-3">
+    <article className="bg-surface-container-low rounded-lg p-3">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="font-mono text-body-sm font-medium text-primary">{course.code.replace("_V", "")}</span>
+        <span className="text-body-sm text-primary font-mono font-medium">{course.code.replace("_V", "")}</span>
         {course.credits !== null && (
-          <span className="shrink-0 rounded-full bg-surface-container px-2 py-0.5 text-xs text-on-surface-variant">
+          <span className="bg-surface-container text-on-surface-variant shrink-0 rounded-full px-2 py-0.5 text-xs">
             {course.credits} cr
           </span>
         )}
       </div>
-      <h4 className="mt-0.5 text-sm font-medium text-on-surface">{course.title}</h4>
+      <h4 className="text-on-surface mt-0.5 text-sm font-medium">{course.title}</h4>
       {detailed && course.description && (
-        <p className="mt-1.5 line-clamp-3 text-body-sm leading-relaxed text-on-surface-variant">{course.description}</p>
+        <p className="text-body-sm text-on-surface-variant mt-1.5 line-clamp-3 leading-relaxed">{course.description}</p>
       )}
-      {times && <p className="mt-1.5 font-mono text-xs text-on-surface-variant">{times}</p>}
-      <p className="mt-1 line-clamp-2 text-xs text-muted">
+      {times && <p className="text-on-surface-variant mt-1.5 font-mono text-xs">{times}</p>}
+      <p className="text-muted mt-1 line-clamp-2 text-xs">
         {course.prerequisite ? `Prereq: ${course.prerequisite}` : "No prerequisites"}
         {detailed && course.corequisite ? ` · Coreq: ${course.corequisite}` : ""}
       </p>
@@ -108,7 +107,7 @@ function SearchCoursesRenderer({ call }: ToolCallRendererProps) {
         <CourseCard key={course.code} course={course} />
       ))}
       {courses.length > shown.length && (
-        <p className="text-xs text-muted">+ {courses.length - shown.length} more matches</p>
+        <p className="text-muted text-xs">+ {courses.length - shown.length} more matches</p>
       )}
     </div>
   );
@@ -126,22 +125,24 @@ function GetCourseRenderer({ call }: ToolCallRendererProps) {
 // ---- get_tuition ----
 
 function isTuitionResult(value: unknown): value is TuitionResult {
-  return typeof value === "object" && value !== null && typeof (value as TuitionResult).per_credit_cad === "number";
+  return typeof value === "object" && value !== null && typeof (value as TuitionResult).amount_cad === "number";
 }
 
 function TuitionRenderer({ call }: ToolCallRendererProps) {
   if (!isTuitionResult(call.result)) return null;
   const t = call.result;
+  const label = t.per_credit_cad != null ? "per credit" : (t.unit ?? "flat");
+  const amount = t.per_credit_cad ?? t.amount_cad ?? 0;
   return (
-    <div className="mt-2 flex items-center gap-3 rounded-lg bg-surface-container-low p-3">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary-container text-on-secondary-container">
+    <div className="bg-surface-container-low mt-2 flex items-center gap-3 rounded-lg p-3">
+      <span className="bg-secondary-container text-on-secondary-container flex size-9 shrink-0 items-center justify-center rounded-lg">
         <Icon name="currencyDollar" size={18} />
       </span>
       <span className="min-w-0">
-        <span className="block text-base font-medium text-on-surface">
-          {formatCad(t.per_credit_cad)} <span className="text-body-sm font-normal text-on-surface-variant">per credit</span>
+        <span className="text-on-surface block text-base font-medium">
+          {formatCad(amount)} <span className="text-body-sm text-on-surface-variant font-normal">{label}</span>
         </span>
-        <span className="block truncate text-xs text-muted">
+        <span className="text-muted block truncate text-xs">
           {t.program} · {t.student_type} · {t.cohort_year} cohort
         </span>
       </span>
@@ -162,20 +163,20 @@ function WalkingDistanceRenderer({ call, isLatest }: ToolCallRendererProps) {
 
   if (!highlight) return null;
   return (
-    <div className="mt-2 flex items-center gap-3 rounded-lg bg-surface-container-low p-3">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary-container text-on-secondary-container">
+    <div className="bg-surface-container-low mt-2 flex items-center gap-3 rounded-lg p-3">
+      <span className="bg-secondary-container text-on-secondary-container flex size-9 shrink-0 items-center justify-center rounded-lg">
         <Icon name="walk" size={18} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-base font-medium text-on-surface">{formatMinutes(highlight.minutes)}</span>
-        <span className="block truncate text-xs text-muted">
+        <span className="text-on-surface block text-base font-medium">{formatMinutes(highlight.minutes)}</span>
+        <span className="text-muted block truncate text-xs">
           {formatMeters(highlight.meters)} · {highlight.from} → {highlight.to}
         </span>
       </span>
       <button
         type="button"
         onClick={showOnMap}
-        className="shrink-0 rounded-full border border-primary px-3 py-1.5 text-xs font-medium text-primary transition-colors duration-150 hover:bg-accent-subtle active:scale-95"
+        className="border-primary text-primary hover:bg-accent-subtle shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 active:scale-95"
       >
         Show on map
       </button>
