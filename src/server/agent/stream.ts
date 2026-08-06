@@ -2,23 +2,18 @@
 // and executes tools. The non-streaming loop in loop.ts remains for property tests.
 
 import { converseStream } from "../bedrock";
-import type {
-  ChatMessage,
-  ContentBlock,
-  ConverseMessage,
-  DatasetModule,
-  OsClient,
-  ToolCall,
-  ToolSpec,
-} from "../core/types";
+import type { ChatMessage, ContentBlock, ConverseMessage, DatasetModule, OsClient, ToolCall } from "../core/types";
 import { executeTool, isToolError } from "./executor";
 import { ITERATION_LIMIT, systemPrompt } from "./loop";
 
 // Stream event types sent as NDJSON lines to the client
 export type StreamEvent =
+  | { type: "thinking"; delta: string }
   | { type: "text"; delta: string }
+  | { type: "text_clear" }
   | { type: "tool_start"; name: string; input: Record<string, unknown> }
   | { type: "tool_end"; name: string; result: unknown }
+  | { type: "turn_start" }
   | { type: "done"; message: string; tool_calls: ToolCall[]; warning?: string }
   | { type: "error"; message: string };
 
@@ -38,22 +33,38 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
   let fullText = "";
 
   for (let i = 0; i < ITERATION_LIMIT; i++) {
+    if (i > 0) yield { type: "turn_start" as const };
+
     let iterText = "";
     const toolUses: { toolUseId: string; name: string; input: Record<string, unknown> }[] = [];
     let stopReason = "end_turn";
+    let sawToolUse = false;
 
+    // Stream thinking immediately. Stream text optimistically as the answer.
+    // If a tool_use block appears after text, emit text_clear to retract it
+    // and re-emit the text as thinking.
     for await (const event of converseStream({ messages: convo, system: systemPrompt(), toolSpecs })) {
-      if (event.type === "text") {
+      if (event.type === "thinking") {
+        yield { type: "thinking", delta: event.delta };
+      } else if (event.type === "text") {
         iterText += event.delta;
-        yield { type: "text", delta: event.delta };
+        if (!sawToolUse) {
+          yield { type: "text", delta: event.delta };
+        }
       } else if (event.type === "tool_use") {
+        if (!sawToolUse && iterText) {
+          // Retract streamed text and reclassify as thinking
+          yield { type: "text_clear" };
+          yield { type: "thinking", delta: iterText };
+        }
+        sawToolUse = true;
         toolUses.push(event);
       } else if (event.type === "stop") {
         stopReason = event.reason;
       }
     }
 
-    if (iterText) fullText = iterText;
+    if (iterText && !sawToolUse) fullText = iterText;
 
     // Build the assistant message for conversation history
     const assistantContent: ContentBlock[] = [];

@@ -4,8 +4,17 @@
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
-  /** Persisted with assistant messages so history reloads keep the tool cards. */
-  tool_calls?: ToolCall[];
+  /** Tool calls made during this assistant turn (persisted for history display). */
+  toolCalls?: ToolCall[];
+  /** Interstitial thinking/tool-call blocks shown before the answer. */
+  interstitial?: InterstitialBlock[];
+}
+
+export interface InterstitialBlock {
+  type: "thinking" | "tool_call";
+  content: string;
+  input?: Record<string, unknown>;
+  result?: unknown;
 }
 
 export interface ToolCall {

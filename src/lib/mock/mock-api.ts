@@ -369,7 +369,7 @@ export function createMockApi({ getToken, latencyMs = 1400, seed = true }: MockA
   }
 
   return {
-    async chat(sessionId, messages, onDelta) {
+    async chat(sessionId, messages, callbacks) {
       await requireToken();
       if (!Array.isArray(messages) || messages.length === 0) {
         throw new ApiError(400, "messages must be a non-empty array");
@@ -380,12 +380,29 @@ export function createMockApi({ getToken, latencyMs = 1400, seed = true }: MockA
       }
       const response = respondToChat(last.content);
 
-      // Simulate streaming: emit text in small chunks
-      if (onDelta) {
-        const words = response.message.split(" ");
-        for (const word of words) {
-          onDelta(word + " ");
-          await sleep(20);
+      // Simulate streaming: emit thinking, tool calls, then text
+      if (callbacks) {
+        if (callbacks.onThinking) {
+          callbacks.onThinking("Let me look that up for you...");
+          await sleep(50);
+        }
+        for (const tc of response.tool_calls) {
+          if (callbacks.onToolStart) callbacks.onToolStart(tc.name, tc.input);
+          await sleep(100);
+          if (callbacks.onToolEnd) callbacks.onToolEnd(tc.name, tc.result);
+          await sleep(50);
+        }
+        if (response.tool_calls.length > 1 && callbacks.onTurnStart && callbacks.onThinking) {
+          callbacks.onTurnStart();
+          callbacks.onThinking("Now let me put that together...");
+          await sleep(50);
+        }
+        if (callbacks.onDelta) {
+          const words = response.message.split(" ");
+          for (const word of words) {
+            callbacks.onDelta(word + " ");
+            await sleep(20);
+          }
         }
       } else {
         await sleep(latencyMs * (response.tool_calls.length > 1 ? 2 : 1.4));
@@ -402,7 +419,7 @@ export function createMockApi({ getToken, latencyMs = 1400, seed = true }: MockA
         {
           role: "assistant",
           content: response.message,
-          ...(response.tool_calls.length > 0 ? { tool_calls: response.tool_calls } : {}),
+          ...(response.tool_calls.length > 0 ? { toolCalls: response.tool_calls } : {}),
         },
       ];
       stored.summary = { ...stored.summary, updatedAt: new Date().toISOString() };

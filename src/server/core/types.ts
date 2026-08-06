@@ -6,6 +6,7 @@ import type { ChatMessage, ChatResponse } from "@/src/shared/types";
 export {
   type ChatMessage,
   type ChatResponse,
+  type InterstitialBlock,
   type LngLat,
   type Profile,
   type SessionSummary,

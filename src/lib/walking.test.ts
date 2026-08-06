@@ -214,7 +214,7 @@ describe("mock-mode journey: chat → highlight → map geometry", () => {
     const history = await api.getSession(sessionId);
     expect(history[0]).toEqual({ role: "user", content: "How long is the walk from IKB to ICCS?" });
     expect(history[1].role).toBe("assistant");
-    expect(history[1].tool_calls?.map((c) => c.name)).toContain("walking_distance");
+    expect(history[1].toolCalls?.map((c) => c.name)).toContain("walking_distance");
   });
 
   it("clears the route when the latest response has no walking_distance call", async () => {

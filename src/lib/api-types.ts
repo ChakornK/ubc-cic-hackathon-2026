@@ -4,6 +4,7 @@
 export {
   type ChatMessage,
   type ChatResponse,
+  type InterstitialBlock,
   type LngLat,
   type Profile,
   type SessionSummary,

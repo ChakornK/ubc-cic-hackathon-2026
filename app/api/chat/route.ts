@@ -1,5 +1,6 @@
 import { streamAgent } from "@/src/server/agent/stream";
 import { requireUser } from "@/src/server/auth";
+import type { InterstitialBlock } from "@/src/server/core/types";
 import { validateChatRequest } from "@/src/server/core/validate";
 import { modules } from "@/src/server/modules";
 import { getOsClient } from "@/src/server/search";
@@ -32,17 +33,45 @@ export async function POST(request: Request): Promise<Response> {
             tool_calls: { name: string; input: Record<string, unknown>; result?: unknown }[];
             warning?: string;
           } | null = null;
+          const interstitial: InterstitialBlock[] = [];
 
           for await (const event of streamAgent(parsed.value.messages, { modules, os: getOsClient() })) {
             controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
-            if (event.type === "done") {
+            if (event.type === "thinking") {
+              const last = interstitial[interstitial.length - 1];
+              if (last?.type === "thinking") {
+                last.content += event.delta;
+              } else {
+                interstitial.push({ type: "thinking", content: event.delta });
+              }
+            } else if (event.type === "tool_start") {
+              interstitial.push({ type: "tool_call", content: event.name, input: event.input });
+            } else if (event.type === "tool_end") {
+              for (let j = interstitial.length - 1; j >= 0; j--) {
+                if (
+                  interstitial[j].type === "tool_call" &&
+                  interstitial[j].content === event.name &&
+                  interstitial[j].result === undefined
+                ) {
+                  interstitial[j].result = event.result;
+                  break;
+                }
+              }
+            } else if (event.type === "done") {
               doneEvent = event;
             }
           }
 
           // Persist after streaming completes
           if (doneEvent && lastUser) {
-            await appendExchange(user.sub, sessionId, lastUser.content, doneEvent.message, doneEvent.tool_calls);
+            await appendExchange(
+              user.sub,
+              sessionId,
+              lastUser.content,
+              doneEvent.message,
+              doneEvent.tool_calls,
+              interstitial.length > 0 ? interstitial : undefined,
+            );
           }
         } catch (e) {
           const message = e instanceof Error ? e.message : "Internal server error";
