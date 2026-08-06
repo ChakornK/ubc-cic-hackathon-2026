@@ -15,7 +15,7 @@ import {
 import { Icon } from "@/src/components/icons";
 import { useApi } from "@/src/components/providers";
 import { ApiError, type ChatMessage } from "@/src/lib/api-types";
-import { extractWalkingHighlight } from "@/src/lib/walking";
+import { mergeMapHighlights } from "@/src/lib/walking";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -95,6 +95,9 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
             interstitial: m.interstitial,
           })),
         );
+        // Put this conversation's last map state back on the map.
+        const lastWithCalls = [...history].reverse().find((m) => m.toolCalls?.length);
+        if (lastWithCalls?.toolCalls) setHighlight(mergeMapHighlights(lastWithCalls.toolCalls));
         setHistoryState("ready");
       })
       .catch((error: unknown) => {
@@ -206,14 +209,14 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
             warning: response.warning,
             interstitial: interstitialBlocks.length > 0 ? [...interstitialBlocks] : undefined,
           });
-          if (!response.tool_calls.some((call) => extractWalkingHighlight(call))) setHighlight(null);
+          // One merged highlight per response (route > places > all buildings);
+          // null clears a stale highlight when the answer has no map content.
+          setHighlight(mergeMapHighlights(response.tool_calls));
           setAnnouncement("New response from assistant");
           refreshSessions();
         })
         .catch((error: unknown) => {
           if (!alive.current) return;
-          // Remove the placeholder on error
-          setMessages((current) => current.filter((m) => m.id !== streamId));
           pendingRetry.current = { conversation };
           const message =
             error instanceof ApiError && error.status !== 500
@@ -256,34 +259,41 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
   return (
     <section
       aria-label="Conversation"
-      className="border-border-subtle bg-surface flex min-h-0 w-full flex-col overflow-hidden rounded-xl border shadow-sm"
+      className="neu-panel glass-neu-strong bg-surface flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border"
     >
-      {/* Chat header */}
-      <div className="border-border-subtle bg-surface-bright flex shrink-0 items-center justify-between border-b px-4 py-3">
+      <div className="border-border-subtle flex shrink-0 items-center justify-between border-b bg-transparent px-4 py-3.5">
         <div className="min-w-0">
-          <h1 className="text-on-surface truncate text-base font-medium">{sessionTitle}</h1>
-          <p className="text-body-sm text-muted">Active session</p>
+          <h1 className="text-on-surface truncate text-base font-medium tracking-[-0.01em]">{sessionTitle}</h1>
+          <p className="text-body-sm text-muted mt-0.5">Grounded in UBC data</p>
         </div>
+        <span className="neu-inset bg-surface-container-low text-on-surface-variant ml-3 flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs">
+          <span className="bg-secondary size-1.5 rounded-full" aria-hidden="true" />
+          Active
+        </span>
       </div>
 
-      {/* Messages */}
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto p-4">
+      <div ref={scrollRef} className="chat-message-well min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
         {historyState === "loading" && (
-          <output aria-label="Loading conversation" className="flex flex-col gap-4">
-            <div className="bg-surface-container h-12 w-3/5 animate-pulse self-end rounded-[16px_16px_4px_16px]" />
-            <div className="bg-surface-container h-20 w-4/5 animate-pulse rounded-[16px_16px_16px_4px]" />
+          <output aria-label="Loading conversation" className="flex flex-col gap-5">
+            <div className="neu-inset bg-surface-container h-12 w-3/5 animate-pulse self-end rounded-[16px_16px_5px_16px]" />
+            <div className="neu-inset bg-surface-container h-20 w-4/5 animate-pulse rounded-[16px_16px_16px_5px]" />
           </output>
         )}
 
         {historyState === "failed" && (
-          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-            <Icon name="alert" size={48} className="text-error" />
-            <p className="text-on-surface text-xl font-medium">Couldn&apos;t load this conversation</p>
-            <div className="flex gap-2">
+          <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-center">
+            <span className="neu-raised bg-surface text-error flex size-16 items-center justify-center rounded-2xl border">
+              <Icon name="alert" size={30} />
+            </span>
+            <div>
+              <p className="text-on-surface text-xl font-medium">Couldn&apos;t load this conversation</p>
+              <p className="text-on-surface-variant mt-1 text-sm">Try again, or start with a fresh chat.</p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-3">
               <button
                 type="button"
                 onClick={() => setHistoryNonce((n) => n + 1)}
-                className="bg-surface-container-low text-on-surface hover:bg-surface-container flex h-9 items-center gap-1.5 rounded-lg px-4 text-sm font-medium shadow-sm transition-all duration-150 active:scale-95"
+                className="neu-button bg-surface text-on-surface flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-medium"
               >
                 <Icon name="refresh2" size={16} />
                 Try again
@@ -291,7 +301,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
               <button
                 type="button"
                 onClick={() => router.push(`/chat/${crypto.randomUUID()}`)}
-                className="bg-primary text-on-primary shadow-glow flex h-9 items-center gap-1.5 rounded-lg px-4 text-sm font-medium transition-all duration-150 hover:scale-[1.02] active:scale-95"
+                className="neu-primary-button bg-primary text-on-primary flex h-10 items-center gap-1.5 rounded-xl px-4 text-sm font-medium"
               >
                 Start new chat
               </button>
@@ -300,19 +310,21 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         )}
 
         {historyState === "ready" && messages.length === 0 && !sending && (
-          <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-            <Icon name="chat1" size={48} className="text-outline" />
-            <h2 className="text-on-surface text-xl font-medium">Ask me about UBC</h2>
-            <p className="text-on-surface-variant max-w-70 text-sm leading-relaxed">
+          <div className="flex h-full flex-col items-center justify-center px-3 text-center sm:px-6">
+            <span className="neu-raised bg-surface text-primary flex size-16 items-center justify-center rounded-2xl border">
+              <Icon name="chat1" size={30} />
+            </span>
+            <h2 className="text-on-surface mt-6 text-2xl font-medium tracking-[-0.025em]">Ask me about UBC</h2>
+            <p className="text-on-surface-variant mt-2 max-w-80 text-sm leading-relaxed">
               I can help with courses, prerequisites, tuition costs, and walking routes between campus buildings.
             </p>
-            <div className="mt-3 flex flex-wrap justify-center gap-2">
+            <div className="mt-6 flex max-w-xl flex-wrap justify-center gap-2.5">
               {SUGGESTIONS.map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"
                   onClick={() => send(suggestion)}
-                  className="border-primary text-primary hover:bg-accent-subtle rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 active:scale-95"
+                  className="neu-button bg-surface text-primary rounded-xl px-3.5 py-2 text-left text-xs font-medium"
                 >
                   {suggestion}
                 </button>
@@ -322,7 +334,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         )}
 
         {historyState === "ready" && messages.length > 0 && (
-          <div role="log" aria-label="Conversation" aria-live="polite" className="flex flex-col gap-5">
+          <div role="log" aria-label="Conversation" aria-live="polite" className="flex flex-col gap-6">
             {messages.map((message) =>
               message.role === "user" ? (
                 <UserMessage key={message.id} message={message} />
@@ -337,7 +349,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                 <TypingIndicator slow={slowResponse} />
               )}
             {sendError && (
-              <div className="border-error/30 bg-error-container/40 flex items-center justify-between gap-3 rounded-xl border px-4 py-3">
+              <div className="neu-raised border-error/30 bg-error-container/40 flex flex-col items-start justify-between gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center">
                 <p className="text-on-surface flex items-center gap-2 text-sm">
                   <Icon name="alert" size={16} className="text-error shrink-0" />
                   {sendError}
@@ -345,7 +357,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                 <button
                   type="button"
                   onClick={retry}
-                  className="bg-surface text-on-surface hover:bg-surface-container-low flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium shadow-sm transition-all duration-150 active:scale-95"
+                  className="neu-button bg-surface text-on-surface flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium"
                 >
                   <Icon name="refresh2" size={14} />
                   Retry
@@ -356,12 +368,11 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         )}
       </div>
 
-      {/* Screen-reader announcements for send/response/error events */}
       <output className="sr-only" aria-live="polite">
         {announcement}
       </output>
 
-      <ChatInput ref={inputRef} disabled={sending || historyState !== "ready"} onSend={send} />
+      <ChatInput ref={inputRef} disabled={sending || historyState !== "ready"} thinking={sending} onSend={send} />
     </section>
   );
 }

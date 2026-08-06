@@ -1,7 +1,7 @@
 "use client";
 
-// Header avatar + dropdown: signed-in email, theme preference, sign out.
-
+// Header avatar + animated dropdown: signed-in email, contained theme preference,
+// and sign out. The menu stays mounted so closing can fade cleanly.
 import { useAppAuth } from "@/src/components/auth/app-auth";
 import { Icon } from "@/src/components/icons";
 import { useTheme, type ThemeMode } from "@/src/components/providers";
@@ -46,63 +46,72 @@ export function UserMenu() {
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen((value) => !value)}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label="Account menu"
-        className="flex size-8 items-center justify-center rounded-full border border-border bg-primary-container text-sm font-medium text-on-primary-container transition-transform duration-150 hover:scale-105"
+        className="neu-button bg-surface text-primary flex size-9 items-center justify-center rounded-xl text-sm font-medium"
       >
-        {initial}
+        <span className="bg-primary-container text-on-primary-container flex size-6 items-center justify-center rounded-lg">
+          {initial}
+        </span>
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-label="Account"
-          className="absolute right-0 top-10 z-50 w-56 rounded-xl border border-border-subtle bg-surface-bright p-2 shadow-lg"
-        >
-          <p className="truncate px-3 py-2 text-body-sm text-on-surface-variant" title={auth.user?.email}>
+      <div
+        inert={!open}
+        aria-hidden={!open}
+        role="dialog"
+        aria-label="Account"
+        className={`profile-menu-surface neu-panel glass-neu bg-surface absolute top-12 right-0 z-50 w-64 max-w-[calc(100vw-2rem)] origin-top-right rounded-2xl border p-2.5 ${
+          open
+            ? "blur-0 visible translate-y-0 scale-100 opacity-100"
+            : "pointer-events-none invisible -translate-y-1.5 scale-[0.97] opacity-0 blur-[2px]"
+        }`}
+      >
+        <div className="rounded-xl px-2.5 py-2">
+          <p className="text-muted text-xs font-medium">Signed in as</p>
+          <p className="text-body-sm text-on-surface mt-0.5 truncate" title={auth.user?.email}>
             {auth.user?.email ?? "Signed in"}
           </p>
-
-          <div className="my-1 border-t border-border-subtle" />
-
-          <div className="flex items-center justify-between gap-2 px-3 py-2">
-            <span className="flex items-center gap-2 text-sm text-on-surface">
-              <Icon name={mode === "dark" ? "moon" : "sun"} size={16} className="text-on-surface-variant" />
-              Theme
-            </span>
-            <div className="flex rounded-lg bg-surface-container-low p-0.5">
-              {THEME_OPTIONS.map((option) => (
-                <button
-                  key={option.mode}
-                  type="button"
-                  onClick={() => setMode(option.mode)}
-                  aria-pressed={mode === option.mode}
-                  className={`rounded-md px-2 py-1 text-xs font-medium transition-colors duration-150 ${
-                    mode === option.mode
-                      ? "bg-surface-bright text-primary shadow-sm"
-                      : "text-on-surface-variant hover:text-on-surface"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="my-1 border-t border-border-subtle" />
-
-          <button
-            type="button"
-            onClick={() => auth.signOut()}
-            className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-sm text-on-surface transition-colors duration-150 hover:bg-accent-subtle"
-          >
-            <Icon name="exit" size={16} className="text-on-surface-variant" />
-            Sign out
-          </button>
         </div>
-      )}
+
+        <div className="bg-border-subtle my-1 h-px" />
+
+        <div className="px-1 py-2">
+          <div className="text-on-surface mb-2 flex items-center gap-2 px-1 text-sm font-medium">
+            <Icon name={mode === "dark" ? "moon" : "sun"} size={16} className="text-primary" />
+            Appearance
+          </div>
+          <div className="neu-inset bg-surface-container-low grid grid-cols-3 gap-1 rounded-xl border p-1">
+            {THEME_OPTIONS.map((option) => (
+              <button
+                key={option.mode}
+                type="button"
+                onClick={() => setMode(option.mode)}
+                aria-pressed={mode === option.mode}
+                className={`h-8 rounded-lg text-xs font-medium transition-all duration-150 ${
+                  mode === option.mode
+                    ? "neu-raised border-border-subtle bg-surface text-primary border"
+                    : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-border-subtle my-1 h-px" />
+
+        <button
+          type="button"
+          onClick={() => auth.signOut()}
+          className="text-on-surface hover:bg-surface-container flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sm transition-colors duration-150"
+        >
+          <Icon name="exit" size={16} className="text-on-surface-variant" />
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }

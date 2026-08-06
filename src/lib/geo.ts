@@ -77,6 +77,26 @@ export function findBuilding(collection: FeatureCollection, query: string): Buil
   return features.find((f) => (f.properties?.NAME ?? "").toUpperCase().includes(q)) ?? null;
 }
 
+/** Ray-cast point-in-ring test (even-odd rule). */
+function pointInRing(point: LngLat, ring: Position[]): boolean {
+  const [x, y] = point;
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+/** True when the point lies inside the feature's footprint (holes excluded). */
+export function pointInFeature(feature: BuildingFeature, point: LngLat): boolean {
+  const polygons = feature.geometry.type === "Polygon" ? [feature.geometry.coordinates] : feature.geometry.coordinates;
+  return polygons.some(
+    (polygon) => pointInRing(point, polygon[0] ?? []) && !polygon.slice(1).some((hole) => pointInRing(point, hole)),
+  );
+}
+
 export interface Bounds {
   west: number;
   south: number;

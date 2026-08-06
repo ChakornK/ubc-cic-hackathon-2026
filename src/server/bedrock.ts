@@ -7,6 +7,7 @@ import {
   type Tool,
   type ToolResultContentBlock,
 } from "@aws-sdk/client-bedrock-runtime";
+import type { DocumentType } from "@smithy/types";
 import type { ContentBlock, ConverseFn, ConverseMessage, ToolSpec } from "./core/types";
 
 let client: BedrockRuntimeClient | undefined;
@@ -21,11 +22,7 @@ function toSdkBlock(b: ContentBlock): SdkContentBlock {
   if (b.text != null) return { text: b.text };
   if (b.toolUse)
     return {
-      toolUse: {
-        toolUseId: b.toolUse.toolUseId,
-        name: b.toolUse.name,
-        input: b.toolUse.input as any, // ponytail: SDK type mismatch
-      },
+      toolUse: { toolUseId: b.toolUse.toolUseId, name: b.toolUse.name, input: b.toolUse.input as DocumentType },
     };
   if (b.toolResult) {
     return {
@@ -62,7 +59,7 @@ function toSdkTool(spec: ToolSpec): Tool {
     toolSpec: {
       name: spec.name,
       description: spec.description,
-      inputSchema: { json: spec.inputSchema.json as any }, // ponytail: SDK type mismatch
+      inputSchema: { json: spec.inputSchema.json as DocumentType },
     },
   };
 }

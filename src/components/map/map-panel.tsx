@@ -3,7 +3,6 @@
 // Map chrome: the neumorphic desktop/tablet card (collapsible to a rail, per the
 // design sketches) and the mobile bottom sheet. Floating glass overlays carry
 // the route info and map controls; a text fallback covers map failures.
-
 import { useChatShell } from "@/src/components/chat/chat-shell-context";
 import { Icon } from "@/src/components/icons";
 import { CampusMap, type MapControls, type MapStatus } from "@/src/components/map/campus-map";
@@ -40,7 +39,7 @@ function GlassButton({
       aria-label={label}
       title={label}
       aria-pressed={pressed}
-      className={`flex size-10 items-center justify-center rounded-lg border border-border-subtle bg-surface/90 shadow-sm backdrop-blur-sm transition-colors duration-150 ${
+      className={`border-border-subtle bg-surface/90 flex size-10 items-center justify-center rounded-lg border shadow-sm backdrop-blur-sm transition-colors duration-150 ${
         pressed ? "text-primary" : "text-on-surface-variant hover:text-primary"
       }`}
     >
@@ -53,16 +52,28 @@ function RouteInfoCard() {
   const { highlight } = useChatShell();
   if (!highlight) return null;
   return (
-    <div className="flex items-center gap-2.5 rounded-lg border border-border-subtle bg-surface/90 px-3 py-2 shadow-md backdrop-blur-sm">
-      <span className="flex size-8 items-center justify-center rounded-md bg-secondary-container text-on-secondary-container">
-        <Icon name="walk" size={18} />
+    <div className="border-border-subtle bg-surface/90 flex items-center gap-2.5 rounded-lg border px-3 py-2 shadow-md backdrop-blur-sm">
+      <span className="bg-secondary-container text-on-secondary-container flex size-8 items-center justify-center rounded-md">
+        <Icon name={highlight.kind === "route" ? "walk" : "location"} size={18} />
       </span>
       <span className="min-w-0">
-        <span className="block text-base font-medium leading-tight text-on-surface">
-          {formatMinutes(highlight.minutes)}
+        <span className="text-on-surface block text-base leading-tight font-medium">
+          {highlight.kind === "route"
+            ? formatMinutes(highlight.minutes)
+            : highlight.kind === "buildings"
+              ? highlight.buildings.length === 1
+                ? highlight.buildings[0].name
+                : `${highlight.buildings.length} buildings`
+              : `${highlight.places.length} place${highlight.places.length === 1 ? "" : "s"}`}
         </span>
-        <span className="block truncate text-xs text-on-surface-variant">
-          {formatMeters(highlight.meters)} · {highlight.from} → {highlight.to}
+        <span className="text-on-surface-variant block truncate text-xs">
+          {highlight.kind === "route"
+            ? `${formatMeters(highlight.meters)} · ${highlight.from} → ${highlight.to}`
+            : highlight.kind === "buildings"
+              ? highlight.buildings.map((b) => b.code).join(" · ")
+              : highlight.near
+                ? `near ${highlight.near}`
+                : highlight.places[0]?.name}
         </span>
       </span>
     </div>
@@ -72,13 +83,24 @@ function RouteInfoCard() {
 function MapFallback() {
   const { highlight } = useChatShell();
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-2 bg-surface-container-low px-6 text-center">
+    <div className="bg-surface-container-low flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
       <Icon name="wifiOff" size={32} className="text-outline" />
       <p className="text-body-sm text-on-surface-variant">Map unavailable</p>
-      {highlight && (
-        <p className="max-w-60 text-sm text-on-surface">
+      {highlight?.kind === "route" && (
+        <p className="text-on-surface max-w-60 text-sm">
           {formatMeters(highlight.meters)}, about {formatMinutes(highlight.minutes)} walking from {highlight.from} to{" "}
           {highlight.to}.
+        </p>
+      )}
+      {highlight?.kind === "buildings" && (
+        <p className="max-w-60 text-sm text-on-surface">
+          {highlight.buildings.map((b) => `${b.name} (${b.code})`).join(", ")}
+        </p>
+      )}
+      {highlight?.kind === "places" && (
+        <p className="max-w-60 text-sm text-on-surface">
+          {highlight.places.map((p) => p.name).join(", ")}
+          {highlight.near ? ` — near ${highlight.near}` : ""}
         </p>
       )}
     </div>
@@ -105,16 +127,16 @@ function MapSurface() {
             controls={controls}
           />
           {status === "loading" && (
-            <div className="absolute inset-0 animate-pulse bg-surface-container-low" aria-hidden="true" />
+            <div className="bg-surface-container-low absolute inset-0 animate-pulse" aria-hidden="true" />
           )}
 
           {/* Route info — floating top-left */}
-          <div className="absolute left-3 top-3 z-10 max-w-[75%]">
+          <div className="absolute top-3 left-3 z-10 max-w-[75%]">
             <RouteInfoCard />
           </div>
 
           {/* Layer + view controls — floating top-right */}
-          <div className="absolute right-3 top-3 z-10 flex flex-col gap-2">
+          <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
             <GlassButton
               label={showRoutes ? "Hide walking paths" : "Show walking paths"}
               icon="layer"
@@ -125,21 +147,21 @@ function MapSurface() {
           </div>
 
           {/* Zoom — floating bottom-right */}
-          <div className="absolute bottom-6 right-3 z-10 flex flex-col overflow-hidden rounded-lg border border-border-subtle bg-surface/90 shadow-sm backdrop-blur-sm">
+          <div className="border-border-subtle bg-surface/90 absolute right-3 bottom-6 z-10 flex flex-col overflow-hidden rounded-lg border shadow-sm backdrop-blur-sm">
             <button
               type="button"
               aria-label="Zoom in"
               onClick={() => controls.current?.zoomIn()}
-              className="flex size-10 items-center justify-center text-on-surface-variant transition-colors duration-150 hover:text-primary"
+              className="text-on-surface-variant hover:text-primary flex size-10 items-center justify-center transition-colors duration-150"
             >
               <Icon name="add" size={20} />
             </button>
-            <div className="mx-2 border-t border-border-subtle" />
+            <div className="border-border-subtle mx-2 border-t" />
             <button
               type="button"
               aria-label="Zoom out"
               onClick={() => controls.current?.zoomOut()}
-              className="flex size-10 items-center justify-center text-on-surface-variant transition-colors duration-150 hover:text-primary"
+              className="text-on-surface-variant hover:text-primary flex size-10 items-center justify-center transition-colors duration-150"
             >
               <Icon name="minimize" size={20} />
             </button>
@@ -150,50 +172,68 @@ function MapSurface() {
   );
 }
 
-/** Desktop/tablet: side-by-side neumorphic card, collapsible to a slim rail. */
+/** Desktop/tablet: a persistent tool slot that collapses into a passive rail. */
 export function MapPanel() {
   const { mapOpen, setMapOpen, highlight } = useChatShell();
   const isMobile = useMediaQuery("(max-width: 639px)");
 
-  // A fresh route is the moment the map earns attention — reopen the rail.
+  // A fresh route is the moment the map earns attention — reopen the tab.
   useEffect(() => {
     if (highlight) setMapOpen(true);
   }, [highlight, setMapOpen]);
 
   if (isMobile) return null;
 
-  if (!mapOpen) {
-    return (
-      <button
-        type="button"
-        onClick={() => setMapOpen(true)}
-        aria-label="Expand campus map"
-        title="Expand campus map"
-        className="flex h-full w-12 flex-col items-center gap-3 rounded-xl border border-border-subtle bg-surface pt-3 text-on-surface-variant shadow-sm transition-colors duration-150 hover:text-primary"
-      >
-        <Icon name="fullscreen" size={18} />
-        <Icon name="map" size={20} />
-        <span className="text-xs font-medium tracking-[0.05em] [writing-mode:vertical-rl]">Campus map</span>
-      </button>
-    );
-  }
-
   return (
-    <section
-      aria-label="Campus map"
-      className="relative flex min-w-0 flex-1 overflow-hidden rounded-xl border border-border-subtle bg-surface shadow-sm"
-    >
-      <MapSurface />
-      <button
-        type="button"
-        onClick={() => setMapOpen(false)}
-        aria-label="Collapse map"
-        title="Collapse map"
-        className="absolute left-3 top-1/2 z-10 flex h-12 w-6 -translate-y-1/2 items-center justify-center rounded-lg border border-border-subtle bg-surface/90 text-on-surface-variant shadow-sm backdrop-blur-sm transition-colors duration-150 hover:text-primary"
+    <div className="relative h-full min-h-0 w-full">
+      <section
+        inert={!mapOpen}
+        aria-hidden={!mapOpen}
+        aria-label="Campus map"
+        className={`map-surface-layer neu-panel glass-neu-strong bg-surface absolute inset-0 flex min-w-0 overflow-hidden rounded-2xl border ${
+          mapOpen ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-3 opacity-0"
+        }`}
       >
-        <Icon name="right" size={16} />
-      </button>
-    </section>
+        <MapSurface />
+        <button
+          type="button"
+          onClick={() => setMapOpen(false)}
+          aria-label="Collapse campus map to tab"
+          title="Collapse map"
+          className="neu-button glass-neu-compact bg-surface/95 text-on-surface-variant hover:text-primary absolute top-3 left-3 z-20 flex size-9 items-center justify-center rounded-xl backdrop-blur-sm"
+        >
+          <Icon name="right" size={17} />
+        </button>
+      </section>
+
+      <aside
+        inert={mapOpen}
+        aria-hidden={mapOpen}
+        aria-label="Collapsed campus map"
+        className={`map-tab-layer neu-panel glass-neu bg-surface text-on-surface-variant absolute inset-y-0 right-0 flex w-[3.25rem] cursor-default flex-col items-center rounded-2xl border py-2.5 ${
+          mapOpen ? "pointer-events-none translate-x-2 opacity-0" : "translate-x-0 opacity-100"
+        }`}
+      >
+        <button
+          type="button"
+          onClick={() => setMapOpen(true)}
+          tabIndex={mapOpen ? -1 : 0}
+          aria-label="Expand campus map"
+          title="Expand campus map"
+          className="neu-button glass-neu-compact bg-surface text-primary hover:text-on-surface flex size-9 items-center justify-center rounded-xl"
+        >
+          <Icon name="fullscreen" size={17} />
+        </button>
+        <span className="bg-border my-3 h-px w-5" aria-hidden="true" />
+        <span className="text-xs font-medium tracking-[0.06em] select-none [writing-mode:vertical-rl]">Campus map</span>
+        <span
+          className="neu-inset bg-surface-container-low text-on-surface-variant mt-auto flex size-8 items-center justify-center rounded-lg border"
+          aria-hidden="true"
+        >
+          <Icon name="map" size={17} />
+        </span>
+      </aside>
+    </div>
   );
 }
 
@@ -244,7 +284,7 @@ export function MapBottomSheet() {
         tabIndex={-1}
         aria-label="Close map"
         onClick={() => setMobileMapOpen(false)}
-        className={`fixed inset-0 z-40 bg-scrim transition-opacity duration-300 ${
+        className={`bg-scrim fixed inset-0 z-40 transition-opacity duration-300 ${
           mobileMapOpen ? "opacity-100" : "opacity-0"
         }`}
       />
@@ -253,24 +293,32 @@ export function MapBottomSheet() {
         role="dialog"
         aria-modal="true"
         aria-label="Campus map"
-        className={`fixed inset-x-0 bottom-0 z-50 flex h-[80vh] flex-col overflow-hidden rounded-t-2xl border-t border-border-subtle bg-surface shadow-lg transition-transform duration-300 ease-out ${
+        className={`border-border-subtle bg-surface fixed inset-x-0 bottom-0 z-50 flex h-[80vh] flex-col overflow-hidden rounded-t-2xl border-t shadow-lg transition-transform duration-300 ease-out ${
           mobileMapOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
         <div
-          className="flex shrink-0 cursor-grab touch-none flex-col items-center gap-2 px-4 pb-3 pt-2"
+          className="flex shrink-0 cursor-grab touch-none flex-col items-center gap-2 px-4 pt-2 pb-3"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
         >
-          <span className="h-1 w-8 rounded-full bg-border" aria-hidden="true" />
+          <span className="bg-border h-1 w-8 rounded-full" aria-hidden="true" />
           <div className="flex w-full items-center justify-between">
             <span className="min-w-0">
-              <span className="block truncate text-base font-medium text-on-surface">
-                {highlight ? `${highlight.from} → ${highlight.to}` : "Campus map"}
+              <span className="text-on-surface block truncate text-base font-medium">
+                {highlight
+                  ? highlight.kind === "route"
+                    ? `${highlight.from} → ${highlight.to}`
+                    : highlight.kind === "buildings"
+                      ? highlight.buildings.length === 1
+                        ? highlight.buildings[0].name
+                        : `${highlight.buildings.length} buildings`
+                      : `${highlight.places.length} place${highlight.places.length === 1 ? "" : "s"}${highlight.near ? ` near ${highlight.near}` : ""}`
+                  : "Campus map"}
               </span>
-              {highlight && (
-                <span className="block text-sm text-on-surface-variant">
+              {highlight?.kind === "route" && (
+                <span className="text-on-surface-variant block text-sm">
                   {formatMeters(highlight.meters)} · {formatMinutes(highlight.minutes)} walk
                 </span>
               )}
@@ -280,7 +328,7 @@ export function MapBottomSheet() {
               type="button"
               onClick={() => setMobileMapOpen(false)}
               aria-label="Close map"
-              className="flex size-8 shrink-0 items-center justify-center rounded-lg text-on-surface-variant transition-colors duration-150 hover:bg-surface-container-high"
+              className="text-on-surface-variant hover:bg-surface-container-high flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors duration-150"
             >
               <Icon name="close" size={18} />
             </button>
