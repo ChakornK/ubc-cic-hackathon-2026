@@ -46,6 +46,7 @@ export class CampusAiStack extends Stack {
     const googleIdp = new cognito.UserPoolIdentityProviderGoogle(this, "GoogleIdP", {
       userPool: this.userPool,
       clientId: props.googleClientId,
+      // Plaintext in CFN template. Move to Secrets Manager for prod.
       clientSecretValue: SecretValue.unsafePlainText(props.googleClientSecret),
       scopes: ["openid", "email", "profile"],
       attributeMapping: {
