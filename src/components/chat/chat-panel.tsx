@@ -86,7 +86,15 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
       .getSession(sessionId)
       .then((history) => {
         if (cancelled) return;
-        setMessages(history.map((m) => ({ id: nextId(), role: m.role, content: m.content })));
+        setMessages(
+          history.map((m) => ({
+            id: nextId(),
+            role: m.role,
+            content: m.content,
+            toolCalls: m.toolCalls,
+            interstitial: m.interstitial,
+          })),
+        );
         setHistoryState("ready");
       })
       .catch((error: unknown) => {

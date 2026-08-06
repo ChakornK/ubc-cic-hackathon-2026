@@ -6,17 +6,10 @@
 import { ToolCallsView } from "@/src/components/chat/tool-renderers";
 import { Icon } from "@/src/components/icons";
 import type { ToolCall } from "@/src/lib/api-types";
+import type { InterstitialBlock } from "@/src/shared/types";
 import { useState } from "react";
 
-export interface InterstitialBlock {
-  type: "thinking" | "tool_call";
-  /** For thinking: the accumulated thinking text. For tool_call: the tool name. */
-  content: string;
-  /** For tool_call: the input params. */
-  input?: Record<string, unknown>;
-  /** For tool_call: the result (set when tool completes). */
-  result?: unknown;
-}
+export type { InterstitialBlock };
 
 export interface DisplayMessage {
   id: string;
