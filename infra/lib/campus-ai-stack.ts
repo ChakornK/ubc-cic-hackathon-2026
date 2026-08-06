@@ -93,8 +93,9 @@ export class CampusAiStack extends Stack {
       oAuth: {
         flows: { authorizationCodeGrant: true },
         scopes: [cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
-        callbackUrls: [props.callbackUrl],
-        logoutUrls: [props.callbackUrl],
+        // The app signs in with redirect_uri = `${origin}/chat` (see src/lib/auth-config.ts).
+        callbackUrls: [`${props.callbackUrl.replace(/\/$/, "")}/chat`, "http://localhost:3000/chat"],
+        logoutUrls: [props.callbackUrl, "http://localhost:3000/"],
       },
     });
     this.userPoolClient.node.addDependency(googleIdp);
