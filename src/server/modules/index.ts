@@ -5,6 +5,7 @@ import { calendar } from "./calendar";
 import { costs } from "./costs";
 import { courses } from "./courses";
 import { events } from "./events";
+import { grades } from "./grades";
 import { pages } from "./pages";
 import { parking } from "./parking";
 import { places } from "./places";
@@ -26,4 +27,5 @@ export const modules: DatasetModule[] = [
   spaces,
   events,
   pages,
+  grades,
 ];
