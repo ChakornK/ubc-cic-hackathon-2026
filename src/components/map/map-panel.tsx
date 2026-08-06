@@ -55,14 +55,26 @@ function RouteInfoCard() {
   return (
     <div className="flex items-center gap-2.5 rounded-lg border border-border-subtle bg-surface/90 px-3 py-2 shadow-md backdrop-blur-sm">
       <span className="flex size-8 items-center justify-center rounded-md bg-secondary-container text-on-secondary-container">
-        <Icon name="walk" size={18} />
+        <Icon name={highlight.kind === "route" ? "walk" : "location"} size={18} />
       </span>
       <span className="min-w-0">
         <span className="block text-base font-medium leading-tight text-on-surface">
-          {formatMinutes(highlight.minutes)}
+          {highlight.kind === "route"
+            ? formatMinutes(highlight.minutes)
+            : highlight.kind === "buildings"
+              ? highlight.buildings.length === 1
+                ? highlight.buildings[0].name
+                : `${highlight.buildings.length} buildings`
+              : `${highlight.places.length} place${highlight.places.length === 1 ? "" : "s"}`}
         </span>
         <span className="block truncate text-xs text-on-surface-variant">
-          {formatMeters(highlight.meters)} · {highlight.from} → {highlight.to}
+          {highlight.kind === "route"
+            ? `${formatMeters(highlight.meters)} · ${highlight.from} → ${highlight.to}`
+            : highlight.kind === "buildings"
+              ? highlight.buildings.map((b) => b.code).join(" · ")
+              : highlight.near
+                ? `near ${highlight.near}`
+                : highlight.places[0]?.name}
         </span>
       </span>
     </div>
@@ -75,10 +87,21 @@ function MapFallback() {
     <div className="flex h-full flex-col items-center justify-center gap-2 bg-surface-container-low px-6 text-center">
       <Icon name="wifiOff" size={32} className="text-outline" />
       <p className="text-body-sm text-on-surface-variant">Map unavailable</p>
-      {highlight && (
+      {highlight?.kind === "route" && (
         <p className="max-w-60 text-sm text-on-surface">
           {formatMeters(highlight.meters)}, about {formatMinutes(highlight.minutes)} walking from {highlight.from} to{" "}
           {highlight.to}.
+        </p>
+      )}
+      {highlight?.kind === "buildings" && (
+        <p className="max-w-60 text-sm text-on-surface">
+          {highlight.buildings.map((b) => `${b.name} (${b.code})`).join(", ")}
+        </p>
+      )}
+      {highlight?.kind === "places" && (
+        <p className="max-w-60 text-sm text-on-surface">
+          {highlight.places.map((p) => p.name).join(", ")}
+          {highlight.near ? ` — near ${highlight.near}` : ""}
         </p>
       )}
     </div>
@@ -267,9 +290,17 @@ export function MapBottomSheet() {
           <div className="flex w-full items-center justify-between">
             <span className="min-w-0">
               <span className="block truncate text-base font-medium text-on-surface">
-                {highlight ? `${highlight.from} → ${highlight.to}` : "Campus map"}
+                {highlight
+                  ? highlight.kind === "route"
+                    ? `${highlight.from} → ${highlight.to}`
+                    : highlight.kind === "buildings"
+                      ? highlight.buildings.length === 1
+                        ? highlight.buildings[0].name
+                        : `${highlight.buildings.length} buildings`
+                      : `${highlight.places.length} place${highlight.places.length === 1 ? "" : "s"}${highlight.near ? ` near ${highlight.near}` : ""}`
+                  : "Campus map"}
               </span>
-              {highlight && (
+              {highlight?.kind === "route" && (
                 <span className="block text-sm text-on-surface-variant">
                   {formatMeters(highlight.meters)} · {formatMinutes(highlight.minutes)} walk
                 </span>
