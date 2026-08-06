@@ -15,7 +15,7 @@ export {
   ESTIMATE_DETOUR,
 } from "@/src/shared/types";
 
-// ---- Tool result payloads (api-spec.md "Tool call reference") ----
+// Tool result payloads shaped as the API returns them.
 
 /** Course document as it appears in tool results: section times already formatted "HH:MM". */
 export interface CourseDoc {

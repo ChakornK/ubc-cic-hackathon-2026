@@ -68,6 +68,6 @@ export function haversineMetersObj(a: { lat: number; lon: number }, b: { lat: nu
   return haversineMeters([a.lon, a.lat], [b.lon, b.lat]);
 }
 
-// Walking constants — single source of truth
+// Walking constants
 export const WALK_SPEED_M_PER_MIN = 80;
 export const ESTIMATE_DETOUR = 1.3;

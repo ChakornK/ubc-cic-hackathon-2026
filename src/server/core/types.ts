@@ -25,7 +25,7 @@ export interface ChatRequest {
 
 export type AgentResult = ChatResponse;
 
-// --- Bedrock Converse wire shapes (structural subset of the SDK types) ---
+// Bedrock Converse wire shapes (structural subset of the SDK types)
 
 export interface ToolSpec {
   name: string;
@@ -50,7 +50,7 @@ export type ConverseFn = (req: {
   toolSpecs: ToolSpec[];
 }) => Promise<{ stopReason: string; message: ConverseMessage }>;
 
-// --- Dataset module system ---
+// Dataset module system
 
 export interface S3Reader {
   getJson(key: string): Promise<unknown>;
