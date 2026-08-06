@@ -151,16 +151,13 @@ export function AssistantMessage({ message, isLatest }: { message: DisplayMessag
         )}
         {interstitial.length > 0 && (
           <div className="mb-3">
-            {interstitial.map((block) =>
+            {interstitial.map((block, idx) =>
               block.type === "thinking" ? (
-                <ThinkingBlock key={`t-${block.content.slice(0, 20)}`} content={block.content} />
+                // biome-ignore lint/suspicious/noArrayIndexKey: append-only list
+                <ThinkingBlock key={`t-${idx}`} content={block.content} />
               ) : (
-                <ToolCallBlock
-                  key={`tc-${block.content}-${JSON.stringify(block.input).slice(0, 30)}`}
-                  name={block.content}
-                  input={block.input}
-                  result={block.result}
-                />
+                // biome-ignore lint/suspicious/noArrayIndexKey: append-only list
+                <ToolCallBlock key={`tc-${idx}`} name={block.content} input={block.input} result={block.result} />
               ),
             )}
           </div>
