@@ -1,6 +1,7 @@
 import {
   BedrockRuntimeClient,
   ConverseCommand,
+  ConverseStreamCommand,
   type Message,
   type ContentBlock as SdkContentBlock,
   type Tool,
@@ -9,6 +10,11 @@ import {
 import type { ContentBlock, ConverseFn, ConverseMessage, ToolSpec } from "./core/types";
 
 let client: BedrockRuntimeClient | undefined;
+
+function getClient(): BedrockRuntimeClient {
+  client ??= new BedrockRuntimeClient({});
+  return client;
+}
 
 /** Converts our flat ContentBlock to the SDK's discriminated union. */
 function toSdkBlock(b: ContentBlock): SdkContentBlock {
@@ -50,8 +56,7 @@ function toSdkTool(spec: ToolSpec): Tool {
 
 /** Non-streaming Converse call; model ID from BEDROCK_MODEL_ID env var. */
 export const converse: ConverseFn = async ({ messages, system, toolSpecs }) => {
-  client ??= new BedrockRuntimeClient({});
-  const res = await client.send(
+  const res = await getClient().send(
     new ConverseCommand({
       modelId: process.env.BEDROCK_MODEL_ID,
       messages: messages.map(toSdkMessage),
@@ -68,3 +73,59 @@ export const converse: ConverseFn = async ({ messages, system, toolSpecs }) => {
     },
   };
 };
+
+// --- Streaming support ---
+
+export type ConverseStreamEvent =
+  | { type: "text"; delta: string }
+  | { type: "tool_use"; toolUseId: string; name: string; input: Record<string, unknown> }
+  | { type: "stop"; reason: string };
+
+/** Streaming Converse call; yields events as they arrive from Bedrock. */
+export async function* converseStream(req: {
+  messages: ConverseMessage[];
+  system: string;
+  toolSpecs: ToolSpec[];
+}): AsyncGenerator<ConverseStreamEvent> {
+  const res = await getClient().send(
+    new ConverseStreamCommand({
+      modelId: process.env.BEDROCK_MODEL_ID,
+      messages: req.messages.map(toSdkMessage),
+      system: [{ text: req.system }],
+      toolConfig: { tools: req.toolSpecs.map(toSdkTool) },
+    }),
+  );
+
+  if (!res.stream) return;
+
+  // Accumulate tool use blocks (input arrives as JSON chunks)
+  let currentToolUseId = "";
+  let currentToolName = "";
+  let currentToolInput = "";
+
+  for await (const event of res.stream) {
+    if (event.contentBlockDelta?.delta?.text) {
+      yield { type: "text", delta: event.contentBlockDelta.delta.text };
+    } else if (event.contentBlockStart?.start?.toolUse) {
+      const tu = event.contentBlockStart.start.toolUse;
+      currentToolUseId = tu.toolUseId ?? "";
+      currentToolName = tu.name ?? "";
+      currentToolInput = "";
+    } else if (event.contentBlockDelta?.delta?.toolUse?.input) {
+      currentToolInput += event.contentBlockDelta.delta.toolUse.input;
+    } else if (event.contentBlockStop && currentToolUseId) {
+      let input: Record<string, unknown> = {};
+      try {
+        input = JSON.parse(currentToolInput || "{}");
+      } catch {
+        // malformed input from model; pass empty
+      }
+      yield { type: "tool_use", toolUseId: currentToolUseId, name: currentToolName, input };
+      currentToolUseId = "";
+      currentToolName = "";
+      currentToolInput = "";
+    } else if (event.messageStop?.stopReason) {
+      yield { type: "stop", reason: event.messageStop.stopReason };
+    }
+  }
+}

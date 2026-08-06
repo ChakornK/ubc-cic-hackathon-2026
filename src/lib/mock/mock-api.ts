@@ -341,7 +341,7 @@ export function createMockApi({ getToken, latencyMs = 1400, seed = true }: MockA
   }
 
   return {
-    async chat(sessionId, messages) {
+    async chat(sessionId, messages, onDelta) {
       await requireToken();
       if (!Array.isArray(messages) || messages.length === 0) {
         throw new ApiError(400, "messages must be a non-empty array");
@@ -351,7 +351,17 @@ export function createMockApi({ getToken, latencyMs = 1400, seed = true }: MockA
         throw new ApiError(400, "last message must be a non-empty user message");
       }
       const response = respondToChat(last.content);
-      await sleep(latencyMs * (response.tool_calls.length > 1 ? 2 : 1.4));
+
+      // Simulate streaming: emit text in small chunks
+      if (onDelta) {
+        const words = response.message.split(" ");
+        for (const word of words) {
+          onDelta(word + " ");
+          await sleep(20);
+        }
+      } else {
+        await sleep(latencyMs * (response.tool_calls.length > 1 ? 2 : 1.4));
+      }
 
       const existing = sessions.get(sessionId);
       const stored: StoredSession = existing ?? {
