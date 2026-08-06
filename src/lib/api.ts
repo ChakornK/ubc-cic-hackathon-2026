@@ -21,6 +21,7 @@ export interface ChatApi {
     messages: ChatMessage[],
     callbacks?: {
       onDelta?: (text: string) => void;
+      onTextClear?: () => void;
       onThinking?: (text: string) => void;
       onToolStart?: (name: string, input: Record<string, unknown>) => void;
       onToolEnd?: (name: string, result: unknown) => void;
@@ -91,6 +92,7 @@ function createHttpApi({ getToken, onUnauthorized, baseUrl = "/api" }: ChatApiOp
     messages: ChatMessage[],
     callbacks?: {
       onDelta?: (text: string) => void;
+      onTextClear?: () => void;
       onThinking?: (text: string) => void;
       onToolStart?: (name: string, input: Record<string, unknown>) => void;
       onToolEnd?: (name: string, result: unknown) => void;
@@ -136,6 +138,8 @@ function createHttpApi({ getToken, onUnauthorized, baseUrl = "/api" }: ChatApiOp
           const event = JSON.parse(line);
           if (event.type === "text" && callbacks?.onDelta) {
             callbacks.onDelta(event.delta);
+          } else if (event.type === "text_clear" && callbacks?.onTextClear) {
+            callbacks.onTextClear();
           } else if (event.type === "thinking" && callbacks?.onThinking) {
             callbacks.onThinking(event.delta);
           } else if (event.type === "tool_start" && callbacks?.onToolStart) {

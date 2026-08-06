@@ -177,6 +177,11 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
             }
             updateMessage({ interstitial: [...interstitialBlocks] });
           },
+          onTextClear() {
+            if (!alive.current) return;
+            streamedText = "";
+            updateMessage({ content: "" });
+          },
           onDelta(delta) {
             if (!alive.current) return;
             streamedText += delta;
