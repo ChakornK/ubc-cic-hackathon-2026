@@ -50,7 +50,7 @@ export class CampusAiStack extends Stack {
       },
     });
 
-    const domainPrefix = `campus-ai-${this.account.slice(-8)}`;
+    const domainPrefix = process.env.COGNITO_DOMAIN_PREFIX ?? "campus-ai-assistant";
     this.userPool.addDomain("HostedUi", {
       cognitoDomain: { domainPrefix },
     });
@@ -81,6 +81,19 @@ export class CampusAiStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
+    // App client — created before Nextjs so client ID is available as an env var
+    // without circular deps. Callback URLs updated post-deploy (see README).
+    this.userPoolClient = this.userPool.addClient("AppClient", {
+      supportedIdentityProviders: [cognito.UserPoolClientIdentityProvider.GOOGLE],
+      oAuth: {
+        flows: { authorizationCodeGrant: true },
+        scopes: [cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
+        callbackUrls: ["https://localhost:3000/"],
+        logoutUrls: ["https://localhost:3000/"],
+      },
+    });
+    this.userPoolClient.node.addDependency(googleIdp);
+
     // --- Next.js (OpenNext via cdk-nextjs-standalone) ---
     this.nextjs = new Nextjs(this, "Web", {
       nextjsPath: path.resolve(__dirname, "../.."),
@@ -91,6 +104,7 @@ export class CampusAiStack extends Stack {
         TABLE_NAME: this.table.tableName,
         DATA_BUCKET: this.dataBucket.bucketName,
         COGNITO_USER_POOL_ID: this.userPool.userPoolId,
+        COGNITO_CLIENT_ID: this.userPoolClient.userPoolClientId,
       },
       overrides: {
         nextjsDistribution: {
@@ -101,21 +115,7 @@ export class CampusAiStack extends Stack {
       },
     });
 
-    // App client — created after IdP so dependency is explicit
-    this.userPoolClient = this.userPool.addClient("AppClient", {
-      supportedIdentityProviders: [cognito.UserPoolClientIdentityProvider.GOOGLE],
-      oAuth: {
-        flows: { authorizationCodeGrant: true },
-        scopes: [cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
-        callbackUrls: [this.nextjs.url + "/"],
-        logoutUrls: [this.nextjs.url + "/"],
-      },
-    });
-    this.userPoolClient.node.addDependency(googleIdp);
-
-    // Inject the client ID into the server env (needed for token verification)
     const serverFn = this.nextjs.serverFunction.lambdaFunction;
-    serverFn.addEnvironment("COGNITO_CLIENT_ID", this.userPoolClient.userPoolClientId);
 
     // --- IAM: least-privilege server role (Task 1.2) ---
     serverFn.addToRolePolicy(
