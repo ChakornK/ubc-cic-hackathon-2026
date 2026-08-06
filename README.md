@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Campus AI Assistant
 
-## Getting Started
+A full-stack Next.js 16 application that answers questions about UBC campus life — courses, tuition, buildings, walking distances — using an AI agent backed by Amazon Bedrock. Deployed to AWS via CDK (OpenNext).
 
-First, run the development server:
+## Architecture
+
+- **Frontend**: Next.js 16, React 19, deck.gl campus map
+- **Infrastructure**: cdk-nextjs-standalone (OpenNext) on CloudFront + Lambda
+- **Auth**: Amazon Cognito with Google Identity Provider
+- **AI**: Amazon Bedrock (Claude via Converse API) with tool use
+- **Search**: Amazon OpenSearch for structured campus data
+- **Storage**: DynamoDB (chat history), S3 (data assets)
+
+## Prerequisites
+
+- Node.js 24
+- AWS CLI configured with sufficient permissions
+- Google OAuth 2.0 credentials (see below)
+
+## Google OAuth Setup
+
+1. Create a project in [Google Cloud Console](https://console.cloud.google.com/).
+2. Navigate to APIs & Services > OAuth consent screen. Configure the consent screen (External user type is fine for development).
+3. Go to APIs & Services > Credentials > Create Credentials > OAuth 2.0 Client ID.
+4. Select **Web application** as the application type.
+5. Add authorized redirect URI: `https://{CognitoDomain}/oauth2/idpresponse` (the Cognito domain is output after CDK deploy).
+6. Save the Client ID and Client Secret for the deploy step.
+7. After CDK deploy completes, add the CloudFront distribution URL from stack outputs as an authorized JavaScript origin and update the redirect URI if needed.
+
+## Deploy
+
+Install dependencies at the repository root:
+
+```bash
+npm install
+```
+
+Deploy the stack with CDK context values:
+
+```bash
+cd infra
+npx cdk deploy \
+  -c googleClientId=YOUR_GOOGLE_CLIENT_ID \
+  -c googleClientSecret=YOUR_GOOGLE_CLIENT_SECRET \
+  -c bedrockModelId=anthropic.claude-sonnet-4-20250514 \
+  -c ingestPrincipalArn=arn:aws:iam::ACCOUNT:user/dev
+```
+
+| Context Value        | Description                                                          |
+| -------------------- | -------------------------------------------------------------------- |
+| `googleClientId`     | OAuth 2.0 Client ID from Google Cloud Console                        |
+| `googleClientSecret` | OAuth 2.0 Client Secret                                              |
+| `bedrockModelId`     | Bedrock model identifier (e.g. `anthropic.claude-sonnet-4-20250514`) |
+| `ingestPrincipalArn` | IAM principal ARN granted permission to run the ingestion script     |
+
+After the first deploy, update the Google OAuth console with the CloudFront callback URL printed in the stack outputs.
+
+## Data Sync and Ingestion
+
+Sync the Unified-UBC-Data repository's `data/` directory to the S3 Data Bucket:
+
+```bash
+npm run sync-data
+```
+
+Index the datasets into OpenSearch (courses, tuition, buildings, walking distances):
+
+```bash
+npm run ingest
+```
+
+Both commands are idempotent. Re-running produces no duplicates.
+
+## Local Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Opens at [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Sample Request
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+A query that exercises multiple tools in a single response:
 
-## Learn More
+```
+How long is the walk from the Buchanan building to the ICICS building,
+and what Computer Science courses have no prerequisites?
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This triggers both the `walking_distance` and `search_courses` tools, demonstrating the agent's multi-tool orchestration.
