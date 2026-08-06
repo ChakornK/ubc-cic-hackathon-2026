@@ -1,5 +1,7 @@
 # Implementation Plan: Campus AI Assistant
 
+> **Parallel execution**: this master list is partitioned into three agent lanes with disjoint file ownership — `tasks-agent-1-backend.md`, `tasks-agent-2-frontend.md`, `tasks-agent-3-infra.md`. The frontend/backend interface is frozen in `api-spec.md`. Sync points: Agent 1's scaffold (1.1) unblocks Agent 2; Agent 3's first real deploy needs a compiling app; the smoke test runs last.
+
 ## Overview
 
 Build bottom-up in one repository holding a single Next.js 15 app (browser UI + `app/api/*` route handlers + `src/server/*` logic) plus an `infra/` CDK workspace: pure core logic first (formatter, validation, agent loop — all property-tested against mocks), then the dataset-module registry and the three initial modules, then persistence, then the route handlers and auth middleware that wire it together, then CDK (deploying the app to Lambda via `cdk-nextjs`/OpenNext), ingest CLI, and the browser UI. Every piece is integrated by the route handlers/registry — no orphaned code.

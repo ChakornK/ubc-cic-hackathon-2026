@@ -105,7 +105,7 @@ Every handler runs through a shared `requireUser(request)` helper: it verifies t
 ```typescript
 interface AgentResult {
   message: string                     // final assistant text
-  tool_calls: { name: string; input: unknown }[]
+  tool_calls: { name: string; input: unknown; result?: unknown }[]  // result included for frontend renderers
   warning?: string                    // present iff Iteration_Limit reached
 }
 
@@ -281,7 +281,7 @@ interface WalkingDistanceDoc { from: string; to: string   // building codes, fro
 ```typescript
 interface ChatRequest  { session_id: string; messages: ChatMessage[] }
 interface ChatMessage  { role: 'user' | 'assistant'; content: string }
-interface ChatResponse { message: string; tool_calls: { name: string; input: unknown }[]; warning?: string }
+interface ChatResponse { message: string; tool_calls: { name: string; input: unknown; result?: unknown }[]; warning?: string }
 interface SessionSummary { session_id: string; title: string; updatedAt: string }
 ```
 
