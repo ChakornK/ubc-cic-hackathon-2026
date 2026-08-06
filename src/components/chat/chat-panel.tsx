@@ -139,7 +139,6 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
 
       let streamedText = "";
       const interstitialBlocks: InterstitialBlock[] = [];
-      let forceNewThinking = false;
 
       const updateMessage = (updates: Partial<DisplayMessage>) => {
         setMessages((current) => current.map((m) => (m.id === streamId ? { ...m, ...updates } : m)));
@@ -149,13 +148,12 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         .chat(sessionId, conversation, {
           onThinking(delta) {
             if (!alive.current) return;
-            // Accumulate thinking into the last thinking block, or create a new one
+            // Append to the last thinking block only if it's immediately preceding (no tool calls in between)
             const last = interstitialBlocks[interstitialBlocks.length - 1];
-            if (last?.type === "thinking" && !forceNewThinking) {
+            if (last?.type === "thinking") {
               last.content += delta;
             } else {
               interstitialBlocks.push({ type: "thinking", content: delta });
-              forceNewThinking = false;
             }
             updateMessage({ interstitial: [...interstitialBlocks] });
           },
@@ -178,10 +176,6 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
               }
             }
             updateMessage({ interstitial: [...interstitialBlocks] });
-          },
-          onTurnStart() {
-            if (!alive.current) return;
-            forceNewThinking = true;
           },
           onDelta(delta) {
             if (!alive.current) return;
