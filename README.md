@@ -52,7 +52,7 @@ npx cdk deploy
 | `BEDROCK_MODEL_ID`      | No       | Bedrock model identifier (default: `anthropic.claude-haiku-4-5-20251001-v1`) |
 | `SKIP_BUILD`            | No       | Set to `true` to skip the Next.js build during synth                         |
 
-On first deploy, set `CALLBACK_URL=https://localhost:3000/`. After deploy completes, update it to the CloudFront URL from stack outputs and redeploy.
+On first deploy, set `CALLBACK_URL=http://localhost:3000/`. After deploy completes, update it to the CloudFront URL from stack outputs and redeploy.
 
 After deploy completes, copy the stack outputs into your `.env` file (see `.env.example`):
 

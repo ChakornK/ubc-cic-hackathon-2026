@@ -1,43 +1,31 @@
 // Core types shared by the agent loop, dataset modules, and API handlers.
 // Response shapes must match .kiro/specs/campus-ai-assistant/api-spec.md.
 
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
+import type { ChatMessage, ChatResponse } from "@/src/shared/types";
+
+export {
+  type ChatMessage,
+  type ChatResponse,
+  type LngLat,
+  type Profile,
+  type SessionSummary,
+  type ToolCall,
+  type ToolErrorResult,
+  isToolError,
+  haversineMeters,
+  haversineMetersObj,
+  WALK_SPEED_M_PER_MIN,
+  ESTIMATE_DETOUR,
+} from "@/src/shared/types";
 
 export interface ChatRequest {
   session_id?: string;
   messages: ChatMessage[];
 }
 
-export interface ToolCall {
-  name: string;
-  input: Record<string, unknown>;
-  result?: unknown;
-}
-
-export interface ChatResponse {
-  message: string;
-  tool_calls: ToolCall[];
-  warning?: string;
-}
-
 export type AgentResult = ChatResponse;
 
-export interface SessionSummary {
-  session_id: string;
-  title: string;
-  updatedAt: string;
-}
-
-export interface Profile {
-  preferences: Record<string, string>;
-  email?: string;
-  updatedAt?: string;
-}
-
-// --- Bedrock Converse wire shapes (structural subset of the SDK types) ---
+// Bedrock Converse wire shapes (structural subset of the SDK types)
 
 export interface ToolSpec {
   name: string;
@@ -62,7 +50,7 @@ export type ConverseFn = (req: {
   toolSpecs: ToolSpec[];
 }) => Promise<{ stopReason: string; message: ConverseMessage }>;
 
-// --- Dataset module system ---
+// Dataset module system
 
 export interface S3Reader {
   getJson(key: string): Promise<unknown>;

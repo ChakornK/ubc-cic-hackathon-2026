@@ -11,7 +11,7 @@ const { getSessionMessages, listSessions } = await import("./store");
 
 beforeEach(() => send.mockReset());
 
-describe("Session_Store", () => {
+describe("session store", () => {
   it("lists only session metadata, newest first (5.2)", async () => {
     send.mockResolvedValueOnce({
       Items: [

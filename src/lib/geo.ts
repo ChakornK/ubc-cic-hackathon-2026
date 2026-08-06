@@ -1,0 +1,102 @@
+// Pure geometry helpers for the campus map: centroids, bounds, and building lookup.
+
+import { haversineMeters, type LngLat } from "@/src/shared/types";
+import type { Feature, FeatureCollection, MultiPolygon, Polygon, Position } from "geojson";
+
+export type { LngLat };
+export { haversineMeters };
+
+export interface BuildingFeatureProperties {
+  BLDG_CODE?: string;
+  NAME?: string;
+  [key: string]: unknown;
+}
+
+export type BuildingFeature = Feature<Polygon | MultiPolygon, BuildingFeatureProperties>;
+
+function isPolygonal(f: Feature): f is BuildingFeature {
+  return f.geometry?.type === "Polygon" || f.geometry?.type === "MultiPolygon";
+}
+
+/** The exterior ring with the largest vertex count (largest ring of a MultiPolygon). */
+function exteriorRing(geometry: Polygon | MultiPolygon): Position[] {
+  if (geometry.type === "Polygon") return geometry.coordinates[0] ?? [];
+  let best: Position[] = [];
+  for (const polygon of geometry.coordinates) {
+    const ring = polygon[0] ?? [];
+    if (ring.length > best.length) best = ring;
+  }
+  return best;
+}
+
+/**
+ * Area-weighted centroid of the feature's exterior ring (shoelace formula,
+ * computed in coordinates local to the first vertex — tiny footprints at
+ * longitude ±120° lose meters of precision otherwise). Falls back to the
+ * ring's vertex average for degenerate rings.
+ */
+export function featureCentroid(feature: BuildingFeature): LngLat | null {
+  const ring = exteriorRing(feature.geometry);
+  if (ring.length < 3) return null;
+  const [ox, oy] = ring[0];
+  let area = 0;
+  let cx = 0;
+  let cy = 0;
+  for (let i = 0; i < ring.length - 1; i++) {
+    const x0 = ring[i][0] - ox;
+    const y0 = ring[i][1] - oy;
+    const x1 = ring[i + 1][0] - ox;
+    const y1 = ring[i + 1][1] - oy;
+    const cross = x0 * y1 - x1 * y0;
+    area += cross;
+    cx += (x0 + x1) * cross;
+    cy += (y0 + y1) * cross;
+  }
+  if (Math.abs(area) < 1e-18) {
+    let sx = 0;
+    let sy = 0;
+    for (const [x, y] of ring) {
+      sx += x;
+      sy += y;
+    }
+    return [sx / ring.length, sy / ring.length];
+  }
+  return [ox + cx / (3 * area), oy + cy / (3 * area)];
+}
+
+/**
+ * Find a building by the model-supplied identifier: exact BLDG_CODE match first
+ * (case-insensitive), then a case-insensitive NAME substring match.
+ */
+export function findBuilding(collection: FeatureCollection, query: string): BuildingFeature | null {
+  const q = query.trim().toUpperCase();
+  if (!q) return null;
+  const features = collection.features.filter(isPolygonal);
+  const byCode = features.find((f) => (f.properties?.BLDG_CODE ?? "").toUpperCase() === q);
+  if (byCode) return byCode;
+  return features.find((f) => (f.properties?.NAME ?? "").toUpperCase().includes(q)) ?? null;
+}
+
+export interface Bounds {
+  west: number;
+  south: number;
+  east: number;
+  north: number;
+}
+
+export function featuresBounds(features: BuildingFeature[]): Bounds | null {
+  let west = Infinity;
+  let south = Infinity;
+  let east = -Infinity;
+  let north = -Infinity;
+  for (const feature of features) {
+    for (const [x, y] of exteriorRing(feature.geometry)) {
+      if (x < west) west = x;
+      if (x > east) east = x;
+      if (y < south) south = y;
+      if (y > north) north = y;
+    }
+  }
+  if (!Number.isFinite(west)) return null;
+  return { west, south, east, north };
+}

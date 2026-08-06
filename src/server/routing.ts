@@ -1,24 +1,22 @@
-import { haversineMeters } from "./modules/buildings";
+import { ESTIMATE_DETOUR, haversineMetersObj, WALK_SPEED_M_PER_MIN, type LngLat } from "@/src/shared/types";
 import { dataBucket } from "./s3";
 
 /** Shortest walking routes over the campus pedestrian network
  *  (walking-routes.geojson, derived at ingest from ubcv_routes.geojson). */
 
-export const WALK_SPEED_M_PER_MIN = 80;
-const ESTIMATE_DETOUR = 1.3; // fallback when the network can't connect two points
-
-export type LonLat = [number, number];
+export { WALK_SPEED_M_PER_MIN };
+export type { LngLat };
 
 export interface RouteResult {
   meters: number;
   minutes: number;
   /** "network" = shortest path over walking paths; "estimate" = straight-line fallback */
   method: "network" | "estimate";
-  polyline: LonLat[]; // GeoJSON coordinate order, building to building
+  polyline: LngLat[]; // GeoJSON coordinate order, building to building
 }
 
 export interface Graph {
-  coords: LonLat[]; // node id -> coordinate
+  coords: LngLat[]; // node id -> coordinate
   adj: { to: number; w: number }[][]; // node id -> edges
   grid: SpatialGrid;
 }
@@ -35,7 +33,7 @@ function gridKey(lon: number, lat: number): string {
   return `${Math.floor(lon / CELL_SIZE)},${Math.floor(lat / CELL_SIZE)}`;
 }
 
-function buildSpatialGrid(coords: LonLat[]): SpatialGrid {
+function buildSpatialGrid(coords: LngLat[]): SpatialGrid {
   const cells = new Map<string, number[]>();
   for (let i = 0; i < coords.length; i++) {
     const k = gridKey(coords[i][0], coords[i][1]);
@@ -49,15 +47,15 @@ function buildSpatialGrid(coords: LonLat[]): SpatialGrid {
 // biome-ignore lint/suspicious/noExplicitAny: raw GeoJSON features
 type Feature = Record<string, any>;
 
-const key = (c: LonLat) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
-const toPoint = (c: LonLat) => ({ lon: c[0], lat: c[1] });
+const key = (c: LngLat) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
+const toPoint = (c: LngLat) => ({ lon: c[0], lat: c[1] });
 
 /** Nodes are shared line endpoints/vertices; edges are consecutive vertices. */
 export function buildGraph(features: Feature[]): Graph {
   const ids = new Map<string, number>();
-  const coords: LonLat[] = [];
+  const coords: LngLat[] = [];
   const adj: { to: number; w: number }[][] = [];
-  const nodeOf = (c: LonLat): number => {
+  const nodeOf = (c: LngLat): number => {
     const k = key(c);
     let id = ids.get(k);
     if (id === undefined) {
@@ -71,13 +69,13 @@ export function buildGraph(features: Feature[]): Graph {
   for (const f of features) {
     const g = f?.geometry;
     if (!g) continue;
-    const lines: LonLat[][] =
+    const lines: LngLat[][] =
       g.type === "LineString" ? [g.coordinates] : g.type === "MultiLineString" ? g.coordinates : [];
     for (const line of lines) {
       for (let i = 1; i < line.length; i++) {
         const a = nodeOf(line[i - 1]);
         const b = nodeOf(line[i]);
-        const w = haversineMeters(toPoint(line[i - 1]), toPoint(line[i]));
+        const w = haversineMetersObj(toPoint(line[i - 1]), toPoint(line[i]));
         adj[a].push({ to: b, w });
         adj[b].push({ to: a, w });
       }
@@ -102,7 +100,7 @@ export function nearestNode(graph: Graph, p: { lat: number; lon: number }): numb
         const bucket = grid.cells.get(`${cx + dx},${cy + dy}`);
         if (!bucket) continue;
         for (const i of bucket) {
-          const d = haversineMeters(p, toPoint(coords[i]));
+          const d = haversineMetersObj(p, toPoint(coords[i]));
           if (d < bestDist) {
             bestDist = d;
             best = i;
@@ -120,7 +118,7 @@ export function nearestNode(graph: Graph, p: { lat: number; lon: number }): numb
   if (best !== -1) return best;
   // Full fallback (should never happen on a connected campus graph)
   for (let i = 0; i < coords.length; i++) {
-    const d = haversineMeters(p, toPoint(coords[i]));
+    const d = haversineMetersObj(p, toPoint(coords[i]));
     if (d < bestDist) {
       bestDist = d;
       best = i;
@@ -197,7 +195,7 @@ export function routeOnGraph(
   to: { lat: number; lon: number },
 ): RouteResult {
   const estimate = (): RouteResult => {
-    const meters = Math.round(haversineMeters(from, to) * ESTIMATE_DETOUR);
+    const meters = Math.round(haversineMetersObj(from, to) * ESTIMATE_DETOUR);
     return {
       meters,
       minutes: Math.ceil(meters / WALK_SPEED_M_PER_MIN),
@@ -213,9 +211,9 @@ export function routeOnGraph(
   const b = nearestNode(graph, to);
   const path = shortestPath(graph, a, b);
   if (!path) return estimate();
-  let meters = haversineMeters(from, toPoint(graph.coords[a])) + haversineMeters(to, toPoint(graph.coords[b]));
+  let meters = haversineMetersObj(from, toPoint(graph.coords[a])) + haversineMetersObj(to, toPoint(graph.coords[b]));
   for (let i = 1; i < path.length; i++) {
-    meters += haversineMeters(toPoint(graph.coords[path[i - 1]]), toPoint(graph.coords[path[i]]));
+    meters += haversineMetersObj(toPoint(graph.coords[path[i - 1]]), toPoint(graph.coords[path[i]]));
   }
   meters = Math.round(meters);
   return {

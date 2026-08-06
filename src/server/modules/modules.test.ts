@@ -1,6 +1,5 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { formatSeconds } from "../core/time";
 import { transformBuilding } from "./buildings";
 import { hasNoPrereqs } from "./courses";
 import { modules } from "./index";
@@ -102,9 +101,5 @@ describe("module registry consistency", () => {
       }
       for (const req of schema.required) expect(schema.properties[req]).toBeDefined();
     }
-  });
-
-  it("formatSeconds(55800) === '15:30'", () => {
-    expect(formatSeconds(55800)).toBe("15:30");
   });
 });
