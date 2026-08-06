@@ -35,26 +35,24 @@ Install dependencies at the repository root:
 npm install
 ```
 
-Deploy the stack with environment variables:
+Deploy the stack. All config is read from `.env` (see `.env.example`):
 
 ```bash
 cd infra
-GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID \
-GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET \
-BEDROCK_MODEL_ID=anthropic.claude-sonnet-4-20250514 \
-INGEST_PRINCIPAL_ARN=arn:aws:iam::ACCOUNT:user/dev \
 npx cdk deploy
 ```
 
-| Environment Variable   | Required | Description                                                              |
-| ---------------------- | -------- | ------------------------------------------------------------------------ |
-| `GOOGLE_CLIENT_ID`     | Yes      | OAuth 2.0 Client ID from Google Cloud Console                            |
-| `GOOGLE_CLIENT_SECRET` | Yes      | OAuth 2.0 Client Secret                                                  |
-| `BEDROCK_MODEL_ID`     | No       | Bedrock model identifier (default: `anthropic.claude-sonnet-4-20250514`) |
-| `INGEST_PRINCIPAL_ARN` | Yes      | IAM principal ARN granted permission to run the ingestion script         |
-| `SKIP_BUILD`           | No       | Set to `true` to skip the Next.js build during synth                     |
+| Environment Variable    | Required | Description                                                                  |
+| ----------------------- | -------- | ---------------------------------------------------------------------------- |
+| `GOOGLE_CLIENT_ID`      | Yes      | OAuth 2.0 Client ID from Google Cloud Console                                |
+| `GOOGLE_CLIENT_SECRET`  | Yes      | OAuth 2.0 Client Secret                                                      |
+| `INGEST_PRINCIPAL_ARN`  | Yes      | IAM principal ARN granted permission to run the ingestion script             |
+| `CALLBACK_URL`          | Yes      | OAuth callback URL (your CloudFront URL, e.g. `https://xyz.cloudfront.net/`) |
+| `COGNITO_DOMAIN_PREFIX` | Yes      | Cognito hosted UI domain prefix (must be globally unique)                    |
+| `BEDROCK_MODEL_ID`      | No       | Bedrock model identifier (default: `anthropic.claude-haiku-4-5-20251001-v1`) |
+| `SKIP_BUILD`            | No       | Set to `true` to skip the Next.js build during synth                         |
 
-After the first deploy, update the Google OAuth console with the CloudFront callback URL printed in the stack outputs.
+On first deploy, set `CALLBACK_URL=https://localhost:3000/`. After deploy completes, update it to the CloudFront URL from stack outputs and redeploy.
 
 After deploy completes, copy the stack outputs into your `.env` file (see `.env.example`):
 
