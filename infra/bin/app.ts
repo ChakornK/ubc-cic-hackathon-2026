@@ -7,15 +7,14 @@ function requireEnv(name: string): string {
   return value;
 }
 
-// Bare model ID required — the stack builds an IAM resource ARN from it.
-// Cross-region prefixes (e.g. "us.anthropic...") or version suffixes (":0") break the ARN.
-const BEDROCK_MODEL_ID_PATTERN = /^[a-z][a-z0-9.-]+[a-z0-9]$/;
+// Model ID or inference profile ID (e.g. "us.anthropic.claude-haiku-4-5-20251001-v1:0").
+const BEDROCK_MODEL_ID_PATTERN = /^[a-z][a-z0-9.:-]+[a-z0-9]$/;
 
 function resolveBedrockModelId(): string {
   const id = requireEnv("BEDROCK_MODEL_ID");
   if (!BEDROCK_MODEL_ID_PATTERN.test(id)) {
     throw new Error(
-      `Invalid BEDROCK_MODEL_ID "${id}". Must be a bare model ID (e.g. "anthropic.claude-haiku-4-5-20251001-v1"), not a cross-region profile or versioned ARN.`,
+      `Invalid BEDROCK_MODEL_ID "${id}". Must be a model ID or inference profile (e.g. "us.anthropic.claude-haiku-4-5-20251001-v1:0").`,
     );
   }
   return id;

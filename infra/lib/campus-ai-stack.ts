@@ -122,10 +122,17 @@ export class CampusAiStack extends Stack {
     const serverFn = this.nextjs.serverFunction.lambdaFunction;
 
     // Least-privilege server role
+    const bedrockResources = [
+      `arn:aws:bedrock:${this.region}::foundation-model/${props.bedrockModelId.replace(/^[a-z]+\./, "")}`,
+    ];
+    // If using an inference profile (e.g. "us.anthropic.claude-..."), also grant access to the profile ARN
+    if (props.bedrockModelId.includes(".") && props.bedrockModelId.split(".").length > 2) {
+      bedrockResources.push(`arn:aws:bedrock:${this.region}:${this.account}:inference-profile/${props.bedrockModelId}`);
+    }
     serverFn.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["bedrock:InvokeModel"],
-        resources: [`arn:aws:bedrock:${this.region}::foundation-model/${props.bedrockModelId}`],
+        resources: bedrockResources,
       }),
     );
 
