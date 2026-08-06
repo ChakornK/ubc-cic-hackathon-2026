@@ -227,19 +227,31 @@ export function routeOnGraph(
 }
 
 let graphPromise: Promise<Graph> | undefined;
+let graphLoadedAt = 0;
 
-/** Preload the graph from raw features — local dev/tests without S3. */
+/** Cache TTL in milliseconds. Reloads the graph from S3 after this period. */
+const GRAPH_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+/** Preload the graph from raw features (local dev/tests without S3). */
 export function primeGraph(features: Feature[]): void {
   graphPromise = Promise.resolve(buildGraph(features));
+  graphLoadedAt = Date.now();
 }
 
-/** Lazy singleton graph from the derived walking-routes artifact in S3. */
+/** Lazy-loaded graph from the derived walking-routes artifact in S3.
+ *  Reloads after GRAPH_TTL_MS to pick up re-ingested data. */
 export function getGraph(): Promise<Graph> {
+  if (graphPromise && Date.now() - graphLoadedAt > GRAPH_TTL_MS) {
+    graphPromise = undefined;
+  }
   graphPromise ??= dataBucket()
     .getJson("derived/walking-routes.geojson")
-    .then((geo) => buildGraph((geo as { features: Feature[] }).features))
+    .then((geo) => {
+      graphLoadedAt = Date.now();
+      return buildGraph((geo as { features: Feature[] }).features);
+    })
     .catch((e) => {
-      graphPromise = undefined; // don't cache a failed load
+      graphPromise = undefined;
       throw e;
     });
   return graphPromise;
