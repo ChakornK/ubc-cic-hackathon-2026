@@ -128,16 +128,35 @@ async function testIngestIdempotency(): Promise<void> {
   }
 }
 
-// Queries OpenSearch _cat/indices for doc counts.
-// Requires OPENSEARCH_ENDPOINT env var (the domain endpoint without protocol).
+// Queries OpenSearch _cat/indices for doc counts via SigV4-signed request.
 async function getDocCounts(): Promise<Record<string, number> | null> {
   const endpoint = process.env.OPENSEARCH_ENDPOINT;
   if (!endpoint) return null;
 
-  const url = `https://${endpoint}/_cat/indices?format=json`;
-  // Use SigV4 if available via AWS SDK, otherwise fall back to open access.
-  // For smoke tests the domain should allow the caller's IAM role.
-  const res = await fetch(url);
+  const { fromNodeProviderChain } = await import("@aws-sdk/credential-providers");
+  const aws4 = await import("aws4");
+
+  const credentials = await fromNodeProviderChain()();
+  const region = process.env.AWS_REGION ?? "us-east-1";
+
+  const opts = aws4.sign(
+    {
+      host: endpoint,
+      path: "/_cat/indices?format=json",
+      service: "es",
+      region,
+      headers: { "Content-Type": "application/json" },
+    },
+    {
+      accessKeyId: credentials.accessKeyId,
+      secretAccessKey: credentials.secretAccessKey,
+      sessionToken: credentials.sessionToken,
+    },
+  );
+
+  const res = await fetch(`https://${endpoint}/_cat/indices?format=json`, {
+    headers: opts.headers as Record<string, string>,
+  });
   if (!res.ok) return null;
 
   const indices = (await res.json()) as Array<{ index: string; "docs.count": string }>;
