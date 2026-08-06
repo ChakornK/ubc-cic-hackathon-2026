@@ -270,11 +270,15 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
             {messages.map((message) =>
               message.role === "user" ? (
                 <UserMessage key={message.id} message={message} />
-              ) : (
+              ) : message.content || message.toolCalls ? (
                 <AssistantMessage key={message.id} message={message} isLatest={message.id === latestAssistantId} />
-              ),
+              ) : null,
             )}
-            {sending && <TypingIndicator slow={slowResponse} />}
+            {sending &&
+              (!messages.length ||
+                messages[messages.length - 1]?.role !== "assistant" ||
+                !messages[messages.length - 1]?.content) && <TypingIndicator slow={slowResponse} />}
+            {sending && messages[messages.length - 1]?.role !== "assistant" && <TypingIndicator slow={slowResponse} />}
             {sendError && (
               <div className="border-error/30 bg-error-container/40 flex items-center justify-between gap-3 rounded-xl border px-4 py-3">
                 <p className="text-on-surface flex items-center gap-2 text-sm">
