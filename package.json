@@ -14,15 +14,26 @@
     "start": "next start",
     "lint": "biome lint .",
     "test": "vitest run --passWithNoTests",
+    "sync-data": "node scripts/sync-data.mjs",
+    "ingest": "tsx scripts/ingest.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1104.0",
+    "@aws-sdk/client-dynamodb": "^3.1104.0",
+    "@aws-sdk/client-s3": "^3.1104.0",
+    "@aws-sdk/credential-providers": "^3.1104.0",
+    "@aws-sdk/lib-dynamodb": "^3.1104.0",
+    "@opensearch-project/opensearch": "^3.6.0",
+    "aws-jwt-verify": "^5.2.1",
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@anthropic-ai/bedrock-sdk": "^0.32.0",
+    "@aws-sdk/client-bedrock": "^3.1104.0",
     "@biomejs/biome": "^2.5.7",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24",
@@ -31,6 +42,7 @@
     "fast-check": "^4.9.0",
     "prettier": "^3.9.6",
     "tailwindcss": "^4",
+    "tsx": "^4.23.9",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   },

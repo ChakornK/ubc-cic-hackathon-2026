@@ -28,12 +28,14 @@ Tool-calling agent backed by indexed university datasets—answers are sourced f
 ## Capabilities and Constraints
 
 **Capabilities:**
+
 - `search_courses`: keyword + filters (subject, credits, term, no-prereqs)
 - `get_course`: full record with prerequisites/corequisites
 - `get_tuition`: per-credit rate by program, student type, cohort
 - `walking_distance`: meters and minutes between buildings
 
 **Constraints:**
+
 - Non-streaming responses (Bedrock Converse API limitation)
 - 8-iteration limit on agent loop
 - Data freshness depends on ingestion script runs

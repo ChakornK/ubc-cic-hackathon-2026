@@ -1,0 +1,267 @@
+import type { DatasetModule } from "../core/types";
+import { stripHtml } from "./html";
+import { slugify } from "./tuition";
+
+export interface AdmissionProgramDoc {
+  id: number;
+  name: string;
+  summary: string;
+  url: string;
+  degrees: string[];
+  interests: string[];
+  duration: string | null;
+  requirement_key: string | null; // null = no published requirements (see note)
+  note: string | null;
+}
+
+export interface RequirementDoc {
+  requirement_key: string;
+  curriculum: string;
+  location: string;
+  location_slug: string;
+  location_term_id: number;
+  program_group: string | null;
+  kind: string;
+  position: number;
+  requirement: string;
+  advisory: boolean; // true = recommended, not a hard gate
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: raw dataset rows
+type Row = Record<string, any>;
+
+/** programs.json (summary, duration, interest ids) joined with
+ *  program_requirements.json (requirement group, degree names, url, note). */
+export function joinPrograms(tables: {
+  programs: Row[];
+  programRequirements: Row[];
+  interests: Row[];
+}): AdmissionProgramDoc[] {
+  const interestName = new Map(tables.interests.map((i) => [i.term_id, i.name as string]));
+  const reqByProgram = new Map(tables.programRequirements.map((r) => [r.program_id, r]));
+  return tables.programs
+    .filter((p) => p.id != null && p.post_title)
+    .map((p) => {
+      const req = reqByProgram.get(p.id);
+      return {
+        id: p.id,
+        name: String(p.post_title),
+        summary: stripHtml(p.summary),
+        url: String(req?.url ?? p.link ?? ""),
+        degrees: Array.isArray(req?.degrees) ? req.degrees : [],
+        interests: (Array.isArray(p.interests) ? p.interests : [])
+          .map((t: number) => interestName.get(t))
+          .filter((n: string | undefined): n is string => !!n),
+        duration: p.duration?.amount ? `${p.duration.amount} ${p.duration.unit}` : null,
+        requirement_key: req?.has_requirements && req.requirement_key ? String(req.requirement_key) : null,
+        note: req?.note ?? null,
+      };
+    });
+}
+
+export function transformRequirement(row: Row): { _id: string; doc: RequirementDoc } | null {
+  if (!row.requirement_key || row.location_term_id == null || !row.requirement) return null;
+  const doc: RequirementDoc = {
+    requirement_key: String(row.requirement_key),
+    curriculum: String(row.curriculum ?? ""),
+    location: String(row.location ?? ""),
+    location_slug: String(row.location_slug ?? ""),
+    location_term_id: row.location_term_id,
+    program_group: row.program_group ?? null,
+    kind: String(row.kind ?? ""),
+    position: typeof row.position === "number" ? row.position : 0,
+    requirement: String(row.requirement),
+    advisory: Boolean(row.advisory),
+  };
+  return {
+    _id: [
+      doc.requirement_key,
+      doc.location_term_id,
+      doc.program_group ?? "",
+      doc.kind,
+      doc.position,
+      slugify(doc.requirement).slice(0, 40),
+    ].join("#"),
+    doc,
+  };
+}
+
+export const admissions: DatasetModule = {
+  name: "admissions",
+  indices: [
+    {
+      index: "admission_programs",
+      mappings: {
+        properties: {
+          id: { type: "integer" },
+          name: { type: "text" },
+          summary: { type: "text" },
+          url: { type: "keyword" },
+          degrees: { type: "text" },
+          interests: { type: "text" },
+          duration: { type: "keyword" },
+          requirement_key: { type: "keyword" },
+          note: { type: "text" },
+        },
+      },
+      async *read(s3) {
+        const [programs, programRequirements, interests] = (await Promise.all([
+          s3.getJson("admissions/programs.json"),
+          s3.getJson("admissions/requirements/program_requirements.json"),
+          s3.getJson("admissions/interests.json"),
+        ])) as Row[][];
+        yield* joinPrograms({ programs, programRequirements, interests });
+      },
+      transform(doc: AdmissionProgramDoc) {
+        return { _id: String(doc.id), doc };
+      },
+    },
+    {
+      index: "admission_requirements",
+      mappings: {
+        properties: {
+          requirement_key: { type: "keyword" },
+          curriculum: { type: "keyword" },
+          location: { type: "text" },
+          location_slug: { type: "keyword" },
+          location_term_id: { type: "integer" },
+          program_group: { type: "keyword" },
+          kind: { type: "keyword" },
+          position: { type: "integer" },
+          requirement: { type: "text" },
+          advisory: { type: "boolean" },
+        },
+      },
+      async *read(s3) {
+        yield* (await s3.getJson("admissions/requirements/required_courses.json")) as Row[];
+      },
+      transform: transformRequirement,
+    },
+  ],
+  tools: [
+    {
+      spec: {
+        name: "search_programs",
+        description:
+          "Search UBC Vancouver undergraduate programs (the you.ubc.ca program finder) by keyword. Returns program names, summaries, degrees, typical duration, and links.",
+        inputSchema: {
+          json: {
+            type: "object",
+            properties: {
+              query: { type: "string", description: "Keywords to match program names and summaries" },
+              degree: { type: "string", description: 'Degree filter, e.g. "Bachelor of Science"' },
+              limit: { type: "number", description: "Max results (default 10)" },
+            },
+            required: ["query"],
+          },
+        },
+      },
+      async execute(input, os) {
+        const filter = input.degree ? [{ match: { degrees: { query: String(input.degree), operator: "and" } } }] : [];
+        const res = await os.search({
+          index: "admission_programs",
+          body: {
+            query: {
+              bool: {
+                must: [{ multi_match: { query: String(input.query), fields: ["name^2", "summary", "interests"] } }],
+                filter,
+              },
+            },
+            size: Math.min(Number(input.limit) || 10, 30),
+          },
+        });
+        const hits = res.body.hits.hits;
+        if (hits.length === 0) throw new Error(`No UBC programs matched "${input.query}"`);
+        return {
+          programs: hits.map((h) => {
+            const p = h._source as AdmissionProgramDoc;
+            return { ...p, summary: p.summary.slice(0, 300) };
+          }),
+        };
+      },
+    },
+    {
+      spec: {
+        name: "get_admission_requirements",
+        description:
+          "Get UBC Vancouver undergraduate admission requirements for a program, for applicants from a specific curriculum or location (a Canadian province, a country, or IB). Distinguishes hard requirements from advisory recommendations.",
+        inputSchema: {
+          json: {
+            type: "object",
+            properties: {
+              program: { type: "string", description: 'Program name, e.g. "Computer Science" or "Engineering"' },
+              location: {
+                type: "string",
+                description:
+                  'Where the applicant studies, e.g. "British Columbia", "Ontario", "India", "International Baccalaureate"',
+              },
+              include_advisory: {
+                type: "boolean",
+                description: "If true, also include recommended (non-mandatory) items. Default false.",
+              },
+            },
+            required: ["program", "location"],
+          },
+        },
+      },
+      async execute(input, os) {
+        const programQuery = String(input.program ?? "");
+        const progRes = await os.search({
+          index: "admission_programs",
+          body: { query: { multi_match: { query: programQuery, fields: ["name^2", "summary"] } }, size: 1 },
+        });
+        const program = progRes.body.hits.hits[0]?._source as AdmissionProgramDoc | undefined;
+        if (!program) throw new Error(`No UBC program matched "${programQuery}"`);
+        if (!program.requirement_key) {
+          throw new Error(
+            `"${program.name}" has no published admission requirements${program.note ? `: ${program.note}` : ""}`,
+          );
+        }
+        // Resolve the location to its unique term id first — location_slug alone
+        // is ambiguous ("basic" exists in both province and country curricula).
+        const locQuery = String(input.location ?? "");
+        const locRes = await os.search({
+          index: "admission_requirements",
+          body: {
+            query: {
+              bool: {
+                must: [{ match: { location: locQuery } }],
+                filter: [{ term: { requirement_key: program.requirement_key } }],
+              },
+            },
+            size: 1,
+          },
+        });
+        const loc = locRes.body.hits.hits[0]?._source as RequirementDoc | undefined;
+        if (!loc) {
+          throw new Error(`No admission requirements found for applicants from "${locQuery}" (${program.name})`);
+        }
+        const filter: Record<string, unknown>[] = [
+          { term: { requirement_key: program.requirement_key } },
+          { term: { location_term_id: loc.location_term_id } },
+        ];
+        if (!input.include_advisory) filter.push({ term: { advisory: false } });
+        const res = await os.search({
+          index: "admission_requirements",
+          body: { query: { bool: { filter } }, size: 200, sort: [{ position: "asc" }] },
+        });
+        const rows = res.body.hits.hits.map((h) => h._source as RequirementDoc);
+        if (rows.length === 0) {
+          throw new Error(`No requirement lines found for "${program.name}" from "${loc.location}"`);
+        }
+        return {
+          program: program.name,
+          requirement_group: program.requirement_key,
+          location: loc.location,
+          curriculum: loc.curriculum,
+          url: program.url,
+          requirements: rows.map((r) => ({
+            kind: r.kind,
+            requirement: r.requirement,
+            ...(r.advisory ? { advisory: true } : {}),
+          })),
+        };
+      },
+    },
+  ],
+};

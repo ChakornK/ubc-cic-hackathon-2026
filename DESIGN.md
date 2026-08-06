@@ -19,22 +19,22 @@
 
 Pastel-inflected, low-saturation colors. Light mode leans warm gray; dark mode leans cool charcoal.
 
-| Role | Light Mode | Dark Mode | Usage |
-|------|------------|-----------|-------|
-| **Background** | `#F8F8F6` | `#121214` | Page ground |
-| **Surface** | `#FFFFFF` | `#1A1A1E` | Cards, panels, chat bubbles |
-| **Surface Elevated** | `#FFFFFF` | `#222226` | Modals, dropdowns |
-| **Border** | `#E8E8E4` | `#2A2A2E` | Dividers, input borders |
-| **Border Subtle** | `#F0F0EC` | `#1E1E22` | Hairlines, separators |
-| **Text Primary** | `#2D2D2D` | `#ECECEC` | Headings, body |
-| **Text Secondary** | `#6B6B6B` | `#9A9A9A` | Labels, metadata |
-| **Text Tertiary** | `#A0A0A0` | `#5A5A5A` | Placeholders, disabled |
-| **Accent** | `#7C9EB2` | `#8FB4C9` | Links, primary actions, active states |
-| **Accent Hover** | `#6A8A9E` | `#A3C4D6` | Hover on accent elements |
-| **Accent Subtle** | `#EEF4F7` | `#1E2A30` | Accent backgrounds, selections |
-| **Success** | `#7DB88F` | `#8FC9A0` | Confirmations, online status |
-| **Warning** | `#C9A86B` | `#D4B87A` | Cautions, limits |
-| **Error** | `#C48B8B` | `#D49A9A` | Errors, destructive actions |
+| Role                 | Light Mode | Dark Mode | Usage                                 |
+| -------------------- | ---------- | --------- | ------------------------------------- |
+| **Background**       | `#F8F8F6`  | `#121214` | Page ground                           |
+| **Surface**          | `#FFFFFF`  | `#1A1A1E` | Cards, panels, chat bubbles           |
+| **Surface Elevated** | `#FFFFFF`  | `#222226` | Modals, dropdowns                     |
+| **Border**           | `#E8E8E4`  | `#2A2A2E` | Dividers, input borders               |
+| **Border Subtle**    | `#F0F0EC`  | `#1E1E22` | Hairlines, separators                 |
+| **Text Primary**     | `#2D2D2D`  | `#ECECEC` | Headings, body                        |
+| **Text Secondary**   | `#6B6B6B`  | `#9A9A9A` | Labels, metadata                      |
+| **Text Tertiary**    | `#A0A0A0`  | `#5A5A5A` | Placeholders, disabled                |
+| **Accent**           | `#7C9EB2`  | `#8FB4C9` | Links, primary actions, active states |
+| **Accent Hover**     | `#6A8A9E`  | `#A3C4D6` | Hover on accent elements              |
+| **Accent Subtle**    | `#EEF4F7`  | `#1E2A30` | Accent backgrounds, selections        |
+| **Success**          | `#7DB88F`  | `#8FC9A0` | Confirmations, online status          |
+| **Warning**          | `#C9A86B`  | `#D4B87A` | Cautions, limits                      |
+| **Error**            | `#C48B8B`  | `#D49A9A` | Errors, destructive actions           |
 
 ### Color Usage Rules
 
@@ -51,27 +51,27 @@ Pastel-inflected, low-saturation colors. Light mode leans warm gray; dark mode l
 
 ```css
 @font-face {
-  font-family: 'Aspekta';
-  src: url('/fonts/Aspekta-Variable.woff2') format('woff2');
+  font-family: "Aspekta";
+  src: url("/fonts/Aspekta-Variable.woff2") format("woff2");
   font-weight: 100 900;
   font-display: swap;
 }
 
---font-sans: 'Aspekta', ui-sans-serif, system-ui, sans-serif;
---font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+--font-sans: "Aspekta", ui-sans-serif, system-ui, sans-serif;
+--font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 ```
 
 ### Type Scale
 
-| Name | Size | Weight | Line Height | Usage |
-|------|------|--------|-------------|-------|
-| **Display** | 30px / 1.875rem | 500 | 1.2 | Hero headings (rare) |
-| **Title** | 20px / 1.25rem | 500 | 1.3 | Page titles, section heads |
-| **Heading** | 16px / 1rem | 500 | 1.4 | Card titles, chat session names |
-| **Body** | 14px / 0.875rem | 400 | 1.5 | Chat messages, descriptions |
-| **Body Small** | 13px / 0.8125rem | 400 | 1.5 | Secondary info, timestamps |
-| **Caption** | 12px / 0.75rem | 450 | 1.4 | Labels, metadata, tool badges |
-| **Mono** | 13px / 0.8125rem | 400 | 1.5 | Code, course codes, data |
+| Name           | Size             | Weight | Line Height | Usage                           |
+| -------------- | ---------------- | ------ | ----------- | ------------------------------- |
+| **Display**    | 30px / 1.875rem  | 500    | 1.2         | Hero headings (rare)            |
+| **Title**      | 20px / 1.25rem   | 500    | 1.3         | Page titles, section heads      |
+| **Heading**    | 16px / 1rem      | 500    | 1.4         | Card titles, chat session names |
+| **Body**       | 14px / 0.875rem  | 400    | 1.5         | Chat messages, descriptions     |
+| **Body Small** | 13px / 0.8125rem | 400    | 1.5         | Secondary info, timestamps      |
+| **Caption**    | 12px / 0.75rem   | 450    | 1.4         | Labels, metadata, tool badges   |
+| **Mono**       | 13px / 0.8125rem | 400    | 1.5         | Code, course codes, data        |
 
 ### Typography Rules
 
@@ -87,7 +87,7 @@ Pastel-inflected, low-saturation colors. Light mode leans warm gray; dark mode l
 
 ```
 4px   - xs   - Inline spacing, icon gaps
-8px   - sm   - Compact padding, list item gaps  
+8px   - sm   - Compact padding, list item gaps
 12px  - md   - Standard padding, form gaps
 16px  - lg   - Section padding, card padding
 24px  - xl   - Major section gaps
@@ -120,11 +120,11 @@ Pastel-inflected, low-saturation colors. Light mode leans warm gray; dark mode l
 
 ### Breakpoints
 
-| Name | Width | Layout |
-|------|-------|--------|
-| **Mobile** | < 640px | Single column, bottom nav, map as overlay |
-| **Tablet** | 640–1024px | Collapsed sidebar, chat/map toggle |
-| **Desktop** | > 1024px | Full sidebar, chat + map side-by-side |
+| Name        | Width      | Layout                                    |
+| ----------- | ---------- | ----------------------------------------- |
+| **Mobile**  | < 640px    | Single column, bottom nav, map as overlay |
+| **Tablet**  | 640–1024px | Collapsed sidebar, chat/map toggle        |
+| **Desktop** | > 1024px   | Full sidebar, chat + map side-by-side     |
 
 ### Panel Behavior
 
@@ -136,12 +136,12 @@ Pastel-inflected, low-saturation colors. Light mode leans warm gray; dark mode l
 
 ### Buttons
 
-| Variant | Background | Text | Border | Usage |
-|---------|------------|------|--------|-------|
-| **Primary** | Accent | White | None | Main actions (Send, Sign in) |
-| **Secondary** | Transparent | Text Primary | Border | Secondary actions |
-| **Ghost** | Transparent | Text Secondary | None | Tertiary actions, icon buttons |
-| **Danger** | Error | White | None | Destructive actions |
+| Variant       | Background  | Text           | Border | Usage                          |
+| ------------- | ----------- | -------------- | ------ | ------------------------------ |
+| **Primary**   | Accent      | White          | None   | Main actions (Send, Sign in)   |
+| **Secondary** | Transparent | Text Primary   | Border | Secondary actions              |
+| **Ghost**     | Transparent | Text Secondary | None   | Tertiary actions, icon buttons |
+| **Danger**    | Error       | White          | None   | Destructive actions            |
 
 - **Size**: 36px height standard, 32px compact, 40px for primary CTAs
 - **Border radius**: 10px
@@ -210,17 +210,18 @@ Example: `[🔍 search_courses]` `[📍 walking_distance]`
 
 ### Specific Animations
 
-| Element | Duration | Easing | Property |
-|---------|----------|--------|----------|
-| Button hover | 150ms | ease-out | background-color, opacity |
-| Panel slide | 250ms | ease-out | transform |
-| Message appear | 200ms | ease-out | opacity, transform (slide up 6px) |
-| Route draw | 500ms | ease-out | stroke-dashoffset |
-| Map zoom | 300ms | ease-out | handled by map library |
+| Element        | Duration | Easing   | Property                          |
+| -------------- | -------- | -------- | --------------------------------- |
+| Button hover   | 150ms    | ease-out | background-color, opacity         |
+| Panel slide    | 250ms    | ease-out | transform                         |
+| Message appear | 200ms    | ease-out | opacity, transform (slide up 6px) |
+| Route draw     | 500ms    | ease-out | stroke-dashoffset                 |
+| Map zoom       | 300ms    | ease-out | handled by map library            |
 
 ### Reduced Motion
 
 Respect `prefers-reduced-motion`:
+
 - Disable transform animations
 - Keep opacity fades (instant or 100ms)
 - Route draws instantly instead of animating
@@ -235,22 +236,22 @@ Respect `prefers-reduced-motion`:
 
 ### Common Icons
 
-| Action | Icon |
-|--------|------|
-| Send message | `arrow-up` (in circle) or `send` |
-| New chat | `plus` |
-| Sessions | `messages-square` |
-| Settings | `settings` |
-| Sign out | `log-out` |
-| Search courses | `search` |
-| Course info | `book-open` |
-| Tuition | `dollar-sign` |
-| Walking | `footprints` or `navigation` |
-| Building | `building` |
-| Map | `map` |
-| Loading | `loader-2` (spinning) |
-| Error | `alert-circle` |
-| Success | `check-circle` |
+| Action         | Icon                             |
+| -------------- | -------------------------------- |
+| Send message   | `arrow-up` (in circle) or `send` |
+| New chat       | `plus`                           |
+| Sessions       | `messages-square`                |
+| Settings       | `settings`                       |
+| Sign out       | `log-out`                        |
+| Search courses | `search`                         |
+| Course info    | `book-open`                      |
+| Tuition        | `dollar-sign`                    |
+| Walking        | `footprints` or `navigation`     |
+| Building       | `building`                       |
+| Map            | `map`                            |
+| Loading        | `loader-2` (spinning)            |
+| Error          | `alert-circle`                   |
+| Success        | `check-circle`                   |
 
 ## States
 
@@ -311,24 +312,24 @@ Tailwind v4 uses CSS-first configuration. Define tokens in your CSS file:
 
 @theme {
   /* Font */
-  --font-sans: 'Aspekta', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --font-sans: "Aspekta", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* Colors - Light Mode (default) */
-  --color-background: #F8F8F6;
-  --color-surface: #FFFFFF;
-  --color-surface-elevated: #FFFFFF;
-  --color-border: #E8E8E4;
-  --color-border-subtle: #F0F0EC;
-  --color-text-primary: #2D2D2D;
-  --color-text-secondary: #6B6B6B;
-  --color-text-tertiary: #A0A0A0;
-  --color-accent: #7C9EB2;
-  --color-accent-hover: #6A8A9E;
-  --color-accent-subtle: #EEF4F7;
-  --color-success: #7DB88F;
-  --color-warning: #C9A86B;
-  --color-error: #C48B8B;
+  --color-background: #f8f8f6;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-border: #e8e8e4;
+  --color-border-subtle: #f0f0ec;
+  --color-text-primary: #2d2d2d;
+  --color-text-secondary: #6b6b6b;
+  --color-text-tertiary: #a0a0a0;
+  --color-accent: #7c9eb2;
+  --color-accent-hover: #6a8a9e;
+  --color-accent-subtle: #eef4f7;
+  --color-success: #7db88f;
+  --color-warning: #c9a86b;
+  --color-error: #c48b8b;
 
   /* Spacing (already default in Tailwind, but explicit for reference) */
   --spacing-xs: 4px;
@@ -354,26 +355,26 @@ Tailwind v4 uses CSS-first configuration. Define tokens in your CSS file:
 @media (prefers-color-scheme: dark) {
   @theme {
     --color-background: #121214;
-    --color-surface: #1A1A1E;
+    --color-surface: #1a1a1e;
     --color-surface-elevated: #222226;
-    --color-border: #2A2A2E;
-    --color-border-subtle: #1E1E22;
-    --color-text-primary: #ECECEC;
-    --color-text-secondary: #9A9A9A;
-    --color-text-tertiary: #5A5A5A;
-    --color-accent: #8FB4C9;
-    --color-accent-hover: #A3C4D6;
-    --color-accent-subtle: #1E2A30;
-    --color-success: #8FC9A0;
-    --color-warning: #D4B87A;
-    --color-error: #D49A9A;
+    --color-border: #2a2a2e;
+    --color-border-subtle: #1e1e22;
+    --color-text-primary: #ececec;
+    --color-text-secondary: #9a9a9a;
+    --color-text-tertiary: #5a5a5a;
+    --color-accent: #8fb4c9;
+    --color-accent-hover: #a3c4d6;
+    --color-accent-subtle: #1e2a30;
+    --color-success: #8fc9a0;
+    --color-warning: #d4b87a;
+    --color-error: #d49a9a;
   }
 }
 
 /* Font face */
 @font-face {
-  font-family: 'Aspekta';
-  src: url('/fonts/Aspekta-Variable.woff2') format('woff2');
+  font-family: "Aspekta";
+  src: url("/fonts/Aspekta-Variable.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -385,26 +386,33 @@ Tailwind v4 uses CSS-first configuration. Define tokens in your CSS file:
 ```html
 <!-- Background and text -->
 <div class="bg-background text-text-primary">
+  <!-- Card -->
+  <div class="bg-surface border border-border-subtle rounded-lg p-lg">
+    <!-- Primary button -->
+    <button
+      class="bg-accent hover:bg-accent-hover text-white rounded-md px-lg py-sm transition-[var(--transition-fast)]"
+    >
+      <!-- Input -->
+      <input
+        class="bg-surface border border-border rounded-md px-md py-sm text-text-primary placeholder:text-text-tertiary focus:border-accent focus:ring-2 focus:ring-accent/40"
+      />
 
-<!-- Card -->
-<div class="bg-surface border border-border-subtle rounded-lg p-lg">
-
-<!-- Primary button -->
-<button class="bg-accent hover:bg-accent-hover text-white rounded-md px-lg py-sm transition-[var(--transition-fast)]">
-
-<!-- Input -->
-<input class="bg-surface border border-border rounded-md px-md py-sm text-text-primary placeholder:text-text-tertiary focus:border-accent focus:ring-2 focus:ring-accent/40">
-
-<!-- User message bubble -->
-<div class="bg-accent-subtle text-text-primary rounded-[14px_14px_4px_14px] px-lg py-md max-w-[80%] ml-auto">
-
-<!-- Assistant message bubble -->
-<div class="bg-surface border border-border-subtle text-text-primary rounded-[14px_14px_14px_4px] px-lg py-md max-w-[85%]">
+      <!-- User message bubble -->
+      <div class="bg-accent-subtle text-text-primary rounded-[14px_14px_4px_14px] px-lg py-md max-w-[80%] ml-auto">
+        <!-- Assistant message bubble -->
+        <div
+          class="bg-surface border border-border-subtle text-text-primary rounded-[14px_14px_14px_4px] px-lg py-md max-w-[85%]"
+        ></div>
+      </div>
+    </button>
+  </div>
+</div>
 ```
 
 ### Font Setup
 
 Download Aspekta from [uncut.wtf](https://uncut.wtf/sans-serif/aspekta/) and place in `/public/fonts/`:
+
 - `Aspekta-Variable.woff2` (variable font, all weights)
 
 Or subset to weights 400, 450, 500 if bundle size is a concern.
