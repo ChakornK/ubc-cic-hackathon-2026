@@ -16,7 +16,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 function Splash({ label }: { label: string }) {
   return (
     <div className="app-shell-canvas flex min-h-svh items-center justify-center">
-      <div className="neu-panel bg-surface flex flex-col items-center gap-3 rounded-2xl border px-10 py-8">
+      <div className="neu-panel bg-surface flex flex-col items-center gap-3 rounded-2xl px-10 py-8">
         <span className="bg-primary-container text-on-primary-container shadow-inset flex size-11 items-center justify-center rounded-xl">
           <Icon name="school" size={22} />
         </span>
@@ -48,7 +48,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
   if (auth.status === "signedOut" && !auth.configured) {
     return (
       <div className="app-shell-canvas flex min-h-svh items-center justify-center px-6">
-        <div className="neu-panel bg-surface max-w-md rounded-2xl border p-6">
+        <div className="neu-panel bg-surface max-w-md rounded-2xl p-6">
           <h1 className="text-on-surface text-base font-medium">Sign-in isn&apos;t configured</h1>
           <p className="text-on-surface-variant mt-2 text-sm leading-relaxed">
             Set <code className="text-body-sm font-mono">NEXT_PUBLIC_COGNITO_AUTHORITY</code> and{" "}
@@ -129,7 +129,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <RequireAuth>
       <div className="app-shell-canvas flex h-svh flex-col overflow-hidden">
-        <header className="glass-neu relative z-30 mx-2 mt-3 flex h-14 shrink-0 items-center justify-between rounded-2xl border px-2 sm:mx-3 sm:px-4">
+        <header className="glass-neu relative z-30 mx-2 mt-3 flex h-14 shrink-0 items-center justify-between rounded-2xl px-2 sm:mx-3 sm:px-4">
           <div className="flex min-w-0 items-center gap-2">
             <button
               type="button"
@@ -144,7 +144,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               aria-label="Go to Reogent homepage"
               className="group flex min-w-0 items-center gap-2.5 rounded-xl py-1 pr-2 focus-visible:outline-offset-4"
             >
-              <span className="bg-surface-container-low text-primary border-border-subtle hidden size-8 shrink-0 items-center justify-center rounded-lg border transition-transform duration-150 group-hover:-translate-y-0.5 sm:flex">
+              <span className="bg-surface-container-low text-primary hidden size-8 shrink-0 items-center justify-center rounded-lg transition-transform duration-150 group-hover:-translate-y-0.5 sm:flex">
                 <Icon name="school" size={17} />
               </span>
               <span className="text-primary group-hover:text-on-surface truncate text-base font-medium tracking-[-0.025em] transition-colors duration-150 sm:text-xl">
@@ -184,7 +184,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               aria-controls="desktop-session-panel"
               aria-expanded={!sessionsCollapsed}
               title="Expand sessions"
-              className="sessions-menu-trigger glass-neu-compact text-on-surface-variant hover:text-primary border-border-subtle absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl border transition-colors duration-150"
+              className="sessions-menu-trigger glass-neu-compact text-on-surface-variant hover:text-primary absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
             >
               <Icon name="menu" size={20} />
             </button>

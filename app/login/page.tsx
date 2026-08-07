@@ -32,7 +32,7 @@ function LoginContent() {
       </nav>
       <div className="flex flex-1 flex-col items-center justify-center py-12">
         <div className="flex w-full max-w-sm flex-col items-center">
-          <span className="neu-raised bg-surface text-primary mb-8 flex size-14 items-center justify-center rounded-2xl border">
+          <span className="neu-raised bg-surface text-primary mb-8 flex size-14 items-center justify-center rounded-2xl">
             <Icon name="school" size={27} />
           </span>
           <h1 className="text-on-surface mb-2 text-2xl font-medium tracking-[-0.02em]">Welcome back</h1>

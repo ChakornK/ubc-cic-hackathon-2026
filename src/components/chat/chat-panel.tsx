@@ -259,7 +259,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
   return (
     <section
       aria-label="Conversation"
-      className="glass-neu-strong flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border"
+      className="glass-neu-strong flex min-h-0 w-full flex-col overflow-hidden rounded-2xl"
     >
       <div className="border-border-subtle flex shrink-0 items-center justify-between border-b bg-transparent px-4 py-3">
         <h1 className="text-on-surface min-w-0 truncate text-base font-medium tracking-[-0.01em]">{sessionTitle}</h1>
@@ -279,7 +279,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
 
         {historyState === "failed" && (
           <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-center">
-            <span className="bg-surface text-error border-border-subtle flex size-16 items-center justify-center rounded-2xl border">
+            <span className="bg-surface text-error flex size-16 items-center justify-center rounded-2xl">
               <Icon name="alert" size={30} />
             </span>
             <div>
@@ -308,7 +308,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
 
         {historyState === "ready" && messages.length === 0 && !sending && (
           <div className="flex h-full flex-col items-center justify-center px-3 text-center sm:px-6">
-            <span className="bg-surface text-primary border-border-subtle flex size-16 items-center justify-center rounded-2xl border">
+            <span className="bg-surface text-primary flex size-16 items-center justify-center rounded-2xl">
               <Icon name="chat1" size={30} />
             </span>
             <h2 className="text-on-surface mt-6 text-xl font-medium tracking-[-0.025em]">Ask me about UBC</h2>

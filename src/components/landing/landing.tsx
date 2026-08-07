@@ -126,7 +126,7 @@ export function Landing() {
   return (
     <>
       <div className="auth-splash bg-background fixed inset-0 z-50 flex items-center justify-center">
-        <div className="neu-panel bg-surface flex items-center gap-3 rounded-2xl border px-6 py-4">
+        <div className="neu-panel bg-surface flex items-center gap-3 rounded-2xl px-6 py-4">
           <span className="bg-primary-container text-on-primary-container shadow-inset flex size-9 items-center justify-center rounded-xl">
             <Icon name="school" size={18} />
           </span>
@@ -223,14 +223,14 @@ export function Landing() {
               </div>
               <div
                 ref={revealCapabilities}
-                className="reveal neu-panel bg-surface grid overflow-hidden rounded-2xl border sm:grid-cols-3"
+                className="reveal neu-panel bg-surface grid overflow-hidden rounded-2xl sm:grid-cols-3"
               >
                 {CAPABILITIES.map((cap) => (
                   <article
                     key={cap.label}
                     className="not-last:border-border-subtle flex flex-col items-start px-6 py-8 not-last:border-b sm:not-last:border-r sm:not-last:border-b-0"
                   >
-                    <span className="neu-inset bg-surface-container-low flex size-12 items-center justify-center rounded-xl border">
+                    <span className="neu-inset bg-surface-container-low flex size-12 items-center justify-center rounded-xl">
                       {cap.glyph}
                     </span>
                     <h3 className="text-on-surface mt-6 text-base font-medium">{cap.label}</h3>
@@ -252,7 +252,7 @@ export function Landing() {
           </section>
 
           <section className="relative px-5 pb-12 sm:px-8">
-            <div className="neu-inset bg-surface-container-low relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] border px-6 py-20 sm:py-24">
+            <div className="neu-inset bg-surface-container-low relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] px-6 py-20 sm:py-24">
               <div className="text-outline pointer-events-none absolute inset-[-30%] opacity-[0.22]">
                 <TopoTexture className="h-full w-full opacity-10" />
               </div>

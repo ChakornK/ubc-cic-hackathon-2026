@@ -63,7 +63,7 @@ export function UserMenu() {
         role="dialog"
         aria-modal="true"
         aria-label="Account"
-        className={`profile-menu-surface glass-neu absolute top-12 right-0 z-50 w-64 max-w-[calc(100vw-2rem)] origin-top-right rounded-2xl border p-2.5 ${
+        className={`profile-menu-surface glass-neu absolute top-12 right-0 z-50 w-64 max-w-[calc(100vw-2rem)] origin-top-right rounded-2xl p-2.5 ${
           open
             ? "blur-0 visible translate-y-0 scale-100 opacity-100"
             : "pointer-events-none invisible -translate-y-1.5 scale-[0.97] opacity-0 blur-[2px]"
