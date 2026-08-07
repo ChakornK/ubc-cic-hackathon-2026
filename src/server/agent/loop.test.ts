@@ -76,7 +76,7 @@ const modules: DatasetModule[] = [
 const userMessages = [{ role: "user" as const, content: "q" }];
 
 describe("agent loop", () => {
-  // Feature: campus-ai-assistant, Property 2: Agent loop terminates with the correct call count
+  // Feature: reogent, Property 2: Agent loop terminates with the correct call count
   it("Property 2: makes exactly min(firstEndTurn+1, 8) converse calls; warning iff no end_turn", async () => {
     await fc.assert(
       fc.asyncProperty(scriptArb, async (script) => {
@@ -92,7 +92,7 @@ describe("agent loop", () => {
     );
   });
 
-  // Feature: campus-ai-assistant, Property 3: Every requested tool call is executed and reported
+  // Feature: reogent, Property 3: Every requested tool call is executed and reported
   it("Property 3: every toolUse gets a matching toolResult and tool_calls lists them in order", async () => {
     await fc.assert(
       fc.asyncProperty(scriptArb, async (script) => {

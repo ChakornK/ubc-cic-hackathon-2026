@@ -1,4 +1,4 @@
-# Campus AI Assistant
+# Reogent
 
 A conversational AI for UBC students. Ask about courses, tuition, walking routes, parking, events, or study spaces. The agent queries indexed university datasets and renders walking routes on an interactive campus map.
 

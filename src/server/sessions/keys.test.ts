@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { messageSk, sessionSk, userPk } from "./keys";
 
 describe("session keys", () => {
-  // Feature: campus-ai-assistant, Property 7: Session keys enforce ownership and order
+  // Feature: reogent, Property 7: Session keys enforce ownership and order
   it("Property 7: PKs are scoped to the caller's sub and message SKs sort chronologically", () => {
     fc.assert(
       fc.property(
