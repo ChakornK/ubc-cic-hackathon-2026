@@ -20,7 +20,7 @@ function Splash({ label }: { label: string }) {
         <span className="bg-primary-container text-on-primary-container shadow-inset flex size-11 items-center justify-center rounded-xl">
           <Icon name="school" size={22} />
         </span>
-        <span className="text-primary animate-pulse text-xl font-medium tracking-[-0.02em]">UBC Assistant</span>
+        <span className="text-primary animate-pulse text-xl font-medium tracking-[-0.02em]">Reogent</span>
         <span className="text-body-sm text-muted">{label}</span>
       </div>
     </div>
@@ -147,14 +147,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             </button>
             <Link
               href="/"
-              aria-label="Go to UBC Assistant homepage"
+              aria-label="Go to Reogent homepage"
               className="group flex min-w-0 items-center gap-2.5 rounded-xl py-1 pr-2 focus-visible:outline-offset-4"
             >
               <span className="neu-raised bg-surface-container-low text-primary hidden size-8 shrink-0 items-center justify-center rounded-lg border transition-transform duration-150 group-hover:-translate-y-0.5 sm:flex">
                 <Icon name="school" size={17} />
               </span>
               <span className="text-primary group-hover:text-on-surface truncate text-lg font-medium tracking-[-0.025em] transition-colors duration-150 sm:text-xl">
-                UBC Assistant
+                Reogent
               </span>
             </Link>
           </div>

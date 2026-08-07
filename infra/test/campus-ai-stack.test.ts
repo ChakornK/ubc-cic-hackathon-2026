@@ -3,7 +3,7 @@ import { Match, Template } from "aws-cdk-lib/assertions";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 import { describe, expect, it, vi } from "vitest";
-import { CampusAiStack } from "../lib/campus-ai-stack";
+import { ReogentStack } from "../lib/campus-ai-stack";
 
 // Mock cdk-nextjs-standalone so it doesn't attempt a Next.js build during synth.
 // The mock creates a real Lambda function the stack can attach policies and env vars to.
@@ -39,14 +39,14 @@ const DEFAULT_PROPS = {
 
 function createTemplate(): Template {
   const app = new App();
-  const stack = new CampusAiStack(app, "TestStack", {
+  const stack = new ReogentStack(app, "TestStack", {
     ...DEFAULT_PROPS,
     env: { account: "123456789012", region: "us-west-2" },
   });
   return Template.fromStack(stack);
 }
 
-describe("CampusAiStack", () => {
+describe("ReogentStack", () => {
   const template = createTemplate();
 
   it("user pool has a Google identity provider", () => {

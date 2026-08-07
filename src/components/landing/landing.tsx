@@ -130,7 +130,7 @@ export function Landing() {
           <span className="bg-primary-container text-on-primary-container shadow-inset flex size-9 items-center justify-center rounded-xl">
             <Icon name="school" size={18} />
           </span>
-          <span className="text-primary animate-pulse text-xl font-medium tracking-[-0.02em]">UBC Assistant</span>
+          <span className="text-primary animate-pulse text-xl font-medium tracking-[-0.02em]">Reogent</span>
         </div>
       </div>
 
@@ -154,7 +154,7 @@ export function Landing() {
               <span className="neu-raised bg-surface text-primary flex size-8 items-center justify-center rounded-lg border transition-transform duration-150 group-hover:-translate-y-0.5">
                 <Icon name="school" size={17} />
               </span>
-              <span className="text-[15px] font-medium tracking-[-0.02em]">UBC Assistant</span>
+              <span className="text-[15px] font-medium tracking-[-0.02em]">Reogent</span>
             </a>
             <button
               type="button"

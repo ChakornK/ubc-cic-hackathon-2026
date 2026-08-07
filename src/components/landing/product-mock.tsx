@@ -13,7 +13,7 @@ export function ProductMock() {
             <span className="neu-raised bg-surface-container-low text-primary flex size-7 items-center justify-center rounded-lg border text-[11px] font-semibold">
               U
             </span>
-            UBC Assistant
+            Reogent
           </span>
           <span className="neu-raised bg-surface text-primary flex size-7 items-center justify-center rounded-lg border text-xs font-medium">
             A
@@ -31,7 +31,7 @@ export function ProductMock() {
                 <span className="neu-raised bg-primary-container text-on-primary-container flex size-6 items-center justify-center rounded-lg border text-[10px] font-semibold">
                   U
                 </span>
-                <span className="text-muted text-xs">UBC Assistant</span>
+                <span className="text-muted text-xs">Reogent</span>
               </div>
               <div className="neu-raised bg-surface text-on-surface rounded-[16px_16px_16px_5px] border px-4 py-3 text-sm leading-relaxed">
                 ICCS to the AMS Nest is about 650 meters — roughly an 8 minute walk heading north through campus.

@@ -6,7 +6,7 @@ import { modules } from "./index";
 import { transformTuition } from "./tuition";
 
 describe("has_no_prereqs filter", () => {
-  // Feature: campus-ai-assistant, Property 6: `has_no_prereqs` filter semantics
+  // Feature: reogent, Property 6: `has_no_prereqs` filter semantics
   it("Property 6: admits exactly the records whose prerequisite is null, absent, or empty", () => {
     fc.assert(
       fc.property(
@@ -37,7 +37,7 @@ describe("ingest document IDs", () => {
     cohort_rule: fc.option(fc.constantFrom("exactly" as const, "or_later" as const), { nil: null }),
   });
 
-  // Feature: campus-ai-assistant, Property 8: Ingest document IDs are deterministic and unique
+  // Feature: reogent, Property 8: Ingest document IDs are deterministic and unique
   it("Property 8: IDs are stable across calls and differ when the natural key differs", () => {
     fc.assert(
       fc.property(tuitionRow, tuitionRow, (a, b) => {

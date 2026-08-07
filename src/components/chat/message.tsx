@@ -179,7 +179,7 @@ export function AssistantMessage({ message, isLatest }: { message: DisplayMessag
         <span className="neu-raised bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg border text-[11px] font-semibold">
           U
         </span>
-        <span className="text-muted text-xs font-medium">UBC Assistant</span>
+        <span className="text-muted text-xs font-medium">Reogent</span>
       </div>
       <div className="neu-raised bg-surface max-w-[94%] rounded-[16px_16px_16px_5px] border px-4 py-3.5 sm:max-w-[88%]">
         {message.warning && (
@@ -215,7 +215,7 @@ export function TypingIndicator({ slow }: { slow: boolean }) {
         <span className="neu-raised bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg border text-[11px] font-semibold">
           U
         </span>
-        <span className="text-muted text-xs font-medium">UBC Assistant</span>
+        <span className="text-muted text-xs font-medium">Reogent</span>
       </div>
       <div className="neu-raised bg-surface inline-flex items-center gap-3 rounded-[16px_16px_16px_5px] border px-3.5 py-3">
         <span className="thinking-orb" aria-hidden="true" />

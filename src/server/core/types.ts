@@ -1,5 +1,5 @@
 // Core types shared by the agent loop, dataset modules, and API handlers.
-// Response shapes must match .kiro/specs/campus-ai-assistant/api-spec.md.
+// Response shapes must match .kiro/specs/reogent/api-spec.md.
 
 import type { ChatMessage, ChatResponse } from "@/src/shared/types";
 

@@ -8,7 +8,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import { Nextjs } from "cdk-nextjs-standalone";
 import type { Construct } from "constructs";
 
-export interface CampusAiStackProps extends StackProps {
+export interface ReogentStackProps extends StackProps {
   /** Google OAuth client ID from the Google Cloud Console. */
   googleClientId: string;
   /** Google OAuth client secret. */
@@ -25,7 +25,7 @@ export interface CampusAiStackProps extends StackProps {
   skipBuild?: boolean;
 }
 
-export class CampusAiStack extends Stack {
+export class ReogentStack extends Stack {
   public readonly userPool: cognito.UserPool;
   public readonly userPoolClient: cognito.UserPoolClient;
   public readonly table: dynamodb.Table;
@@ -33,7 +33,7 @@ export class CampusAiStack extends Stack {
   public readonly dataBucket: s3.Bucket;
   public readonly nextjs: Nextjs;
 
-  constructor(scope: Construct, id: string, props: CampusAiStackProps) {
+  constructor(scope: Construct, id: string, props: ReogentStackProps) {
     super(scope, id, props);
 
     this.userPool = new cognito.UserPool(this, "UserPool", {
@@ -93,8 +93,9 @@ export class CampusAiStack extends Stack {
       oAuth: {
         flows: { authorizationCodeGrant: true },
         scopes: [cognito.OAuthScope.OPENID, cognito.OAuthScope.EMAIL, cognito.OAuthScope.PROFILE],
-        callbackUrls: [props.callbackUrl, `${props.callbackUrl}chat`],
-        logoutUrls: [props.callbackUrl],
+        // The app signs in with redirect_uri = `${origin}/chat` (see src/lib/auth-config.ts).
+        callbackUrls: [`${props.callbackUrl.replace(/\/$/, "")}/chat`, "http://localhost:3000/chat"],
+        logoutUrls: [props.callbackUrl, "http://localhost:3000/"],
       },
     });
     this.userPoolClient.node.addDependency(googleIdp);

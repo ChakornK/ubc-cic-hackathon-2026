@@ -227,7 +227,7 @@ A realistic recreation of the app interface showing a multi-turn conversation wi
 │  ┌────────────────────────────────────────────────────────────────────────┐ │
 │  │  Mock Header bar                                                      │ │
 │  │  bg: Surface / h: 44px / border-bottom: 1px Border Subtle            │ │
-│  │  Left: "UBC Assistant" (14px, wt 500)                                 │ │
+│  │  Left: "Reogent" (14px, wt 500)                                 │ │
 │  │  Right: avatar circle (24px, bg: Accent Subtle)                       │ │
 │  └────────────────────────────────────────────────────────────────────────┘ │
 │                                                                             │
@@ -363,7 +363,7 @@ All animations use Intersection Observer, trigger once, and respect `prefers-red
 
 ### Wordmark
 
-Text-only: "UBC Assistant" (or chosen product name).
+Text-only: "Reogent" (or chosen product name).
 
 - Font: Aspekta
 - Weight: 500
@@ -428,7 +428,7 @@ Appears twice: hero and closing CTA.
 - Feature cards: Semantic headings (h3) within a section with h2
 - Scroll animations: `prefers-reduced-motion` disables all transforms and parallax
 - Color contrast: All text meets WCAG AA. Accent on white button text: verified 3:1+ for large text (15px weight 500 qualifies)
-- Page title: "UBC Assistant — AI for your campus"
+- Page title: "Reogent — AI for your campus"
 - Background texture: purely decorative, no alt text needed
 - Scroll indicator: `aria-hidden="true"`
 
@@ -747,7 +747,7 @@ Visual break between messages from different time periods:
 
 ```
 ┌─ Avatar + Name ─────────────────────────────────────────────────┐
-│  [24px avatar]  UBC Assistant                                   │
+│  [24px avatar]  Reogent                                   │
 │  (Primary Cont  (Caption, Outline)                              │
 │   bg, robot                                                     │
 │   icon 14px)                                                    │
@@ -789,7 +789,7 @@ Visual break between messages from different time periods:
 
 - Margin-bottom: 8px (before bubble)
 - Avatar: 24px circle, Primary Container bg, `smart_toy` icon 14px
-- Name: "UBC Assistant" in Caption (12px), Outline color
+- Name: "Reogent" in Caption (12px), Outline color
 - Gap: 8px between avatar and name
 
 **Structured content block:**
@@ -1485,7 +1485,7 @@ When `prefers-reduced-motion: reduce`:
 
 ## Open Decisions (For Implementation)
 
-1. **Product name/wordmark**: "UBC Assistant" is placeholder
+1. **Product name/wordmark**: "Reogent" is placeholder
 2. **Session grouping**: Spec uses Today/Yesterday/This week/This month/Older
 3. **Map tile provider**: Carto Positron recommended, MapTiler or Stadia also acceptable
 4. **Typing indicator**: Dots only (no "Assistant is typing..." text)

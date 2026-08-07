@@ -293,7 +293,7 @@ The chat panel is a card that contains the conversation:
 
 ```
 ┌────────────────────────────────────────┐
-│ [avatar] UBC Assistant                 │  Header with avatar + name
+│ [avatar] Reogent                 │  Header with avatar + name
 ├────────────────────────────────────────┤
 │ Assistant response text                │  bg: Surface
 │ Left-aligned                           │  border: 1px Border Subtle
