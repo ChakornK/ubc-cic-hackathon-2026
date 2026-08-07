@@ -32,11 +32,12 @@ services:
   meilisearch:
     image: getmeili/meilisearch:v1
     environment:
-      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-devkey}
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-change-me-meilisearch-key}
+      MEILI_ENV: ${MEILI_ENV:-development}
     volumes:
       - msdata:/meili_data
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7700/health"]
+      test: ["CMD", "curl", "-sf", "http://localhost:7700/health"]
       interval: 5s
       timeout: 3s
       retries: 5
