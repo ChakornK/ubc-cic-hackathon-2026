@@ -1,7 +1,7 @@
 // Core types shared by the agent loop, dataset modules, and API handlers.
-// Response shapes must match .kiro/specs/reogent/api-spec.md.
 
 import type { ChatMessage, ChatResponse } from "@/src/shared/types";
+import type { MeiliSearch } from "meilisearch";
 
 export {
   type ChatMessage,
@@ -26,7 +26,7 @@ export interface ChatRequest {
 
 export type AgentResult = ChatResponse;
 
-// Bedrock Converse wire shapes (structural subset of the SDK types)
+// LLM message shapes
 
 export interface ToolSpec {
   name: string;
@@ -61,30 +61,26 @@ export interface S3Writer extends S3Reader {
   putJson(key: string, value: unknown): Promise<void>;
 }
 
-/** Structural subset of @opensearch-project/opensearch's Client used by tools. */
-export interface OsClient {
-  search(params: { index: string; body: Record<string, unknown> }): Promise<{
-    // biome-ignore lint/suspicious/noExplicitAny: _source shape is per-index; tools cast
-    body: { hits: { hits: { _id: string; _source: any; highlight?: Record<string, string[]> }[] } };
-  }>;
-  get(params: { index: string; id: string }): Promise<{
-    // biome-ignore lint/suspicious/noExplicitAny: _source shape is per-index; tools cast
-    body: { _source: any };
-  }>;
-}
+/** Search client passed to tool execute functions. */
+export type SearchClient = MeiliSearch;
 
 // biome-ignore lint/suspicious/noExplicitAny: raw rows are dataset-specific
 export interface IndexDef<TRaw = any> {
   index: string;
-  mappings: Record<string, unknown>;
+  /** Meilisearch index settings: searchableAttributes, filterableAttributes, sortableAttributes. */
+  settings: {
+    searchableAttributes?: string[];
+    filterableAttributes?: string[];
+    sortableAttributes?: string[];
+  };
   read(s3: S3Reader): AsyncIterable<TRaw>;
-  transform(raw: TRaw): { _id: string; doc: unknown } | null;
+  transform(raw: TRaw): { id: string; doc: Record<string, unknown> } | null;
   derive?(s3: S3Writer): Promise<void>;
 }
 
 export interface ToolDef {
   spec: ToolSpec;
-  execute(input: Record<string, unknown>, os: OsClient): Promise<unknown>;
+  execute(input: Record<string, unknown>, search: SearchClient): Promise<unknown>;
 }
 
 export interface GeoArtifact {

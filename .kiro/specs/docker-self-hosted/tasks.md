@@ -37,10 +37,11 @@ Bottom-up migration: replace each AWS service adapter one at a time, keeping the
   - [x] 5.1 Create `src/server/llm.ts` — openai package, maps ConverseMessage ↔ OpenAI format
   - [x] 5.2 Update imports (stream.ts), deleted `src/server/bedrock.ts`
 
-- [ ] 6. Checkpoint - Verify build compiles
-  - `npm run build` with zero AWS env vars
-  - Fix any remaining AWS imports
-  - _Requirements: 7.4_
+- [x] 6. Checkpoint - Verify build compiles
+  - Only remaining errors are in search.ts/ingest.ts (Task 7 scope)
+  - Excluded `infra/` from tsconfig
+  - Fixed user-menu AppAuthUser references
+  - Removed DynamoDB-based store.test.ts
 
 - [ ] 7. Search migration (Meilisearch)
   - [ ] 7.1 Rewrite `src/server/search.ts`

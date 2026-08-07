@@ -1,25 +1,12 @@
-import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
-import { Client } from "@opensearch-project/opensearch";
-import { AwsSigv4Signer } from "@opensearch-project/opensearch/aws";
-import type { OsClient } from "./core/types";
+import { MeiliSearch } from "meilisearch";
 
-let client: Client | undefined;
+let client: MeiliSearch | undefined;
 
-/** SigV4-signed OpenSearch client from env vars (lazy singleton). */
-export function getOpenSearch(): Client {
-  client ??= new Client({
-    ...AwsSigv4Signer({
-      region: process.env.AWS_REGION ?? "us-east-1",
-      service: "es",
-      getCredentials: fromNodeProviderChain(),
-    }),
-    node: process.env.OPENSEARCH_ENDPOINT?.startsWith("http")
-      ? process.env.OPENSEARCH_ENDPOINT
-      : `https://${process.env.OPENSEARCH_ENDPOINT}`,
+/** Returns a shared Meilisearch client. Reads MEILI_URL and MEILI_MASTER_KEY from env. */
+export function getSearch(): MeiliSearch {
+  client ??= new MeiliSearch({
+    host: process.env.MEILI_URL || "http://localhost:7700",
+    apiKey: process.env.MEILI_MASTER_KEY || "",
   });
   return client;
-}
-
-export function getOsClient(): OsClient {
-  return getOpenSearch() as unknown as OsClient;
 }
