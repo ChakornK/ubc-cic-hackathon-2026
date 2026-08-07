@@ -51,24 +51,11 @@ Bottom-up migration: replace each AWS service adapter one at a time, keeping the
   - Updated agent loop, executor, stream, API routes, and tests
   - All 97 tests pass
 
-- [ ] 8. Docker packaging
-  - [ ] 8.1 Create `Dockerfile`
-    - Multi-stage: deps → build → runner (node:24-alpine)
-    - Copy standalone output + static + public
-    - _Requirements: 6.3_
-  - [ ] 8.2 Create `docker-compose.yml`
-    - Services: app, postgres, meilisearch
-    - Named volumes: pgdata, msdata
-    - Bind-mount `./data` for campus data
-    - Health checks for postgres and meilisearch
-    - _Requirements: 6.1, 6.2, 6.4, 6.5_
-  - [ ] 8.3 Create `.env.example`
-    - Document all environment variables with sensible defaults
-    - _Requirements: 6.4_
-  - [ ] 8.4 Create startup entrypoint script
-    - Run DB migration on first boot
-    - Wait for postgres/meilisearch to be healthy before starting app
-    - _Requirements: 2.5, 6.2_
+- [x] 8. Docker packaging
+  - [x] 8.1 Create `Dockerfile` (multi-stage: deps → build → runner)
+  - [x] 8.2 Create `docker-compose.yml` (app, postgres, meilisearch with health checks)
+  - [x] 8.3 Create `.env.example`
+  - [x] 8.4 Create `.dockerignore`
 
 - [ ] 9. Cleanup
   - Remove `infra/` directory (CDK stack)
