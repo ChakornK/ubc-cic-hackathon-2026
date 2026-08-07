@@ -33,16 +33,9 @@ Bottom-up migration: replace each AWS service adapter one at a time, keeping the
   - [x] 4.3 Replace client-side auth — removed OIDC, created login/register form
   - Deleted `src/lib/auth-config.ts`
 
-- [ ] 5. LLM adapter (OpenAI-compatible)
-  - [ ] 5.1 Create `src/server/llm.ts` replacing `src/server/bedrock.ts`
-    - Use `openai` package, read `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` env vars
-    - Implement `converse` (non-streaming) mapping `ConverseMessage` ↔ OpenAI messages
-    - Implement `converseStream` mapping to OpenAI streaming with tool calls
-    - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
-  - [ ] 5.2 Update imports across codebase
-    - Replace all `import ... from "./bedrock"` with `import ... from "./llm"`
-    - Delete `src/server/bedrock.ts`
-    - _Requirements: 7.1_
+- [x] 5. LLM adapter (OpenAI-compatible)
+  - [x] 5.1 Create `src/server/llm.ts` — openai package, maps ConverseMessage ↔ OpenAI format
+  - [x] 5.2 Update imports (stream.ts), deleted `src/server/bedrock.ts`
 
 - [ ] 6. Checkpoint - Verify build compiles
   - `npm run build` with zero AWS env vars
