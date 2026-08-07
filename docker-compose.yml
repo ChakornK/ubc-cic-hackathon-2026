@@ -16,7 +16,7 @@ services:
       - MEILI_URL=http://meilisearch:7700
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     environment:
       POSTGRES_DB: reogent
       POSTGRES_USER: reogent
