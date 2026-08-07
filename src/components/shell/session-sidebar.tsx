@@ -59,7 +59,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
             onClick={onCollapse}
             aria-label="Collapse session history"
             title="Collapse sessions"
-            className="glass-neu-compact text-on-surface-variant hover:text-primary border-border-subtle flex size-9 shrink-0 items-center justify-center rounded-xl border"
+            className="glass-neu-compact text-on-surface-variant hover:text-primary border-border-subtle flex size-9 shrink-0 items-center justify-center rounded-xl border transition-colors duration-150"
           >
             <Icon name="left" size={18} />
           </button>

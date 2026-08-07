@@ -144,7 +144,7 @@ export function Landing() {
 
         <header className="pointer-events-none fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-6">
           <div
-            className={`glass-neu pointer-events-auto mx-auto flex h-14 max-w-6xl items-center justify-between rounded-2xl border px-3 transition-all duration-200 sm:px-4 ${
+            className={`glass-neu pointer-events-auto mx-auto flex h-14 max-w-6xl items-center justify-between rounded-2xl border px-3 transition-[border-color,background-color,backdrop-filter] duration-200 sm:px-4 ${
               scrolled
                 ? "border-border-subtle bg-background/90 backdrop-blur-md"
                 : "bg-background/55 border-transparent backdrop-blur-sm"
@@ -188,7 +188,7 @@ export function Landing() {
               <div id="sign-in" className="mt-10 flex w-full scroll-mt-24 justify-center">
                 <SignInButton />
               </div>
-              <p className="text-body-sm text-muted mt-4">Free to use · Sign in with Google</p>
+              <p className="text-body-sm text-muted mt-4">Free to use · Create an account to start</p>
             </div>
 
             <div className="animate-scroll-hint text-muted absolute bottom-8" aria-hidden="true">
@@ -265,7 +265,7 @@ export function Landing() {
                 <div className="mt-9 flex w-full justify-center">
                   <SignInButton wide />
                 </div>
-                <p className="text-body-sm text-muted mt-4">Sign in with your Google account. Free to use.</p>
+                <p className="text-body-sm text-muted mt-4">Create an account or sign in. Free to use.</p>
               </div>
             </div>
             <p className="text-muted mt-10 text-center text-xs">Built for UBC CIC Hackathon 2026</p>
