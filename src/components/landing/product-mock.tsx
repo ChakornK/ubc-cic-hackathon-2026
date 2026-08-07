@@ -28,7 +28,7 @@ export function ProductMock() {
 
             <div className="max-w-[94%]">
               <div className="mb-2 flex items-center gap-2">
-                <span className="bg-primary-container text-on-primary-container border-border-subtle flex size-6 items-center justify-center rounded-lg border text-[0.625rem] font-medium">
+                <span className="bg-primary-container text-on-primary-container flex size-6 items-center justify-center rounded-lg text-[0.625rem] font-medium">
                   R
                 </span>
                 <span className="text-muted text-xs">Reogent</span>
@@ -44,7 +44,7 @@ export function ProductMock() {
               </div>
             </div>
 
-            <div className="neu-inset bg-surface-container-low border-border-subtle mt-auto flex min-h-11 items-center justify-between rounded-2xl border py-1 pr-1.5 pl-4">
+            <div className="neu-inset bg-surface-container-low mt-auto flex min-h-11 items-center justify-between rounded-2xl py-1 pr-1.5 pl-4">
               <span className="text-muted truncate pr-3 text-sm">Ask about courses, campus, or academic rules…</span>
               <span className="neu-primary-button bg-primary text-on-primary flex size-8 shrink-0 items-center justify-center rounded-xl">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">

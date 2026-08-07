@@ -109,7 +109,7 @@ function DetailCard({
     </>
   );
   const cardClass =
-    "flex w-full shrink-0 snap-start snap-always flex-col overflow-hidden rounded-lg border border-border-subtle bg-surface-container-low";
+    "flex w-full shrink-0 snap-start snap-always flex-col overflow-hidden rounded-lg bg-surface-container-low";
   return href ? (
     <a className={cardClass} href={href} target="_blank" rel="noreferrer">
       {body}
@@ -177,7 +177,7 @@ export function BuildingPopup({ building, onClose }: { building: SelectedBuildin
       role="dialog"
       aria-modal="false"
       aria-label={`${building.name} details`}
-      className="glass-neu-compact border-border-subtle absolute top-3 bottom-6 left-3 z-20 flex w-80 max-w-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-2xl border"
+      className="glass-neu-compact absolute top-3 bottom-6 left-3 z-20 flex w-80 max-w-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-2xl"
     >
       <div className="border-border-subtle flex items-start gap-2.5 border-b px-3.5 py-3">
         <span className="bg-secondary-container text-on-secondary-container mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md">

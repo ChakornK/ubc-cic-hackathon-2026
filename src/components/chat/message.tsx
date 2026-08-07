@@ -72,7 +72,7 @@ function ThinkingBlock({ content }: { content: string }) {
     <details
       open={open}
       onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
-      className="group border-border-subtle bg-surface-container-low mb-2 rounded-lg border"
+      className="group bg-surface-container-low mb-2 rounded-lg"
     >
       <summary className="text-muted flex cursor-pointer items-center gap-2 px-3 py-2 text-xs font-medium select-none">
         <Icon name="bling" size={14} className="text-outline shrink-0" />
@@ -146,7 +146,7 @@ function ToolCallBlock({ name, input, result }: { name: string; input?: Record<s
     <details
       open={open}
       onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}
-      className="group border-border-subtle bg-surface-container-low mb-2 rounded-lg border"
+      className="group bg-surface-container-low mb-2 rounded-lg"
     >
       <summary className="text-on-surface-variant flex cursor-pointer items-center gap-2 px-3 py-2 text-xs font-medium select-none">
         <Icon name="search" size={14} className="text-primary shrink-0" />
@@ -180,7 +180,7 @@ export function AssistantMessage({ message, isLatest }: { message: DisplayMessag
       </div>
       <div className="bg-surface max-w-[88%] min-w-0 rounded-[16px_16px_16px_5px] px-4 py-3">
         {message.warning && (
-          <div className="bg-tertiary-container text-body-sm text-on-tertiary-container border-border-subtle mb-3 flex items-start gap-2 rounded-xl border px-3 py-2">
+          <div className="bg-tertiary-container text-body-sm text-on-tertiary-container mb-3 flex items-start gap-2 rounded-xl px-3 py-2">
             <Icon name="alert" size={16} className="mt-0.5 shrink-0" />
             <span>{message.warning}</span>
           </div>

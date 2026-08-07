@@ -613,7 +613,7 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
       {selected && <BuildingPopup building={selected} onClose={() => setSelected(null)} />}
       {picked && (picked.name || picked.code) && (
         <div
-          className="border-border bg-surface-bright pointer-events-none absolute z-10 max-w-60 rounded-lg border px-3 py-2 shadow-md"
+          className="bg-surface-bright pointer-events-none absolute z-10 max-w-60 rounded-lg px-3 py-2 shadow-md"
           style={{ left: picked.x + 12, top: picked.y + 12 }}
           role="status"
         >

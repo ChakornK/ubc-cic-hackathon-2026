@@ -161,7 +161,7 @@ function MapSurface() {
             >
               <Icon name="add" size={20} />
             </button>
-            <div className="border-border-subtle mx-2 border-t" />
+            <span className="bg-border-subtle/60 mx-2 block h-px" aria-hidden="true" />
             <button
               type="button"
               aria-label="Zoom out"

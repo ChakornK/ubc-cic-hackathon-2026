@@ -83,7 +83,7 @@ export function UserMenu() {
             <Icon name={mode === "dark" ? "moon" : "sun"} size={16} className="text-primary" />
             Appearance
           </div>
-          <div className="bg-surface-container-low border-border-subtle grid grid-cols-3 gap-1 rounded-xl border p-1">
+          <div className="bg-surface-container-low grid grid-cols-3 gap-1 rounded-xl p-1">
             {THEME_OPTIONS.map((option) => (
               <button
                 key={option.mode}
@@ -92,7 +92,7 @@ export function UserMenu() {
                 aria-pressed={mode === option.mode}
                 className={`h-8 rounded-lg text-xs font-medium transition-all duration-150 ${
                   mode === option.mode
-                    ? "bg-surface text-primary border-border-subtle border"
+                    ? "bg-surface text-primary shadow-sm"
                     : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
                 }`}
               >
