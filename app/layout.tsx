@@ -19,7 +19,7 @@ const commitMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "UBC Assistant — AI for your campus",
+  title: "Reogent — AI for your campus",
   description:
     "Courses, prerequisites, tuition, and walking routes — answered instantly from real UBC data, with routes drawn on a live campus map.",
 };
