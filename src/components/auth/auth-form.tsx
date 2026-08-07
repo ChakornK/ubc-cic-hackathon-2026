@@ -19,6 +19,10 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [pending, setPending] = useState(false);
 
   const redirect = searchParams.get("redirect") || "/chat";
+  const oppositeHref =
+    mode === "login"
+      ? `/signup?redirect=${encodeURIComponent(redirect)}`
+      : `/login?redirect=${encodeURIComponent(redirect)}`;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,35 +40,50 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} aria-busy={pending} className="flex w-full max-w-80 flex-col items-center gap-3">
-      <input
-        type="text"
-        placeholder="Username"
-        aria-label="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-        aria-invalid={!!error}
-        aria-describedby={error ? "auth-error" : undefined}
-        className="neu-inset bg-surface-container-low text-on-surface focus-visible:ring-primary/40 h-11 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        aria-label="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-        minLength={6}
-        aria-invalid={!!error}
-        aria-describedby={error ? "auth-error" : undefined}
-        className="neu-inset bg-surface-container-low text-on-surface focus-visible:ring-primary/40 h-11 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
-      />
+    <form onSubmit={handleSubmit} aria-busy={pending} className="flex w-full max-w-80 flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="auth-username" className="text-on-surface-variant text-xs font-medium">
+          Username
+        </label>
+        <input
+          id="auth-username"
+          type="text"
+          autoComplete="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          aria-invalid={!!error}
+          aria-describedby={error ? "auth-error" : undefined}
+          className="neu-inset bg-surface-container-low text-on-surface placeholder:text-muted focus-visible:ring-primary/40 h-11 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
+        />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="auth-password" className="text-on-surface-variant text-xs font-medium">
+          Password{mode === "signup" && <span className="text-muted ml-1">(6+ characters)</span>}
+        </label>
+        <input
+          id="auth-password"
+          type="password"
+          autoComplete={mode === "login" ? "current-password" : "new-password"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          minLength={6}
+          aria-invalid={!!error}
+          aria-describedby={error ? "auth-error" : undefined}
+          className="neu-inset bg-surface-container-low text-on-surface placeholder:text-muted focus-visible:ring-primary/40 h-11 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
+        />
+      </div>
+      {error && (
+        <p id="auth-error" role="alert" aria-live="assertive" className="text-error text-center text-xs">
+          {error}
+        </p>
+      )}
       <button
         type="submit"
         disabled={pending}
         aria-busy={pending}
-        className="neu-primary-button bg-primary text-on-primary flex h-12 w-full items-center justify-center rounded-xl text-base font-medium disabled:cursor-not-allowed disabled:opacity-60"
+        className="neu-primary-button bg-primary text-on-primary mt-1 flex h-12 w-full items-center justify-center rounded-xl text-base font-medium disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending
           ? mode === "login"
@@ -74,23 +93,18 @@ export function AuthForm({ mode }: AuthFormProps) {
             ? "Sign in"
             : "Create account"}
       </button>
-      {error && (
-        <p id="auth-error" role="alert" aria-live="assertive" className="text-error text-center text-xs">
-          {error}
-        </p>
-      )}
-      <p className="text-muted text-xs">
+      <p className="text-muted flex min-h-[44px] items-center justify-center text-sm">
         {mode === "login" ? (
           <>
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-primary underline">
+            <Link href={oppositeHref} className="text-primary ml-1 font-medium underline">
               Sign up
             </Link>
           </>
         ) : (
           <>
             Already have an account?{" "}
-            <Link href="/login" className="text-primary underline">
+            <Link href={oppositeHref} className="text-primary ml-1 font-medium underline">
               Sign in
             </Link>
           </>

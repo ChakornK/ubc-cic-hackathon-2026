@@ -156,12 +156,12 @@ export function Landing() {
               </span>
               <span className="text-base font-medium tracking-[-0.02em]">Reogent</span>
             </a>
-            <a
-              href="#top"
-              className="neu-button bg-surface text-on-surface-variant hover:text-on-surface focus-visible:ring-primary/40 h-9 rounded-xl px-4 text-sm font-medium focus-visible:ring-2 focus-visible:ring-offset-2"
+            <Link
+              href="/login"
+              className="neu-button bg-surface text-on-surface-variant hover:text-on-surface h-9 rounded-xl px-4 text-sm font-medium"
             >
               Sign in
-            </a>
+            </Link>
           </div>
         </header>
 
