@@ -69,11 +69,9 @@ export function UserMessage({ message }: { message: DisplayMessage }) {
 
 function ThinkingBlock({ content }: { content: string }) {
   const [open, setOpen] = useState(false);
-  // Parse <status>...</status> tag if present, otherwise fall back to first line
   const statusMatch = content.match(/<status>(.*?)<\/status>/);
-  const label = statusMatch?.[1]?.trim() || content.split(/[.\n]/)[0]?.trim().slice(0, 80) || "Thinking…";
-  // Strip the status tag from displayed content
-  const displayContent = statusMatch ? content.replace(/<status>.*?<\/status>\n?/, "").trim() : content;
+  const label = statusMatch?.[1]?.trim() || "Reasoning";
+  const displayContent = content.replace(/<status>.*?<\/status>\n?/, "").trim();
   return (
     <details
       open={open}
