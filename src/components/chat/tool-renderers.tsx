@@ -174,7 +174,7 @@ function WalkingDistanceRenderer({ call }: ToolCallRendererProps) {
       </span>
       <button
         type="button"
-        // Restores THIS card's route — older cards stay openable after newer answers.
+        aria-label={`Show route from ${highlight.from} to ${highlight.to} on map`}
         onClick={() => {
           setHighlight(highlight);
           showOnMap();
@@ -206,7 +206,7 @@ function FindBuildingRenderer({ call }: ToolCallRendererProps) {
       </span>
       <button
         type="button"
-        // Restores THIS card's building — older cards stay openable after newer answers.
+        aria-label={`Show ${building.name} on map`}
         onClick={() => {
           setHighlight(highlight);
           showOnMap();
@@ -247,7 +247,7 @@ function FindPlacesRenderer({ call }: ToolCallRendererProps) {
       </span>
       <button
         type="button"
-        // Restores THIS card's pins — older cards stay openable after newer answers.
+        aria-label={`Show ${highlight.places.length} place${highlight.places.length === 1 ? "" : "s"} on map`}
         onClick={() => {
           setHighlight(highlight);
           showOnMap();
