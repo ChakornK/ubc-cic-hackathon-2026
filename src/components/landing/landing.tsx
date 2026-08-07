@@ -158,7 +158,7 @@ export function Landing() {
             </a>
             <Link
               href="/login"
-              className="neu-button bg-surface text-on-surface-variant hover:text-on-surface h-9 rounded-xl px-4 text-sm font-medium"
+              className="neu-button bg-surface text-on-surface-variant hover:text-on-surface flex h-9 items-center rounded-xl px-4 text-sm font-medium"
             >
               Sign in
             </Link>
