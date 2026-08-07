@@ -103,6 +103,7 @@ export class ReogentStack extends Stack {
     this.nextjs = new Nextjs(this, "Web", {
       nextjsPath: path.resolve(__dirname, "../.."),
       skipBuild: props.skipBuild ?? false,
+      streaming: true,
       environment: {
         BEDROCK_MODEL_ID: props.bedrockModelId,
         OPENSEARCH_ENDPOINT: this.searchDomain.domainEndpoint,
@@ -122,17 +123,14 @@ export class ReogentStack extends Stack {
 
     const serverFn = this.nextjs.serverFunction.lambdaFunction;
 
-    // Least-privilege server role
+    // Least-privilege server role — wildcard region for cross-region inference
     const bedrockResources = [
-      `arn:aws:bedrock:${this.region}::foundation-model/${props.bedrockModelId.replace(/^[a-z]+\./, "")}`,
+      `arn:aws:bedrock:*::foundation-model/${props.bedrockModelId.replace(/^[a-z]+\./, "")}`,
+      `arn:aws:bedrock:us-east-1:${this.account}:inference-profile/${props.bedrockModelId}`,
     ];
-    // If using an inference profile (e.g. "us.anthropic.claude-..."), also grant access to the profile ARN
-    if (props.bedrockModelId.includes(".") && props.bedrockModelId.split(".").length > 2) {
-      bedrockResources.push(`arn:aws:bedrock:${this.region}:${this.account}:inference-profile/${props.bedrockModelId}`);
-    }
     serverFn.addToRolePolicy(
       new iam.PolicyStatement({
-        actions: ["bedrock:InvokeModel"],
+        actions: ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
         resources: bedrockResources,
       }),
     );

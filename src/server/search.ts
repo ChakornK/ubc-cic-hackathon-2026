@@ -13,7 +13,9 @@ export function getOpenSearch(): Client {
       service: "es",
       getCredentials: fromNodeProviderChain(),
     }),
-    node: process.env.OPENSEARCH_ENDPOINT,
+    node: process.env.OPENSEARCH_ENDPOINT?.startsWith("http")
+      ? process.env.OPENSEARCH_ENDPOINT
+      : `https://${process.env.OPENSEARCH_ENDPOINT}`,
   });
   return client;
 }

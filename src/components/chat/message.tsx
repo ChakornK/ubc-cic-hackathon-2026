@@ -132,6 +132,10 @@ function humanizeToolCall(name: string, input?: Record<string, unknown>): string
       return "Finding free rooms";
     case "get_room_schedule":
       return `Checking room schedule`;
+    case "get_grades":
+      return `Looking up grades for ${slug("course_code") || "course"}`;
+    case "search_grades":
+      return q ? `Searched grade data for "${q}"` : "Searched grade data";
     default:
       return name.replace(/_/g, " ");
   }
