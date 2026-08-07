@@ -2,7 +2,6 @@
 
 // App-wide client providers: theme (light/dark with system default), auth bridge,
 // and the shared ChatApi instance.
-
 import { AppAuthProvider, useAppAuth } from "@/src/components/auth/app-auth";
 import { createChatApi, type ChatApi } from "@/src/lib/api";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -96,9 +95,7 @@ function ApiProvider({ children }: { children: ReactNode }) {
       createChatApi({
         getToken: () => authRef.current.getToken(),
         onUnauthorized: () => {
-          if (authRef.current.status === "signedIn" || authRef.current.status === "signedOut") {
-            authRef.current.signIn();
-          }
+          authRef.current.signOut();
         },
       }),
     [],

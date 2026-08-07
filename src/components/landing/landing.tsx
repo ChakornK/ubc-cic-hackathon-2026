@@ -156,13 +156,12 @@ export function Landing() {
               </span>
               <span className="text-[15px] font-medium tracking-[-0.02em]">Reogent</span>
             </a>
-            <button
-              type="button"
-              onClick={() => (auth.configured ? auth.signIn() : undefined)}
+            <a
+              href="#top"
               className="neu-button bg-surface text-on-surface-variant hover:text-on-surface h-9 rounded-xl px-4 text-sm font-medium"
             >
               Sign in
-            </button>
+            </a>
           </div>
         </header>
 

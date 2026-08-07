@@ -1,5 +1,4 @@
 import { AppProviders } from "@/src/components/providers";
-import { storedUserKey } from "@/src/lib/auth-config";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -31,15 +30,12 @@ export const viewport: Viewport = {
   ],
 };
 
-// Runs before first paint: applies the stored (or system) theme, and on the
-// landing route flags a stored sign-in so returning users see the splash
-// instead of a flash of the landing page (UX_SPEC "Already signed in").
-const AUTH_KEY = storedUserKey();
+// Runs before first paint: applies stored or system theme.
+// Returning users skip the landing page flash.
+const AUTH_KEY = "reogent.auth.user";
 const BOOTSTRAP =
   `try{var t=localStorage.getItem("campus.theme");document.documentElement.dataset.theme=(t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches))?"dark":"light"}catch(e){document.documentElement.dataset.theme="light"}` +
-  (AUTH_KEY
-    ? `try{if(location.pathname==="/"&&localStorage.getItem(${JSON.stringify(AUTH_KEY)}))document.documentElement.dataset.authPending=""}catch(e){}`
-    : "");
+  `try{if(location.pathname==="/"&&localStorage.getItem(${JSON.stringify(AUTH_KEY)}))document.documentElement.dataset.authPending=""}catch(e){}`;
 
 const DIRECTION_CONTRACT = `impeccable direction contract
 THESIS: one conversational surface that proves its answers — the map lights up with the exact route the assistant just computed; refuses the generic chatbot-in-a-box with decorative sidebar.
