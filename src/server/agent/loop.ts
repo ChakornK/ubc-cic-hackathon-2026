@@ -5,12 +5,15 @@ import type {
   ConverseFn,
   ConverseMessage,
   DatasetModule,
-  OsClient,
+  SearchClient,
   ToolCall,
 } from "../core/types";
 import { executeTool, isToolError } from "./executor";
 
 export const ITERATION_LIMIT = 8;
+
+const NUDGE =
+  "You have used many tool calls. Please provide your final answer now based on the information you have gathered so far. Do not call more tools unless absolutely necessary.";
 
 export const SYSTEM_PROMPT = `You are the UBC Vancouver campus assistant. Answer questions about courses, admissions, tuition and costs, campus buildings and walking routes, study spaces and library room bookings, food and services, parking, events, key dates, and university policies.
 
@@ -47,7 +50,7 @@ export function systemPrompt(now = new Date()): string {
 export interface AgentDeps {
   converse: ConverseFn;
   modules: DatasetModule[];
-  os: OsClient;
+  search: SearchClient;
 }
 
 /** The tool-calling loop against the Converse API (Requirements 2.2–2.7). */
@@ -60,7 +63,12 @@ export async function runAgentLoop(messages: ChatMessage[], deps: AgentDeps): Pr
   const toolCalls: ToolCall[] = [];
   let lastText = "";
 
-  for (let i = 0; i < ITERATION_LIMIT; i++) {
+  for (let i = 0; ; i++) {
+    // After hitting the soft limit, nudge the model to wrap up but keep tools available
+    if (i === ITERATION_LIMIT) {
+      convo.push({ role: "user", content: [{ text: NUDGE }] });
+    }
+
     const res = await deps.converse({ messages: convo, system: systemPrompt(), toolSpecs });
     convo.push(res.message);
     const text = (res.message.content ?? [])
@@ -77,7 +85,7 @@ export async function runAgentLoop(messages: ChatMessage[], deps: AgentDeps): Pr
     for (const block of res.message.content ?? []) {
       if (!block.toolUse) continue;
       const { toolUseId, name, input } = block.toolUse;
-      const result = await executeTool(deps.modules, name, input, deps.os);
+      const result = await executeTool(deps.modules, name, input, deps.search);
       toolCalls.push({ name, input, result });
       results.push({
         toolResult: {
@@ -89,10 +97,4 @@ export async function runAgentLoop(messages: ChatMessage[], deps: AgentDeps): Pr
     }
     convo.push({ role: "user", content: results });
   }
-
-  return {
-    message: lastText,
-    tool_calls: toolCalls,
-    warning: `Stopped after ${ITERATION_LIMIT} model calls without a final answer.`,
-  };
 }

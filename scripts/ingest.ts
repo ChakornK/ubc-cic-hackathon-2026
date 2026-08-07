@@ -1,11 +1,11 @@
-// npm run ingest — registry-driven indexing of the Data_Bucket into OpenSearch
-// (4.2, 4.3). Exits non-zero on any module failure.
+// Indexes campus datasets into Meilisearch.
+// Exits non-zero on any module failure.
+import { dataStore } from "../src/server/data";
 import { runIngest } from "../src/server/ingest";
 import { modules } from "../src/server/modules";
-import { dataBucket } from "../src/server/s3";
-import { getOpenSearch } from "../src/server/search";
+import { getSearch } from "../src/server/search";
 
-runIngest(modules, getOpenSearch(), dataBucket())
+runIngest(modules, getSearch(), dataStore())
   .then(() => console.log("Ingest complete."))
   .catch((e) => {
     console.error("Ingest failed:", e);

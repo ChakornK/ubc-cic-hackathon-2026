@@ -1,28 +1,45 @@
-import { CognitoJwtVerifier } from "aws-jwt-verify";
+import * as jose from "jose";
 
 export interface AuthedUser {
   sub: string;
-  email?: string;
+  username: string;
 }
-
-let verifier: { verify(token: string): Promise<{ sub: string; email?: unknown }> } | undefined;
 
 const unauthorized = (error: string) =>
   new Response(JSON.stringify({ error }), { status: 401, headers: { "content-type": "application/json" } });
 
-/** Verifies the bearer ID token (issuer/audience/expiry, JWKS cached across
- *  warm invocations) and returns the claims, or a 401 Response (1.2, 1.3). */
+function getSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET env var is not set");
+  return new TextEncoder().encode(secret);
+}
+
+/** Signs a JWT for the given user. Expires in 7 days. */
+export async function signToken(userId: string, username: string): Promise<string> {
+  return new jose.SignJWT({ username })
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(userId)
+    .setIssuedAt()
+    .setExpirationTime("7d")
+    .sign(getSecret());
+}
+
+/** Verifies the Bearer token and returns user info, or a 401 Response. */
 export async function requireUser(request: Request): Promise<AuthedUser | Response> {
+  // Auth disabled: return default user
+  if (process.env.AUTH_ENABLED === "false") {
+    return { sub: "default", username: "local" };
+  }
+
   const token = request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!token) return unauthorized("Missing bearer token");
+
   try {
-    verifier ??= CognitoJwtVerifier.create({
-      userPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
-      clientId: process.env.COGNITO_CLIENT_ID ?? "",
-      tokenUse: "id",
-    });
-    const claims = await verifier.verify(token);
-    return { sub: claims.sub, email: typeof claims.email === "string" ? claims.email : undefined };
+    const { payload } = await jose.jwtVerify(token, getSecret());
+    return {
+      sub: payload.sub ?? "unknown",
+      username: (payload.username as string) ?? "unknown",
+    };
   } catch {
     return unauthorized("Invalid or expired token");
   }

@@ -44,12 +44,12 @@ export interface AvailabilityDoc {
 // biome-ignore lint/suspicious/noExplicitAny: raw dataset rows
 type Row = Record<string, any>;
 
-export function transformStudySpace(row: Row): { _id: string; doc: StudySpaceDoc } | null {
+export function transformStudySpace(row: Row): { id: string; doc: StudySpaceDoc } | null {
   if (row.id == null || !row.Title) return null;
   const capacity = Number(row.Capacity); // source carries it as a string
   const floor = Number(row.floor);
   return {
-    _id: String(row.id),
+    id: String(row.id),
     doc: {
       id: String(row.id),
       title: String(row.Title),
@@ -68,10 +68,10 @@ export function transformStudySpace(row: Row): { _id: string; doc: StudySpaceDoc
   };
 }
 
-export function transformLibRoom(row: Row): { _id: string; doc: LibRoomDoc } | null {
+export function transformLibRoom(row: Row): { id: string; doc: LibRoomDoc } | null {
   if (row.eid == null || !row.title) return null;
   return {
-    _id: String(row.eid),
+    id: String(row.eid),
     doc: {
       eid: row.eid,
       building_code: row.building_code ?? null,
@@ -84,10 +84,10 @@ export function transformLibRoom(row: Row): { _id: string; doc: LibRoomDoc } | n
   };
 }
 
-export function transformAvailability(row: Row): { _id: string; doc: AvailabilityDoc } | null {
+export function transformAvailability(row: Row): { id: string; doc: AvailabilityDoc } | null {
   if (row.eid == null || !row.room || !row.start || !row.state) return null;
   return {
-    _id: `${row.eid}#${row.start}`,
+    id: `${row.eid}#${row.start}`,
     doc: {
       eid: row.eid,
       location: row.location ?? null,
@@ -111,22 +111,10 @@ export const spaces: DatasetModule = {
   indices: [
     {
       index: "study_spaces",
-      mappings: {
-        properties: {
-          id: { type: "keyword" },
-          title: { type: "text" },
-          name: { type: "text" },
-          building_code: { type: "keyword" },
-          building_name: { type: "text" },
-          room_number: { type: "keyword" },
-          capacity: { type: "integer" },
-          space_type: { type: "keyword" },
-          furniture: { type: "text" },
-          layout: { type: "text" },
-          floor: { type: "integer" },
-          photo: { type: "keyword", index: false },
-          link: { type: "keyword", index: false },
-        },
+      settings: {
+        searchableAttributes: ["title", "name", "building_name"],
+        filterableAttributes: ["building_code", "space_type", "capacity"],
+        sortableAttributes: ["capacity"],
       },
       async *read(s3) {
         yield* (await s3.getJson("learning-spaces/rooms.json")) as Row[];
@@ -135,16 +123,9 @@ export const spaces: DatasetModule = {
     },
     {
       index: "lib_rooms",
-      mappings: {
-        properties: {
-          eid: { type: "integer" },
-          building_code: { type: "keyword" },
-          location: { type: "text" },
-          title: { type: "text" },
-          capacity: { type: "integer" },
-          url: { type: "keyword", index: false },
-          thumbnail: { type: "keyword", index: false },
-        },
+      settings: {
+        searchableAttributes: ["title", "location"],
+        filterableAttributes: ["building_code", "capacity", "eid"],
       },
       async *read(s3) {
         yield* (await s3.getJson("room-bookings/rooms.json")) as Row[];
@@ -153,20 +134,10 @@ export const spaces: DatasetModule = {
     },
     {
       index: "room_availability",
-      mappings: {
-        properties: {
-          eid: { type: "integer" },
-          location: { type: "text" },
-          building_code: { type: "keyword" },
-          room: { type: "text" },
-          capacity: { type: "integer" },
-          state: { type: "keyword" },
-          date: { type: "keyword" },
-          start: { type: "keyword" }, // ISO timestamps — sort correctly as strings
-          end: { type: "keyword" },
-          minutes: { type: "integer" },
-          collected_at: { type: "keyword" },
-        },
+      settings: {
+        searchableAttributes: ["room", "location"],
+        filterableAttributes: ["state", "minutes", "capacity", "date", "eid"],
+        sortableAttributes: ["start", "capacity"],
       },
       async *read(s3) {
         yield* (await s3.getJson("room-bookings/availability.json")) as Row[];
@@ -194,35 +165,19 @@ export const spaces: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const must: Record<string, unknown>[] = [];
-        if (input.query)
-          must.push({ multi_match: { query: String(input.query), fields: ["title^2", "building_name"] } });
-        const filter: Record<string, unknown>[] = [];
-        if (input.building) {
-          filter.push({
-            bool: {
-              should: [
-                { term: { building_code: String(input.building).toUpperCase() } },
-                { match: { building_name: String(input.building) } },
-              ],
-              minimum_should_match: 1,
-            },
-          });
-        }
-        if (input.space_type) filter.push({ term: { space_type: String(input.space_type) } });
-        if (input.min_capacity !== undefined) filter.push({ range: { capacity: { gte: Number(input.min_capacity) } } });
-        const res = await os.search({
-          index: "study_spaces",
-          body: {
-            query: { bool: { must: must.length > 0 ? must : [{ match_all: {} }], filter } },
-            size: Math.min(Number(input.limit) || 10, 30),
-            sort: [{ capacity: { order: "desc", missing: "_last" } }],
-          },
+      async execute(input, search) {
+        const filters: string[] = [];
+        if (input.building) filters.push(`building_code = '${String(input.building).toUpperCase()}'`);
+        if (input.space_type) filters.push(`space_type = '${String(input.space_type)}'`);
+        if (input.min_capacity !== undefined) filters.push(`capacity >= ${Number(input.min_capacity)}`);
+        const res = await search.index("study_spaces").search(input.query ? String(input.query) : "", {
+          filter: filters.length > 0 ? filters.join(" AND ") : undefined,
+          sort: ["capacity:desc"],
+          limit: Math.min(Number(input.limit) || 10, 30),
         });
-        const hits = res.body.hits.hits;
+        const hits = res.hits;
         if (hits.length === 0) throw new Error("No study spaces matched those filters");
-        return { spaces: hits.map((h) => h._source as StudySpaceDoc) };
+        return { spaces: hits as unknown as StudySpaceDoc[] };
       },
     },
     {
@@ -242,22 +197,16 @@ export const spaces: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const filter: Record<string, unknown>[] = [{ term: { state: "free" } }];
-        if (input.min_minutes !== undefined) filter.push({ range: { minutes: { gte: Number(input.min_minutes) } } });
-        if (input.min_capacity !== undefined) filter.push({ range: { capacity: { gte: Number(input.min_capacity) } } });
-        const must: Record<string, unknown>[] = input.location
-          ? [{ match: { location: String(input.location) } }]
-          : [{ match_all: {} }];
-        const res = await os.search({
-          index: "room_availability",
-          body: {
-            query: { bool: { must, filter } },
-            size: 20,
-            sort: [{ capacity: { order: "desc", missing: "_last" } }],
-          },
+      async execute(input, search) {
+        const filters: string[] = ["state = 'free'"];
+        if (input.min_minutes !== undefined) filters.push(`minutes >= ${Number(input.min_minutes)}`);
+        if (input.min_capacity !== undefined) filters.push(`capacity >= ${Number(input.min_capacity)}`);
+        const res = await search.index("room_availability").search(input.location ? String(input.location) : "", {
+          filter: filters.join(" AND "),
+          sort: ["capacity:desc"],
+          limit: 20,
         });
-        const rows = res.body.hits.hits.map((h) => h._source as AvailabilityDoc);
+        const rows = res.hits as unknown as AvailabilityDoc[];
         if (rows.length === 0) throw new Error("No free library rooms matched those filters in the latest snapshot");
         return { as_of: asOf(rows), rooms: rows };
       },
@@ -278,17 +227,15 @@ export const spaces: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const filter: Record<string, unknown>[] = input.date ? [{ term: { date: String(input.date) } }] : [];
-        const res = await os.search({
-          index: "room_availability",
-          body: {
-            query: { bool: { must: [{ match: { room: { query: String(input.room), operator: "and" } } }], filter } },
-            size: 100,
-            sort: [{ start: "asc" }],
-          },
+      async execute(input, search) {
+        const filters: string[] = [];
+        if (input.date) filters.push(`date = '${String(input.date)}'`);
+        const res = await search.index("room_availability").search(String(input.room), {
+          filter: filters.length > 0 ? filters.join(" AND ") : undefined,
+          sort: ["start:asc"],
+          limit: 100,
         });
-        const rows = res.body.hits.hits.map((h) => h._source as AvailabilityDoc);
+        const rows = res.hits as unknown as AvailabilityDoc[];
         if (rows.length === 0) throw new Error(`No library room matched "${input.room}" in the latest snapshot`);
         return {
           room: rows[0].room,

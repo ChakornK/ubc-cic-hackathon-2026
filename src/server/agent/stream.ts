@@ -1,8 +1,8 @@
 // Streaming agent loop: yields NDJSON events as the model generates text
 // and executes tools. The non-streaming loop in loop.ts remains for property tests.
 
-import { converseStream } from "../bedrock";
-import type { ChatMessage, ContentBlock, ConverseMessage, DatasetModule, OsClient, ToolCall } from "../core/types";
+import type { ChatMessage, ContentBlock, ConverseMessage, DatasetModule, SearchClient, ToolCall } from "../core/types";
+import { converseStream } from "../llm";
 import { executeTool, isToolError } from "./executor";
 import { ITERATION_LIMIT, systemPrompt } from "./loop";
 
@@ -19,7 +19,7 @@ export type StreamEvent =
 
 export interface StreamAgentDeps {
   modules: DatasetModule[];
-  os: OsClient;
+  search: SearchClient;
 }
 
 /** Runs the agent loop, yielding StreamEvents via an async generator. */
@@ -32,8 +32,20 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
   const toolCalls: ToolCall[] = [];
   let fullText = "";
 
-  for (let i = 0; i < ITERATION_LIMIT; i++) {
+  for (let i = 0; ; i++) {
     if (i > 0) yield { type: "turn_start" as const };
+
+    // After soft limit, nudge model to wrap up but keep tools available
+    if (i === ITERATION_LIMIT) {
+      convo.push({
+        role: "user",
+        content: [
+          {
+            text: "You have used many tool calls. Please provide your final answer now based on the information you have gathered so far. Do not call more tools unless absolutely necessary.",
+          },
+        ],
+      });
+    }
 
     let iterText = "";
     const toolUses: { toolUseId: string; name: string; input: Record<string, unknown> }[] = [];
@@ -43,7 +55,11 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
     // Stream thinking immediately. Stream text optimistically as the answer.
     // If a tool_use block appears after text, emit text_clear to retract it
     // and re-emit the text as thinking.
-    for await (const event of converseStream({ messages: convo, system: systemPrompt(), toolSpecs })) {
+    for await (const event of converseStream({
+      messages: convo,
+      system: systemPrompt(),
+      toolSpecs,
+    })) {
       if (event.type === "thinking") {
         yield { type: "thinking", delta: event.delta };
       } else if (event.type === "text") {
@@ -83,7 +99,7 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
     const results: ContentBlock[] = [];
     for (const { toolUseId, name, input } of toolUses) {
       yield { type: "tool_start", name, input };
-      const result = await executeTool(deps.modules, name, input, deps.os);
+      const result = await executeTool(deps.modules, name, input, deps.search);
       toolCalls.push({ name, input, result });
       yield { type: "tool_end", name, result };
       results.push({
@@ -96,11 +112,4 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
     }
     convo.push({ role: "user", content: results });
   }
-
-  yield {
-    type: "done",
-    message: fullText,
-    tool_calls: toolCalls,
-    warning: `Stopped after ${ITERATION_LIMIT} model calls without a final answer.`,
-  };
 }

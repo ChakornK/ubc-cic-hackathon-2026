@@ -1,7 +1,7 @@
 import type { FeatureCollection } from "geojson";
-import type { DatasetModule, OsClient } from "../core/types";
+import type { DatasetModule, SearchClient } from "../core/types";
+import { dataStore } from "../data";
 import { route } from "../routing";
-import { dataBucket } from "../s3";
 
 export interface BuildingDoc {
   code: string;
@@ -56,12 +56,12 @@ export function acronymAliases(...names: (string | null | undefined)[]): string[
   return [...out];
 }
 
-export function transformBuilding(f: Feature): { _id: string; doc: BuildingDoc } | null {
+export function transformBuilding(f: Feature): { id: string; doc: BuildingDoc } | null {
   const code = f?.properties?.BLDG_CODE;
   if (!code) return null;
   const { lat, lon } = centroid(f.geometry);
   const name = f.properties.NAME ?? code;
-  return { _id: code, doc: { code, name, aliases: acronymAliases(name, f.properties.SHORTNAME), lat, lon } };
+  return { id: code, doc: { code, name, aliases: acronymAliases(name, f.properties.SHORTNAME), lat, lon } };
 }
 
 let geoPromise: Promise<FeatureCollection> | undefined;
@@ -73,7 +73,7 @@ const GEO_TTL_MS = 10 * 60 * 1000;
  *  routing graph. */
 export function getBuildingsGeoJson(): Promise<FeatureCollection> {
   if (geoPromise && Date.now() - geoLoadedAt > GEO_TTL_MS) geoPromise = undefined;
-  geoPromise ??= dataBucket()
+  geoPromise ??= dataStore()
     .getJson(BUILDINGS_KEY)
     .then((geo) => {
       geoLoadedAt = Date.now();
@@ -87,25 +87,21 @@ export function getBuildingsGeoJson(): Promise<FeatureCollection> {
 }
 
 /** Exact code, then acronym alias ("IKB" → IBLC), then fuzzy name search. */
-export async function resolveBuilding(os: OsClient, query: string): Promise<BuildingDoc> {
+export async function resolveBuilding(search: SearchClient, query: string): Promise<BuildingDoc> {
   const norm = query.trim().toUpperCase();
   try {
-    const res = await os.get({ index: "buildings", id: norm });
-    return res.body._source as BuildingDoc;
+    return (await search.index("buildings").getDocument(norm)) as unknown as BuildingDoc;
   } catch {
-    const alias = await os.search({
-      index: "buildings",
-      body: { query: { term: { aliases: norm } }, size: 1 },
+    const alias = await search.index("buildings").search("", {
+      filter: `aliases = '${norm}'`,
+      limit: 1,
     });
-    const aliasHit = alias.body.hits.hits[0];
-    if (aliasHit) return aliasHit._source as BuildingDoc;
-    const res = await os.search({
-      index: "buildings",
-      body: { query: { multi_match: { query, fields: ["code^2", "name"] } }, size: 1 },
-    });
-    const hit = res.body.hits.hits[0];
+    const aliasHit = alias.hits[0];
+    if (aliasHit) return aliasHit as unknown as BuildingDoc;
+    const res = await search.index("buildings").search(query, { limit: 1 });
+    const hit = res.hits[0];
     if (!hit) throw new Error(`Unknown building: "${query}"`);
-    return hit._source as BuildingDoc;
+    return hit as unknown as BuildingDoc;
   }
 }
 
@@ -114,14 +110,9 @@ export const buildings: DatasetModule = {
   indices: [
     {
       index: "buildings",
-      mappings: {
-        properties: {
-          code: { type: "keyword" },
-          name: { type: "text" },
-          aliases: { type: "keyword" },
-          lat: { type: "float" },
-          lon: { type: "float" },
-        },
+      settings: {
+        searchableAttributes: ["code", "name", "aliases"],
+        filterableAttributes: ["code", "aliases"],
       },
       async *read(s3) {
         yield* ((await s3.getJson(BUILDINGS_KEY)) as { features: Feature[] }).features;
@@ -182,9 +173,9 @@ export const buildings: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const from = await resolveBuilding(os, String(input.from_building ?? ""));
-        const to = await resolveBuilding(os, String(input.to_building ?? ""));
+      async execute(input, search) {
+        const from = await resolveBuilding(search, String(input.from_building ?? ""));
+        const to = await resolveBuilding(search, String(input.to_building ?? ""));
         if (from.code === to.code) return { from: from.code, to: to.code, meters: 0, minutes: 0 };
         // polyline stays out of the model context — /api/route serves it to the map
         const { meters, minutes, method } = await route(from, to);
@@ -206,8 +197,8 @@ export const buildings: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        return await resolveBuilding(os, String(input.query ?? ""));
+      async execute(input, search) {
+        return await resolveBuilding(search, String(input.query ?? ""));
       },
     },
   ],

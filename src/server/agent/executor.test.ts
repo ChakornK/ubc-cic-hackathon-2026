@@ -1,9 +1,9 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import type { DatasetModule, OsClient } from "../core/types";
+import type { DatasetModule, SearchClient } from "../core/types";
 import { executeTool, isToolError } from "./executor";
 
-const os = {} as OsClient;
+const search = {} as SearchClient;
 
 const spec = (name: string) => ({ name, description: "d", inputSchema: { json: {} } });
 
@@ -34,7 +34,7 @@ describe("tool executor", () => {
             },
           ];
           const name = scenario.kind === "unknown" ? "nope" : "t";
-          const result = await executeTool(modules, name, {}, os);
+          const result = await executeTool(modules, name, {}, search);
           expect(isToolError(result)).toBe(true);
           const err = result as { status: "error"; message: string };
           expect(err.message.length).toBeGreaterThan(0);
@@ -48,6 +48,6 @@ describe("tool executor", () => {
     const modules: DatasetModule[] = [
       { name: "m", indices: [], tools: [{ spec: spec("ok"), execute: async () => ({ hits: 3 }) }] },
     ];
-    expect(await executeTool(modules, "ok", {}, os)).toEqual({ hits: 3 });
+    expect(await executeTool(modules, "ok", {}, search)).toEqual({ hits: 3 });
   });
 });

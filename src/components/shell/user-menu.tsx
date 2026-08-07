@@ -39,7 +39,7 @@ export function UserMenu() {
     };
   }, [open]);
 
-  const initial = (auth.user?.name ?? auth.user?.email ?? "?").trim().charAt(0).toUpperCase();
+  const initial = (auth.user?.username ?? "?").trim().charAt(0).toUpperCase();
 
   return (
     <div ref={rootRef} className="relative">
@@ -70,8 +70,8 @@ export function UserMenu() {
       >
         <div className="rounded-xl px-2.5 py-2">
           <p className="text-muted text-xs font-medium">Signed in as</p>
-          <p className="text-body-sm text-on-surface mt-0.5 truncate" title={auth.user?.email}>
-            {auth.user?.email ?? "Signed in"}
+          <p className="text-body-sm text-on-surface mt-0.5 truncate" title={auth.user?.username}>
+            {auth.user?.username ?? "Signed in"}
           </p>
         </div>
 

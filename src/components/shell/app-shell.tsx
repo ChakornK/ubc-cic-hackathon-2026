@@ -27,12 +27,10 @@ function Splash({ label }: { label: string }) {
   );
 }
 
-/** Gate: initializing → splash; signed out on arrival → straight to sign-in
- * (Requirement 1.4 flow); signed out mid-session (sign-out) → back home. */
+/** Gate: initializing → splash; signed out → redirect to landing/login. */
 function RequireAuth({ children }: { children: ReactNode }) {
   const auth = useAppAuth();
   const router = useRouter();
-  const redirected = useRef(false);
   const wasSignedIn = useRef(false);
 
   useEffect(() => {
@@ -40,12 +38,8 @@ function RequireAuth({ children }: { children: ReactNode }) {
       wasSignedIn.current = true;
       return;
     }
-    if (auth.status !== "signedOut") return;
-    if (wasSignedIn.current) {
+    if (auth.status === "signedOut") {
       router.replace("/");
-    } else if (auth.configured && !redirected.current) {
-      redirected.current = true;
-      auth.signIn();
     }
   }, [auth, router]);
 

@@ -1,5 +1,5 @@
 import { ESTIMATE_DETOUR, haversineMetersObj, WALK_SPEED_M_PER_MIN, type LngLat } from "@/src/shared/types";
-import { dataBucket } from "./s3";
+import { dataStore } from "./data";
 
 /** Shortest walking routes over the campus pedestrian network
  *  (walking-routes.geojson, derived at ingest from ubcv_routes.geojson). */
@@ -260,7 +260,7 @@ export function getGraph(): Promise<Graph> {
   if (graphPromise && Date.now() - graphLoadedAt > GRAPH_TTL_MS) {
     graphPromise = undefined;
   }
-  graphPromise ??= dataBucket()
+  graphPromise ??= dataStore()
     .getJson("derived/walking-routes.geojson")
     .then((geo) => {
       graphLoadedAt = Date.now();
@@ -283,7 +283,7 @@ export function getEntrances(): Promise<Record<string, LngLat[]>> {
   if (entrancesPromise && Date.now() - entrancesLoadedAt > GRAPH_TTL_MS) {
     entrancesPromise = undefined;
   }
-  entrancesPromise ??= dataBucket()
+  entrancesPromise ??= dataStore()
     .getJson("derived/building-entrances.json")
     .then((data) => {
       entrancesLoadedAt = Date.now();
