@@ -124,10 +124,10 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
                         onClick={() => openSession(session.session_id)}
                         aria-current={active ? "page" : undefined}
                         title={session.title}
-                        className={`flex min-h-10 w-full items-center gap-2.5 rounded-lg px-3 text-left transition-all duration-150 ${
+                        className={`flex h-9 w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-150 ${
                           active
-                            ? "neu-raised border-border-subtle bg-surface text-primary border"
-                            : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                            ? "bg-accent-subtle text-primary"
+                            : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                         }`}
                       >
                         <Icon name="chat1" size={16} className="shrink-0" />
