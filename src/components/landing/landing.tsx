@@ -86,17 +86,17 @@ const CAPABILITIES = [
   {
     glyph: <CourseSearchGlyph />,
     label: "Course search",
-    copy: "Find courses by subject, credits, or prerequisites. Filter to exactly what fits your schedule.",
+    copy: "Filter by subject, credits, term, or prerequisite status. Returns full course records from the catalog.",
   },
   {
     glyph: <TuitionGlyph />,
     label: "Tuition lookup",
-    copy: "Per-credit rates by program, student type, and cohort year. No more PDF hunting.",
+    copy: "Per-credit rates by program, student type, and cohort year. Sourced from the fee schedule, not estimated.",
   },
   {
     glyph: <RoutesGlyph />,
     label: "Campus routes",
-    copy: "Walking distance and time between any two buildings. See the route on a real map.",
+    copy: "Walking distance and time between any two buildings, drawn on the map with the actual path.",
   },
 ] as const;
 
@@ -176,7 +176,7 @@ export function Landing() {
                 Know your campus.
               </h1>
               <p className="text-on-surface-variant mt-8 max-w-xl text-base leading-relaxed">
-                Courses, prerequisites, tuition, walking routes—answered instantly from real UBC data.
+                Ask about courses, tuition, prerequisites, or walking routes. Get answers pulled from actual UBC data.
               </p>
               <div id="sign-in" className="mt-10 flex w-full scroll-mt-24 items-center justify-center gap-3">
                 <Link
@@ -198,10 +198,10 @@ export function Landing() {
           <section className="bg-surface-container-low/45 px-3 py-20 sm:px-6 sm:py-28">
             <div className="mx-auto mb-10 max-w-3xl text-center">
               <h2 className="text-3xl font-medium tracking-[-0.03em] text-balance sm:text-4xl">
-                See the answer. See the route.
+                Chat meets campus map.
               </h2>
               <p className="text-on-surface-variant mx-auto mt-4 max-w-xl text-base leading-relaxed">
-                One workspace keeps grounded answers and campus context side by side.
+                Ask a question, get a sourced answer. If it involves a location, the map shows you where.
               </p>
             </div>
             <div
@@ -218,7 +218,7 @@ export function Landing() {
               <div className="mb-10 max-w-xl">
                 <h2 className="text-3xl font-medium tracking-[-0.03em] text-balance sm:text-4xl">What it knows</h2>
                 <p className="text-on-surface-variant mt-4 text-base leading-relaxed">
-                  University questions stay connected instead of sending you across scattered systems.
+                  Pulls from the same course catalogs, tuition tables, and campus GeoJSON you'd search manually.
                 </p>
               </div>
               <div
@@ -260,7 +260,7 @@ export function Landing() {
                 <h2 className="text-[1.875rem] font-medium tracking-[-0.035em] text-balance sm:text-5xl">
                   Ready to ask?
                 </h2>
-                <p className="text-on-surface-variant mt-4 text-base">Your courses, your campus, one conversation.</p>
+                <p className="text-on-surface-variant mt-4 text-base">One chat. Courses, campus, costs.</p>
                 <div className="mt-9 flex items-center justify-center gap-3">
                   <Link
                     href="/signup"
@@ -275,7 +275,7 @@ export function Landing() {
                     Sign in
                   </Link>
                 </div>
-                <p className="text-body-sm text-muted mt-4">Free to use · No credit card required</p>
+                <p className="text-body-sm text-muted mt-4">Free to use</p>
               </div>
             </div>
             <p className="text-muted mt-10 text-center text-xs">Built for UBC CIC Hackathon 2026</p>
