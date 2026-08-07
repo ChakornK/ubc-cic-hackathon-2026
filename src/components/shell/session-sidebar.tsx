@@ -49,7 +49,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
           <Icon name="school" size={20} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="text-on-surface block text-lg leading-tight font-medium tracking-[-0.02em]">Sessions</span>
+          <span className="text-on-surface block text-base leading-tight font-medium tracking-[-0.02em]">Sessions</span>
           <span className="text-body-sm text-muted block truncate">Your conversation history</span>
         </span>
         {onCollapse && (

@@ -129,7 +129,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <RequireAuth>
       <div className="app-shell-canvas flex h-svh flex-col overflow-hidden">
-        <header className="glass-neu relative z-30 mx-3 mt-3 flex h-14 shrink-0 items-center justify-between rounded-2xl border px-3 sm:px-4">
+        <header className="glass-neu relative z-30 mx-2 mt-3 flex h-14 shrink-0 items-center justify-between rounded-2xl border px-2 sm:mx-3 sm:px-4">
           <div className="flex min-w-0 items-center gap-2">
             <button
               type="button"
@@ -147,7 +147,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span className="bg-surface-container-low text-primary border-border-subtle hidden size-8 shrink-0 items-center justify-center rounded-lg border transition-transform duration-150 group-hover:-translate-y-0.5 sm:flex">
                 <Icon name="school" size={17} />
               </span>
-              <span className="text-primary group-hover:text-on-surface truncate text-lg font-medium tracking-[-0.025em] transition-colors duration-150 sm:text-xl">
+              <span className="text-primary group-hover:text-on-surface truncate text-base font-medium tracking-[-0.025em] transition-colors duration-150 sm:text-xl">
                 Reogent
               </span>
             </Link>

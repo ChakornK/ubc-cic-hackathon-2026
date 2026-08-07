@@ -318,7 +318,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
             <span className="bg-surface text-primary border-border-subtle flex size-16 items-center justify-center rounded-2xl border">
               <Icon name="chat1" size={30} />
             </span>
-            <h2 className="text-on-surface mt-6 text-[1.25rem] font-medium tracking-[-0.025em]">Ask me about UBC</h2>
+            <h2 className="text-on-surface mt-6 text-xl font-medium tracking-[-0.025em]">Ask me about UBC</h2>
             <p className="text-on-surface-variant mt-2 max-w-80 text-sm leading-relaxed">
               I can help with courses, prerequisites, tuition costs, and walking routes between campus buildings.
             </p>

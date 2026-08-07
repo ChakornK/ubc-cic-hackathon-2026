@@ -182,7 +182,7 @@ export function Landing() {
               <h1 className="max-w-[12ch] text-[clamp(3rem,8vw,5.75rem)] leading-[0.98] font-medium tracking-[-0.04em] text-balance">
                 Know your campus.
               </h1>
-              <p className="text-on-surface-variant mt-7 max-w-xl text-base leading-relaxed sm:text-lg">
+              <p className="text-on-surface-variant mt-7 max-w-xl text-base leading-relaxed">
                 Courses, prerequisites, tuition, walking routes—answered instantly from real UBC data.
               </p>
               <div id="sign-in" className="mt-10 flex w-full scroll-mt-24 justify-center">

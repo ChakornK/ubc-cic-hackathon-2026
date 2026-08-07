@@ -50,7 +50,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
   }
 
   return (
-    <div className="shrink-0 bg-transparent px-3 pt-2 pb-3 sm:px-4 sm:pb-4">
+    <div className="shrink-0 bg-transparent px-3 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4 sm:pb-4">
       <form
         data-thinking={thinking}
         aria-busy={thinking}
