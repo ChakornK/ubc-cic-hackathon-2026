@@ -1,804 +1,353 @@
-# Design System
+---
+name: Reogent
+description: AI campus assistant with soft neumorphic depth and molded tactile surfaces
+colors:
+  background: "#f8f8f6"
+  surface: "#fafafa"
+  surface-container-lowest: "#ffffff"
+  surface-container-low: "#f4f3f5"
+  surface-container: "#eeeeef"
+  surface-container-high: "#e8e8e9"
+  surface-bright: "#ffffff"
+  primary: "#416375"
+  primary-container: "#7c9eb2"
+  secondary: "#306946"
+  secondary-container: "#b3f1c4"
+  tertiary: "#7a5733"
+  tertiary-container: "#f4e3cf"
+  error: "#a04747"
+  error-container: "#ffdad6"
+  on-surface: "#1a1c1d"
+  on-surface-variant: "#42484c"
+  muted: "#5c6367"
+  outline: "#72787c"
+  outline-variant: "#c2c7cc"
+  border: "#e8e8e4"
+  border-subtle: "#f0f0ec"
+  accent-subtle: "#eef4f7"
+  surface-tint: "#416375"
+  on-primary: "#ffffff"
+  on-primary-container: "#103546"
+typography:
+  body:
+    fontFamily: "Aspekta, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 400
+    lineHeight: 1.5
+  body-sm:
+    fontFamily: "Aspekta, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 400
+    lineHeight: 1.5
+  heading:
+    fontFamily: "Aspekta, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 500
+    lineHeight: 1.4
+  title:
+    fontFamily: "Aspekta, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 500
+    lineHeight: 1.3
+  display:
+    fontFamily: "Aspekta, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.875rem"
+    fontWeight: 500
+    lineHeight: 1.2
+  caption:
+    fontFamily: "Aspekta, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 450
+    lineHeight: 1.4
+  mono:
+    fontFamily: "Commit Mono, ui-monospace, SF Mono, Menlo, Consolas, monospace"
+    fontSize: "0.8125rem"
+    fontWeight: 400
+    lineHeight: 1.5
+rounded:
+  sm: "6px"
+  md: "8px"
+  lg: "12px"
+  xl: "16px"
+  full: "9999px"
+spacing:
+  xs: "4px"
+  sm: "8px"
+  md: "12px"
+  lg: "16px"
+  xl: "24px"
+  2xl: "32px"
+components:
+  button-primary:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.xl}"
+    padding: "8px 12px"
+  button-primary-hover:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
+  button-secondary:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.on-surface}"
+    rounded: "{rounded.xl}"
+    padding: "8px 12px"
+  button-ghost:
+    backgroundColor: "transparent"
+    textColor: "{colors.on-surface-variant}"
+    rounded: "{rounded.xl}"
+    padding: "8px 12px"
+  card:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.on-surface}"
+    rounded: "{rounded.lg}"
+    padding: "16px"
+  input:
+    backgroundColor: "{colors.surface-container-low}"
+    textColor: "{colors.on-surface}"
+    rounded: "{rounded.full}"
+    padding: "8px 12px"
+  chip:
+    backgroundColor: "transparent"
+    textColor: "{colors.primary}"
+    rounded: "{rounded.full}"
+    padding: "6px 12px"
+  nav-item:
+    backgroundColor: "transparent"
+    textColor: "{colors.on-surface-variant}"
+    rounded: "{rounded.md}"
+    padding: "8px 12px"
+  nav-item-active:
+    backgroundColor: "{colors.accent-subtle}"
+    textColor: "{colors.primary}"
+    rounded: "{rounded.md}"
+    padding: "8px 12px"
+---
 
-<!-- impeccable:design-schema 1 -->
+# Design System: Reogent
 
-## Visual Direction
+## Overview
 
-**Soft neumorphism meets muted minimalism.** The interface has gentle depth—surfaces rise and recede through soft shadows rather than hard borders. Elements feel tactile, like they could be pressed. The palette stays pastel and restrained, but the UI has dimensionality.
+**Creative North Star: "The Soft Instrument"**
 
-This is NOT the heavy-handed neumorphism of 2020 with its dramatic inset/outset shadows. It's a refined, modern interpretation: subtle elevation changes, soft ambient shadows, and a layered surface hierarchy that creates depth without sacrificing clarity or accessibility.
+Reogent's interface is a precision instrument rendered in soft matte material. Every surface is molded from the same substance — gently dimensional, functional, quietly confident. The neumorphic treatment creates depth through sculpted shadow rather than transparency or decoration. Controls feel pressable. Panels feel lifted. The whole system reads as a single material shaped into different forms for different purposes.
 
-### Design Principles
+This is modern neumorphism that learned from the excesses of 2020: shadows are warm and diffuse, not dramatic. The glass-material overlays add translucency only where it serves spatial hierarchy (the header floating over content, panels layering over the map). Depth communicates function — recessed means input, raised means action, flat means content.
 
-1. **Soft depth**: Surfaces have gentle elevation. Cards float. Inputs feel pressable. Shadows are diffuse and warm, never harsh.
-2. **Content-forward**: Chat messages and map data are the product—the neumorphic treatment frames them without competing.
-3. **Tactile affordance**: Interactive elements look touchable. Buttons have subtle dimension. The UI invites interaction.
-4. **Muted warmth**: Colors stay soft and approachable. The neumorphic shadows use warm tints, not pure black.
-5. **Layered surfaces**: A clear hierarchy of surface levels (background → container-low → container → surface → elevated) creates spatial organization.
+The dual-shadow architecture is intentional: basic elevation tokens (`--elevation-sm/md/lg`) provide a Tailwind-compatible utility layer, while the refined neumorphic system (`--neu-panel/raised/inset`) handles composed surfaces with multi-shadow recipes. A radial-gradient canvas behind everything gives the "table" warmth and subtle spatial cues.
 
-## Color
+**Key Characteristics:**
 
-### Palette
+- Molded and tactile — every element feels pressable, shaped from a single soft material
+- Content-forward — chat messages and map data are the product; the neumorphic frame never competes
+- Dual-layer shadow — utility-level elevation tokens coexist with refined composed neumorphic shadows
+- Glass as hierarchy — backdrop-blur materials appear only where layering serves function (header, panels over map)
+- Warm shadows — tinted with warm gray `rgba(174, 174, 174, x)` in light mode, never pure black
 
-Pastel-inflected, low-saturation colors with a warm gray foundation. The palette supports the neumorphic depth model—shadows are tinted warm, highlights are cool.
+## Colors
 
-#### Surface Hierarchy (Light Mode)
+A muted, pastel-inflected palette with a warm gray foundation. Colors support the neumorphic depth model — shadows are tinted warm, highlights run cool-white.
 
-The neumorphic approach requires multiple surface levels to create depth:
+### Primary
 
-| Level                      | Color     | Usage                                              |
-| -------------------------- | --------- | -------------------------------------------------- |
-| **Background**             | `#F8F8F6` | Page ground, the "table" everything sits on        |
-| **Surface Container Low**  | `#F4F3F5` | Sidebar, recessed areas                            |
-| **Surface Container**      | `#EEEEEF` | Content wells, grouped sections                    |
-| **Surface Container High** | `#E8E8E9` | Hover states, pressed states                       |
-| **Surface**                | `#FAFAFA` | Elevated cards, main content panels                |
-| **Surface Bright**         | `#FFFFFF` | Highest elevation, focused inputs, active elements |
+- **Steel Cove** (`#416375`): Primary actions, active states, focus rings, surface tint. The single accent color used sparingly for interactive meaning.
+- **Cove Container** (`#7c9eb2`): Primary button backgrounds, accent areas, avatar backgrounds. Softer carrier for the primary identity.
 
-#### Semantic Colors
+### Secondary
 
-| Role                     | Light Mode | Dark Mode | Usage                                           |
-| ------------------------ | ---------- | --------- | ----------------------------------------------- |
-| **Primary**              | `#416375`  | `#A9CBE0` | Primary actions, active states, key UI elements |
-| **Primary Container**    | `#7C9EB2`  | `#294B5C` | Primary button backgrounds, accent areas        |
-| **On Primary**           | `#FFFFFF`  | `#001E2B` | Text/icons on primary surfaces                  |
-| **On Primary Container** | `#103546`  | `#C4E7FD` | Text/icons on primary container                 |
-| **Secondary**            | `#306946`  | `#98D4A9` | Success states, positive actions                |
-| **Secondary Container**  | `#B3F1C4`  | `#155130` | Success backgrounds, route info                 |
-| **Tertiary**             | `#7A5733`  | `#EBBE92` | Warnings, tertiary actions                      |
-| **Tertiary Container**   | `#BB9269`  | `#5F401E` | Warning backgrounds                             |
-| **Error**                | `#C48B8B`  | `#D49A9A` | Errors, destructive actions                     |
-| **Error Container**      | `#FFDAD6`  | `#93000A` | Error backgrounds                               |
+- **Campus Green** (`#306946`): Success states, positive feedback, route confirmation.
+- **Green Container** (`#b3f1c4`): Success backgrounds, route information panels.
 
-#### Text Colors
+### Tertiary
 
-| Role                   | Light Mode | Dark Mode | Usage                            |
-| ---------------------- | ---------- | --------- | -------------------------------- |
-| **On Surface**         | `#1A1C1D`  | `#E3E2E4` | Primary text                     |
-| **On Surface Variant** | `#42484C`  | `#C2C7CC` | Secondary text, labels, metadata |
-| **Outline**            | `#72787C`  | `#8C9297` | Icons, tertiary text             |
-| **Outline Variant**    | `#C2C7CC`  | `#42484C` | Disabled text, placeholders      |
+- **Warm Bark** (`#7a5733`): Warnings, tertiary actions.
+- **Bark Container** (`#f4e3cf`): Warning backgrounds, tertiary accents.
 
-#### Border Colors
+### Neutral
 
-| Role              | Light Mode | Dark Mode | Usage                      |
-| ----------------- | ---------- | --------- | -------------------------- |
-| **Border**        | `#E8E8E4`  | `#2A2A2E` | Standard borders, dividers |
-| **Border Subtle** | `#F0F0EC`  | `#1E1E22` | Hairlines, soft separators |
+- **Background** (`#f8f8f6`): Page ground — the "table" everything sits on. Receives the radial-gradient canvas treatment.
+- **Surface** (`#fafafa`): Elevated cards, main content panels. The default resting material.
+- **Surface Container Low** (`#f4f3f5`): Sidebar, recessed areas. Reads as pressed into the background.
+- **Surface Container** (`#eeeeef`): Content wells, grouped sections, inline code backgrounds.
+- **Surface Container High** (`#e8e8e9`): Hover states, pressed states. Darkest neutral surface.
+- **Surface Bright** (`#ffffff`): Highest elevation — focused inputs, active elements, dropdown menus.
+- **On Surface** (`#1a1c1d`): Primary text. 4.5:1+ on all surfaces.
+- **On Surface Variant** (`#42484c`): Secondary text, labels. 4.5:1 on light surfaces.
+- **Muted** (`#5c6367`): Meta text, placeholders. Added for WCAG AA compliance where Outline/Outline Variant fall short.
+- **Border** (`#e8e8e4`): Standard borders, dividers.
+- **Border Subtle** (`#f0f0ec`): Hairlines, soft separators, neumorphic edge accents.
+- **Accent Subtle** (`#eef4f7`): Selected nav items, hover backgrounds, user message bubbles.
 
-#### Accent Colors
+### Named Rules
 
-| Role              | Light Mode | Dark Mode | Usage                                 |
-| ----------------- | ---------- | --------- | ------------------------------------- |
-| **Accent Subtle** | `#EEF4F7`  | `#1E2A30` | Selected nav items, hover backgrounds |
-| **Surface Tint**  | `#416375`  | `#A9CBE0` | Tint overlay for interactive states   |
+**The Warm Shadow Rule.** Neumorphic shadows in light mode use `rgba(174, 174, 174, x)` — never pure black. In dark mode, shadows shift to `rgba(0, 0, 0, x)` with highlights at `rgba(65, 66, 72, 0.48)`.
 
-### Neumorphic Shadow System
-
-The key to soft neumorphism is layered, diffuse shadows. Light source is top-left.
-
-```css
-/* Elevation 1: Subtle lift (cards at rest) */
---shadow-sm: 4px 4px 8px rgba(174, 174, 174, 0.12), -2px -2px 6px rgba(255, 255, 255, 0.8);
-
-/* Elevation 2: Medium lift (hovered cards, panels) */
---shadow-md: 6px 6px 14px rgba(174, 174, 174, 0.15), -3px -3px 10px rgba(255, 255, 255, 0.9);
-
-/* Elevation 3: High lift (modals, dropdowns, map overlays) */
---shadow-lg: 8px 8px 20px rgba(174, 174, 174, 0.18), -4px -4px 14px rgba(255, 255, 255, 1);
-
-/* Inset: Pressed/recessed elements (input fields, pressed buttons) */
---shadow-inset: inset 2px 2px 5px rgba(174, 174, 174, 0.15), inset -2px -2px 5px rgba(255, 255, 255, 0.7);
-
-/* Soft glow: For primary action buttons */
---shadow-glow: 0 4px 14px rgba(65, 99, 117, 0.3);
-```
-
-### Color Usage Rules
-
-- **Surface hierarchy creates depth**: Use container levels to show spatial relationships
-- **Shadows are warm-tinted**: Never pure black—use warm grays like `rgba(174, 174, 174, x)`
-- **Highlights are white**: The "light source" from top-left creates white highlight edges
-- **Primary for actions**: Steel blue primary is for interactive elements, not decoration
-- **Semantic colors for meaning**: Success/warning/error only when communicating state
+**The Muted-for-AA Rule.** Where the design calls for subdued text (placeholders, metadata, timestamps), use `--muted` (`#5c6367`) instead of `--outline` or `--outline-variant`, which fail WCAG AA contrast on the light surface hierarchy.
 
 ## Typography
 
-### Font Stack
+**Display Font:** Aspekta Variable (with ui-sans-serif, system-ui fallback)
+**Mono Font:** Commit Mono Variable (with ui-monospace, SF Mono, Menlo, Consolas fallback)
 
-**Primary**: [Aspekta](https://uncut.wtf/sans-serif/aspekta/) — a variable sans-serif with clean geometry and subtle warmth.
+**Character:** Aspekta is a clean geometric sans with subtle warmth — modern without being cold, legible at small sizes. Commit Mono is neutral and highly readable for code and structured data. The pairing is workmanlike and precise, matching the "soft instrument" identity.
 
-**Monospace**: [Commit Mono](https://uncut.wtf/monospace/commit-mono/) — a neutral, highly legible monospace for code and data.
+### Hierarchy
 
-```css
-@font-face {
-  font-family: "Aspekta";
-  src: url("/fonts/Aspekta-Variable.woff2") format("woff2");
-  font-weight: 100 900;
-  font-display: swap;
-}
+- **Display** (500, 1.875rem, 1.2): Hero headings on landing page. Rare in-app.
+- **Title** (500, 1.25rem, 1.3): Page titles, section heads. Letter-spacing -0.02em.
+- **Heading** (500, 1rem, 1.4): Card titles, chat session names, assistant message headers.
+- **Body** (400, 0.875rem, 1.5): Chat messages, descriptions. The base size for information-dense UI.
+- **Body Small** (400, 0.8125rem, 1.5): Secondary info, timestamps, tool badge content.
+- **Caption** (450, 0.75rem, 1.4): Labels, metadata, navigation items.
+- **Mono** (400, 0.8125rem, 1.5): Course codes, times, building codes, inline code, tool call parameters.
 
-@font-face {
-  font-family: "Commit Mono";
-  src: url("/fonts/CommitMono-Variable.woff2") format("woff2");
-  font-weight: 400 700;
-  font-display: swap;
-}
+### Named Rules
 
---font-sans: "Aspekta", ui-sans-serif, system-ui, sans-serif;
---font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-```
+**The Weight-Not-Bold Rule.** Emphasis uses weight 500–550, never 700+. This keeps the muted, instrument-like feel. Only structural headings go to 600.
 
-### Type Scale
-
-| Name           | Size             | Weight | Line Height | Usage                           |
-| -------------- | ---------------- | ------ | ----------- | ------------------------------- |
-| **Display**    | 30px / 1.875rem  | 500    | 1.2         | Hero headings (rare)            |
-| **Title**      | 20px / 1.25rem   | 500    | 1.3         | Page titles, section heads      |
-| **Heading**    | 16px / 1rem      | 500    | 1.4         | Card titles, chat session names |
-| **Body**       | 14px / 0.875rem  | 400    | 1.5         | Chat messages, descriptions     |
-| **Body Small** | 13px / 0.8125rem | 400    | 1.5         | Secondary info, timestamps      |
-| **Caption**    | 12px / 0.75rem   | 450    | 1.4         | Labels, metadata, tool badges   |
-| **Mono**       | 13px / 0.8125rem | 400    | 1.5         | Code, course codes, data        |
-
-### Typography Rules
-
-- **14px base** for body text—optimized for dense information
-- **Sentence case** for UI labels; Title Case only for proper nouns
-- **No italic for emphasis** in UI; use weight or color
-- **Mono for data**: Course codes (`CPSC 110`), times (`14:30`), building codes (`ICCS`)
-- **Weight 450-500** for emphasis instead of bold—keeps the muted feel
-
-## Spacing
-
-### Scale
-
-```
-4px   - xs   - Inline spacing, icon gaps
-8px   - sm   - Compact padding, list item gaps
-12px  - md   - Standard padding, form gaps
-16px  - lg   - Section padding, card padding
-24px  - xl   - Major section gaps
-32px  - 2xl  - Page margins, panel gaps
-48px  - 3xl  - Hero spacing (rare)
-```
-
-### Spacing Rules
-
-- **8px grid**: All spacing aligns to multiples of 8px (with 4px for tight situations)
-- **Consistent padding**: Cards use 16px padding; inputs use 12px horizontal, 8px vertical
-- **Breathing room**: 24px minimum between unrelated sections
-- **Dense where useful**: Chat messages can be tighter (8px gap) for conversational flow
+**The Mono-for-Data Rule.** Anything that is a structured identifier — `CPSC 110`, `14:30`, `ICCS` — renders in Commit Mono. Data has a different texture than prose.
 
 ## Layout
 
-### Structure
+The app shell uses a flexible grid that collapses progressively:
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Header: Logo + Session picker + User menu      h: 56px    │
-├─────────────────────────────────────────────────────────────┤
-│                    │                                        │
-│   Sessions List    │           Main Content                 │
-│   w: 280px         │     (Chat + Map split or stacked)      │
-│   (collapsible)    │                                        │
-│                    │                                        │
-└─────────────────────────────────────────────────────────────┘
-```
+**Desktop (>1024px):** Sidebar (collapsible, 3.75rem–18.5rem) + main content area. Main area splits: chat panel (minmax 22rem, 42fr) + map panel (minmax 3.25rem, 58fr). All transitions use `--neu-ease` (cubic-bezier 0.16, 1, 0.3, 1).
 
-### Breakpoints
+**Tablet (640–1024px):** Sidebar collapses to a trigger button. Chat + map share a CSS grid with animated column collapse.
 
-| Name        | Width      | Layout                                    |
-| ----------- | ---------- | ----------------------------------------- |
-| **Mobile**  | < 640px    | Single column, bottom nav, map as overlay |
-| **Tablet**  | 640–1024px | Collapsed sidebar, chat/map toggle        |
-| **Desktop** | > 1024px   | Full sidebar, chat + map side-by-side     |
+**Mobile (<640px):** Single column. Map overlays or toggles. Sidebar is a slide-over sheet.
 
-### Panel Behavior
+**Spacing rhythm:** Standard Tailwind scale (no custom tokens). Most common values: `gap-2` (8px), `gap-2.5` (10px), `gap-3` (12px), `p-3` (12px), `p-4` (16px), `px-3`/`px-4` for horizontal card padding. 8px grid alignment.
 
-- **Chat panel**: Minimum 360px, maximum 600px, grows to fill on mobile
-- **Map panel**: Fills remaining space, minimum 400px on desktop
-- **Sidebar**: Fixed 280px on desktop, slide-over drawer on mobile/tablet
+**App shell canvas:** The background carries two subtle radial gradients — `accent-subtle` at top-right (72% opacity, 34% radius) and `primary-container` at bottom-left (10% opacity, 30% radius). This gives the "table" warmth without being decorative.
+
+## Elevation & Depth
+
+The system uses **dual-tier shadows** — both intentional, serving different architectural roles:
+
+### Tier 1: Utility Elevation (Tailwind-mapped)
+
+Basic elevation tokens consumed via `shadow-sm`, `shadow-md`, `shadow-lg`, `shadow-inset`, `shadow-glow` Tailwind utilities. Used for quick one-off depth assignments.
+
+| Token               | Light Value                                                                           | Purpose                |
+| ------------------- | ------------------------------------------------------------------------------------- | ---------------------- |
+| `--elevation-sm`    | `4px 4px 8px rgba(174,174,174,0.12), -2px -2px 6px rgba(255,255,255,0.8)`             | Cards at rest          |
+| `--elevation-md`    | `6px 6px 14px rgba(174,174,174,0.15), -3px -3px 10px rgba(255,255,255,0.9)`           | Hovered cards          |
+| `--elevation-lg`    | `8px 8px 20px rgba(174,174,174,0.18), -4px -4px 14px rgba(255,255,255,1)`             | Modals, dropdowns      |
+| `--elevation-inset` | `inset 2px 2px 5px rgba(174,174,174,0.15), inset -2px -2px 5px rgba(255,255,255,0.7)` | Recessed inputs        |
+| `--elevation-glow`  | `0 4px 14px rgba(65,99,117,0.3)`                                                      | Primary action buttons |
+
+### Tier 2: Refined Neumorphic (composed CSS classes)
+
+Multi-shadow recipes for composed surfaces. Applied via `.neu-panel`, `.neu-raised`, `.neu-inset`, `.neu-button`, `.neu-primary-button` classes. Built from primitive tokens:
+
+| Primitive           | Light                    | Dark                     |
+| ------------------- | ------------------------ | ------------------------ |
+| `--neu-highlight`   | `rgba(255,255,255,0.92)` | `rgba(65,66,72,0.48)`    |
+| `--neu-edge`        | `rgba(255,255,255,0.76)` | `rgba(255,255,255,0.09)` |
+| `--neu-shadow`      | `rgba(105,112,116,0.17)` | `rgba(0,0,0,0.42)`       |
+| `--neu-shadow-deep` | `rgba(91,99,104,0.24)`   | `rgba(0,0,0,0.6)`        |
+
+Composed shadows:
+
+- `--neu-panel-shadow`: `14px 14px 34px var(--neu-shadow), -10px -10px 27px var(--neu-highlight)` — outer panels, header, cards
+- `--neu-raised-shadow`: `8px 8px 19px var(--neu-shadow), -6px -6px 15px var(--neu-highlight)` — buttons, message bubbles
+- `--neu-inset-shadow`: `inset 4px 4px 10px var(--neu-shadow), inset -3px -3px 9px var(--neu-highlight)` — sidebar, composer, recessed wells
+
+Every `.neu-*` class also carries `inset 0 1px 0 var(--neu-edge)` — a top-edge highlight simulating the light source from upper-left.
+
+### Glass-Neumorphic Materials
+
+A hybrid layer for surfaces that need translucency + depth. Applied via `.glass-neu`, `.glass-neu-strong`, `.glass-neu-inset`, `.glass-neu-compact`. Combines:
+
+- `backdrop-filter: blur(12–18px) saturate(1.08–1.16)`
+- Semi-transparent `background-color` via `color-mix()`
+- Diagonal gradient overlays (135–145deg) blending `surface-bright` → `surface` → `accent-subtle`
+- Mixed border colors from `--neu-edge` + `--border-subtle`
+- Composed shadow underneath
+
+| Class                | Opacity                   | Blur | Use                            |
+| -------------------- | ------------------------- | ---- | ------------------------------ |
+| `.glass-neu`         | 68% surface               | 18px | Header, collapsed sidebar rail |
+| `.glass-neu-strong`  | 82% surface               | 14px | Chat panel, map panel          |
+| `.glass-neu-inset`   | 76% surface-container-low | 16px | Sidebar body (recessed)        |
+| `.glass-neu-compact` | 74% surface               | 12px | Small floating controls        |
+
+Fallback: `@supports not (backdrop-filter: blur(1px))` → solid `var(--surface)` or `var(--surface-container-low)`.
+
+### Named Rules
+
+**The Dual-Tier Rule.** Tier 1 (elevation utilities) is for quick assignments in markup. Tier 2 (`.neu-*` classes) is for composed surfaces that need multi-shadow recipes + edge highlights. Never mix them on the same element.
+
+**The Light-Source Rule.** The implied light source is always upper-left. Shadows fall bottom-right, highlights sit top-left. Every `.neu-*` class has `inset 0 1px 0 var(--neu-edge)` to reinforce this.
+
+## Shapes
+
+**Form language:** Generously rounded, consistent, functional. Radius increases with element size — small controls get 6–8px, panels get 12–16px, pills get `full`.
+
+- **Panels/Cards:** `rounded-2xl` (16px) — header, chat panel, map panel, sidebar, bottom sheets
+- **Buttons/Containers:** `rounded-xl` (12–16px) — action buttons, icon containers, badges
+- **Inner controls:** `rounded-lg` (12px) — session items, details blocks, tool cards
+- **Small elements:** `rounded-md` (8px) — small icon badges, nav items, inline code
+- **Pills:** `rounded-full` — chat input, action chips, dots, avatars, quick-action pills
+- **Chat bubbles:** Asymmetric — user: `16px 16px 5px 16px` (flat bottom-right), assistant: `16px 16px 16px 5px` (flat bottom-left)
+
+**Border treatment:** 1px `border-subtle` on neumorphic surfaces. The border is structural scaffolding for the shadow system — it anchors the edge highlight and prevents shadow from floating.
 
 ## Components
 
 ### Buttons
 
-**Neumorphic buttons have subtle lift and respond to interaction with shadow changes.**
+Molded, pressable, dimensional. State communicates through shadow change + micro-transform.
 
-| Variant       | Background            | Text               | Shadow          | Usage                                 |
-| ------------- | --------------------- | ------------------ | --------------- | ------------------------------------- |
-| **Primary**   | Primary (`#416375`)   | On Primary (white) | `--shadow-glow` | Main actions (Send, New Conversation) |
-| **Secondary** | Surface Container Low | On Surface         | `--shadow-sm`   | Secondary actions                     |
-| **Ghost**     | Transparent           | On Surface Variant | None            | Tertiary actions, icon buttons        |
-| **Danger**    | Error                 | White              | `--shadow-sm`   | Destructive actions                   |
+- **Primary:** `bg-primary text-on-primary rounded-xl`. Shadow: `.neu-primary-button` (glow underneath + highlight). Hover: brightness(1.05), translateY(-2px), expanded glow. Active: inset shadow, translateY(1px), scale(0.985).
+- **Secondary:** `bg-surface text-on-surface rounded-xl`. Shadow: `.neu-button` (raised). Hover: expanded shadow, translateY(-1px). Active: inset shadow, scale(0.98).
+- **Ghost:** Transparent background, `text-on-surface-variant`. No shadow at rest. Hover: subtle surface background.
+- **Sizes:** Standard 36px height, Compact 32px, Large 40–44px.
 
-**Button states:**
+### Cards / Containers
 
-- **Rest**: Subtle lift with `--shadow-sm`
-- **Hover**: Increased lift with `--shadow-md`, slight scale (1.02)
-- **Active/Pressed**: Inset shadow `--shadow-inset`, scale (0.98)
-- **Disabled**: 50% opacity, no shadow, no pointer events
+- **Standard card:** `bg-surface border border-border-subtle rounded-2xl`. Shadow: `.neu-panel` or `.glass-neu-strong`. Padding: 12–16px.
+- **Chat panel:** `.neu-panel .glass-neu-strong bg-surface rounded-2xl border`. Internal: header bar (surface-bright, border-bottom), message well (`.chat-message-well` — recessed with inset shadows), composer area (border-top).
 
-**Sizes:**
+### Inputs / Fields
 
-- **Standard**: 36px height, 12px horizontal padding
-- **Compact**: 32px height, 8px horizontal padding
-- **Large**: 40-44px height, 16px horizontal padding (primary CTAs)
+- **Chat input:** Pill-shaped (`rounded-full`). `bg-surface-container-low border border-border-subtle`. Shadow: `--elevation-inset` at rest. Focus: remove inset shadow, add primary border + ring glow. Internal: attach button left, send button right (circular, primary).
+- **Composer thinking state:** Animated conic-gradient border (`thinking-border-orbit` at 2.4s) with expanded neumorphic glow. A `thinking-orb` (spinning gradient sphere with inset shadow) replaces the send button.
 
-**Border radius**: 8px (standard), `full` for icon-only buttons
+### Navigation
 
-### Inputs
-
-**Inputs use inset shadows to feel recessed into the surface.**
-
-```
-┌─────────────────────────────────────────────┐
-│  [icon]  Placeholder text...          [btn] │
-└─────────────────────────────────────────────┘
-```
-
-- **Height**: 40px standard, 44px for main chat input
-- **Background**: Surface Container Low
-- **Border**: 1px Border Subtle (rest), 1px Primary (focus)
-- **Shadow**: `--shadow-inset` (rest), none (focus)
-- **Border radius**: `full` for chat input (pill shape), 10px for form inputs
-- **Placeholder**: Outline Variant color
-- **Focus**: Remove inset shadow, add 1px Primary border, subtle glow
-
-**Chat input specific:**
-
-- Pill-shaped (`rounded-full`)
-- Attach button on left (icon button, ghost)
-- Send button on right (icon button, primary, circular)
-- Inner padding: 12px left (after attach), 44px right (for send button)
-
-### Cards
-
-**Cards float above the background with soft neumorphic shadows.**
-
-- **Background**: Surface
-- **Border**: 1px Border Subtle
-- **Border radius**: 12px (standard), 16px (large panels)
-- **Shadow**: `--shadow-sm` at rest, `--shadow-md` on hover (if interactive)
-- **Padding**: 16px (standard), 12px (compact)
-
-### Chat Panel
-
-The chat panel is a card that contains the conversation:
-
-- **Background**: Surface
-- **Border**: 1px Border Subtle
-- **Border radius**: 12px
-- **Shadow**: `--shadow-sm`
-- **Internal structure**:
-  - Header bar (session title, actions) — bg: Surface Bright, border-bottom
-  - Message area — bg: inherits, scrollable, padding 16px
-  - Input area — bg: Surface Bright, border-top, padding 12px
+- **Sidebar:** `.neu-inset .glass-neu-inset bg-surface-container-low rounded-2xl`. Width: 3.75rem (collapsed) to 18.5rem (expanded). Collapse/expand animated with `--neu-ease` (380ms).
+- **Nav items:** Height 36px, `px-3 py-2 rounded-lg`. Active: `bg-accent-subtle text-primary`. Inactive: `text-on-surface-variant`. Hover: `bg-surface-container-high`.
+- **Header:** `.neu-panel .glass-neu bg-surface/90 rounded-2xl border`. Height ~56px. Floats over content with backdrop-blur.
 
 ### Chat Messages
 
-**User messages:**
-
-```
-┌────────────────────────────────────────┐
-│ User message text                      │  bg: Accent Subtle (#EEF4F7)
-│ Right-aligned                          │  text: On Surface
-│ Max-width: 80%                         │  radius: 16px 16px 4px 16px
-│ No border, no shadow                   │  padding: 12px 16px
-└────────────────────────────────────────┘
-```
-
-**Assistant messages:**
-
-```
-┌────────────────────────────────────────┐
-│ [avatar] Reogent                 │  Header with avatar + name
-├────────────────────────────────────────┤
-│ Assistant response text                │  bg: Surface
-│ Left-aligned                           │  border: 1px Border Subtle
-│ Max-width: 85%                         │  radius: 16px 16px 16px 4px
-│ May contain structured content         │  padding: 12px 16px
-│                                        │
-│ ┌────────────────────────────────────┐ │  Structured content block
-│ │ Prerequisite info, etc.            │ │  bg: Surface Container Low
-│ └────────────────────────────────────┘ │  radius: 8px, padding: 12px
-│                                        │
-│ [tool badges row]                      │
-├────────────────────────────────────────┤
-│ [Quick action] [Quick action]          │  Action pills below message
-└────────────────────────────────────────┘
-```
-
-**Assistant avatar:**
-
-- Size: 24px circle
-- Background: Primary Container
-- Icon: 14px, On Primary Container color
-
-### Tool Badges
-
-Inline indicators showing which data tools were used:
-
-- **Background**: Surface Container Low
-- **Border**: 1px Border Subtle
-- **Text**: Mono font (JetBrains Mono or system mono), 12px, On Surface Variant
-- **Icon**: 14px, On Surface Variant
-- **Border radius**: 6px
-- **Padding**: 4px 8px
-- **Layout**: Flex row, 8px gap, wraps
-
-Example: `[🔍 search_courses(course="CPSC 310")]` `[📍 walking_distance(...)]`
-
-### Quick Action Pills
-
-Suggested follow-up actions below assistant messages:
-
-- **Background**: Transparent
-- **Border**: 1px Primary
-- **Text**: Primary color, Caption size (12px), weight 450
-- **Border radius**: `full` (pill shape)
-- **Padding**: 6px 12px
-- **Hover**: bg Accent Subtle
-- **Layout**: Flex row, 8px gap
-
-Examples: "Show on Map", "Check my academic history"
-
-### Structured Content Blocks
-
-For displaying formatted data within assistant messages:
-
-- **Background**: Surface Container Low
-- **Border radius**: 8px
-- **Padding**: 12px
-- **Typography**:
-  - Title: Heading size (16px), weight 500
-  - Content: Body Small (13px), On Surface Variant
-  - Lists: 16px left padding, disc bullets
-
-### Date Separators
-
-Visual breaks between messages from different time periods:
-
-```
-─────────────── Today, 10:42 AM ───────────────
-```
-
-- **Text**: Caption size (12px), On Surface Variant
-- **Background**: Surface Container Low (pill behind text)
-- **Border radius**: `full`
-- **Padding**: 4px 12px
-- **Layout**: Centered, horizontal lines on sides (optional, or just centered pill)
-
-### Map Panel
-
-**The map is contained in a neumorphic card with floating overlay controls.**
-
-- **Container**: Same as cards (Surface, border, radius 12px, shadow-sm)
-- **Map tiles**: Light, desaturated (Carto Positron or similar)
-- **Border radius**: 12px (clips the map)
-
-**Route styling:**
-
-- **Line**: Primary color, 4-6px width, dashed (`12 8` pattern), rounded caps
-- **Origin marker**: Primary filled circle (10px) with white stroke (3px)
-- **Destination marker**: Primary filled circle (12px) with white stroke, white inner dot (4px)
-- **Labels**: Aspekta 14px weight 600, On Primary Container color, positioned near markers
-
-**Map overlay cards (floating UI):**
-
-_Route info card (top-left):_
-
-```
-┌─────────────────────────────────┐
-│ [walk icon]  12 min             │  bg: Surface/90% + backdrop-blur
-│              950 m via Main Mall│  border: 1px Border Subtle
-└─────────────────────────────────┘  radius: 8px, shadow-md, padding: 8px 12px
-```
-
-- Icon in Secondary Container background, 18px
-- Duration: Heading size, On Surface
-- Distance/route: Caption size, On Surface Variant
-
-_Control buttons (top-right, stacked):_
-
-- 40px square buttons
-- bg: Surface/90% + backdrop-blur
-- border: 1px Border Subtle
-- radius: 8px
-- Icons: 20px, On Surface Variant (hover: Primary)
-
-_Zoom controls (bottom-right):_
-
-- Combined button group (+ / -)
-- Same styling as control buttons
-- Divider between buttons
-
-### Sidebar Navigation
-
-**The sidebar uses Surface Container Low as its background to feel recessed.**
-
-- **Background**: Surface Container Low
-- **Width**: 280px
-- **Border**: right 1px Border Subtle
-- **Padding**: 16px vertical, varies horizontal
-
-**Sidebar header:**
-
-- Logo/icon: 40px circle, Primary Container bg, school icon
-- Title: "Sessions" in Title size, Primary color
-- Subtitle: "AI Assistant" in Body Small, On Surface Variant
-
-**New Conversation button:**
-
-- Full width, Primary style
-- Height: 36px
-- Icon: `plus` (18px) + "New Conversation"
-- Margin: 8px horizontal, 8px bottom
-
-**Navigation items:**
-
-```
-┌────────────────────────────────────────┐
-│ [icon]  Current Chat                   │  Active: bg Accent Subtle, text Primary
-├────────────────────────────────────────┤
-│ [icon]  Academic History               │  Inactive: text On Surface Variant
-│ [icon]  Campus Map                     │  Hover: bg Surface Container High
-│ [icon]  Course Resources               │
-└────────────────────────────────────────┘
-```
-
-- Height: 36px per item
-- Padding: 8px 12px
-- Border radius: 8px
-- Icon: 20px, 12px gap to text
-- Active state: Accent Subtle bg, Primary text, filled icon variant
-
-**Footer links (Help, Settings):**
-
-- Same styling as nav items
-- Separated by border-top with 16px margin
-- Icons: help, settings
-
-### Header Bar
-
-- **Height**: 56px
-- **Background**: Background (not Surface, to separate from content)
-- **Border**: bottom 1px Border Subtle
-- **Padding**: 0 16px
-
-**Contents:**
-
-- **Left**: Hamburger menu (mobile only), then app title "UBC AI Assistant" in Display size, Primary color
-- **Right**: Notification bell (ghost button), Settings (ghost button), User avatar (32px circle, border)
-
-**User avatar:**
-
-- Size: 32px
-- Border: 1px Border Subtle
-- Border radius: full
-- Overflow: hidden (for image)
-
-### Dropdowns & Menus
-
-- **Background**: Surface Bright
-- **Border**: 1px Border Subtle
-- **Border radius**: 12px
-- **Shadow**: `--shadow-lg`
-- **Padding**: 8px
-- **Item height**: 36px
-- **Item hover**: Surface Container High bg
-- **Item border radius**: 6px
-
-## Motion
-
-### Principles
-
-- **Purposeful**: Animation communicates state change, not decoration
-- **Gentle**: 150ms for micro-interactions, 250ms for panels, 350ms for page transitions
-- **Ease**: `ease-out` for entrances, `ease-in-out` for state changes
-
-### Specific Animations
-
-| Element        | Duration | Easing   | Property                          |
-| -------------- | -------- | -------- | --------------------------------- |
-| Button hover   | 150ms    | ease-out | background-color, opacity         |
-| Panel slide    | 250ms    | ease-out | transform                         |
-| Message appear | 200ms    | ease-out | opacity, transform (slide up 6px) |
-| Route draw     | 500ms    | ease-out | stroke-dashoffset                 |
-| Map zoom       | 300ms    | ease-out | handled by map library            |
-
-### Reduced Motion
-
-Respect `prefers-reduced-motion`:
-
-- Disable transform animations
-- Keep opacity fades (instant or 100ms)
-- Route draws instantly instead of animating
-
-## Iconography
-
-### Style
-
-- **Library**: [Mingcute Icons](https://www.mingcute.com/) — rounded, friendly, consistent
-- **Style**: Line icons (outline) for navigation, filled for active states
-- **Stroke**: 1.5px default weight
-- **Size**: 16px inline, 18px in buttons, 20px standalone, 24px navigation
-
-### Icon Usage
-
-| Context          | Size | Style                            |
-| ---------------- | ---- | -------------------------------- |
-| Inline with text | 16px | Line                             |
-| Inside buttons   | 18px | Line (or filled if primary)      |
-| Navigation items | 20px | Line (inactive), Filled (active) |
-| Header actions   | 20px | Line                             |
-| Empty states     | 48px | Line                             |
-
-### Common Icons (Mingcute names)
-
-| Action        | Icon Name                         |
-| ------------- | --------------------------------- |
-| Send message  | `arrow-up-line` or `send-line`    |
-| New chat      | `add-line`                        |
-| Chat/Sessions | `chat-1-line` / `chat-1-fill`     |
-| History       | `history-line`                    |
-| Settings      | `settings-3-line`                 |
-| Help          | `question-line`                   |
-| Sign out      | `exit-line`                       |
-| Search        | `search-line`                     |
-| Course/Book   | `book-2-line`                     |
-| Tuition/Money | `currency-dollar-line`            |
-| Walking/Route | `walk-line` or `route-line`       |
-| Location      | `location-line` / `location-fill` |
-| Building      | `building-1-line`                 |
-| Map           | `map-line`                        |
-| Layers        | `layer-line`                      |
-| My location   | `aim-line`                        |
-| Zoom in       | `add-line`                        |
-| Zoom out      | `minimize-line`                   |
-| Attach file   | `attachment-line`                 |
-| More options  | `more-2-line`                     |
-| Notifications | `notification-line`               |
-| User/Profile  | `user-3-line`                     |
-| Loading       | `loading-line` (animated)         |
-| Error         | `alert-line`                      |
-| Success       | `check-circle-line`               |
-| School        | `school-line`                     |
-| Menu          | `menu-line`                       |
-
-## States
-
-### Loading
-
-- **Chat**: Typing indicator (three dots pulsing gently) in assistant message position
-- **Map**: Subtle pulse on affected area
-- **Full page**: Centered spinner with "Loading..." text below
-
-### Empty States
-
-- **No sessions**: "Start a conversation" with prominent new chat button
-- **No messages**: Brief helper text about what the assistant can do
-- **No route**: Map shows buildings but no highlighted route
-
-### Error States
-
-- **API error**: Inline error message in chat with retry button
-- **Auth error**: Redirect to sign-in with explanation
-- **Map error**: Fallback to text-only walking directions
-
-## Accessibility
-
-### Requirements (WCAG 2.1 AA)
-
-- **Color contrast**: 4.5:1 minimum for body text, 3:1 for large text and UI components
-- **Focus visible**: All interactive elements have visible focus indicator (2px Accent ring)
-- **Keyboard navigation**: Full functionality without mouse
-- **Screen reader**: Proper ARIA labels, live regions for chat updates
-- **Reduced motion**: Respect user preference
-
-### Specific Implementations
-
-- **Chat**: Messages in `role="log"` with `aria-live="polite"`
-- **Map**: Text summary of route available (e.g., "5 minute walk from ICCS to Buchanan")
-- **Tool badges**: Include in screen reader output ("Used search_courses tool")
-- **Skip link**: "Skip to chat" at page top
-
-## Dark Mode
-
-- **Default**: Respect `prefers-color-scheme`
-- **Toggle**: Available in user menu
-- **Persistence**: Store preference in localStorage
-
-### Dark Mode Adjustments
-
-- Reduce image brightness to 90%
-- Map uses dark tile variant (Carto Dark Matter or Stadia Alidade Smooth Dark)
-- Colors shift cooler in dark mode for reduced eye strain
-
-## Tokens (Tailwind v4)
-
-Tailwind v4 uses CSS-first configuration. Define tokens in your CSS file:
-
-```css
-/* app.css or globals.css */
-@import "tailwindcss";
-
-@theme {
-  /* Fonts */
-  --font-sans: "Aspekta", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-
-  /* Surface Hierarchy - Light Mode */
-  --color-background: #f8f8f6;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f4f3f5;
-  --color-surface-container: #eeeeef;
-  --color-surface-container-high: #e8e8e9;
-  --color-surface: #fafafa;
-  --color-surface-bright: #ffffff;
-
-  /* Semantic Colors */
-  --color-primary: #416375;
-  --color-primary-container: #7c9eb2;
-  --color-on-primary: #ffffff;
-  --color-on-primary-container: #103546;
-  --color-secondary: #306946;
-  --color-secondary-container: #b3f1c4;
-  --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #00210f;
-  --color-tertiary: #7a5733;
-  --color-tertiary-container: #bb9269;
-  --color-error: #c48b8b;
-  --color-error-container: #ffdad6;
-
-  /* Text Colors */
-  --color-on-surface: #1a1c1d;
-  --color-on-surface-variant: #42484c;
-  --color-outline: #72787c;
-  --color-outline-variant: #c2c7cc;
-
-  /* Border Colors */
-  --color-border: #e8e8e4;
-  --color-border-subtle: #f0f0ec;
-
-  /* Accent */
-  --color-accent-subtle: #eef4f7;
-  --color-surface-tint: #416375;
-
-  /* Neumorphic Shadows */
-  --shadow-sm: 4px 4px 8px rgba(174, 174, 174, 0.12), -2px -2px 6px rgba(255, 255, 255, 0.8);
-  --shadow-md: 6px 6px 14px rgba(174, 174, 174, 0.15), -3px -3px 10px rgba(255, 255, 255, 0.9);
-  --shadow-lg: 8px 8px 20px rgba(174, 174, 174, 0.18), -4px -4px 14px rgba(255, 255, 255, 1);
-  --shadow-inset: inset 2px 2px 5px rgba(174, 174, 174, 0.15), inset -2px -2px 5px rgba(255, 255, 255, 0.7);
-  --shadow-glow: 0 4px 14px rgba(65, 99, 117, 0.3);
-
-  /* Spacing */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 12px;
-  --spacing-lg: 16px;
-  --spacing-xl: 24px;
-  --spacing-2xl: 32px;
-  --spacing-3xl: 48px;
-
-  /* Border Radius */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-
-  /* Transitions */
-  --transition-fast: 150ms ease-out;
-  --transition-base: 200ms ease-out;
-  --transition-slow: 350ms ease-in-out;
-}
-
-/* Dark mode overrides */
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: #121214;
-    --color-surface-container-lowest: #0e0e10;
-    --color-surface-container-low: #1a1a1e;
-    --color-surface-container: #222226;
-    --color-surface-container-high: #2c2c30;
-    --color-surface: #1a1a1e;
-    --color-surface-bright: #2a2a2e;
-
-    --color-primary: #a9cbe0;
-    --color-primary-container: #294b5c;
-    --color-on-primary: #001e2b;
-    --color-on-primary-container: #c4e7fd;
-    --color-secondary: #98d4a9;
-    --color-secondary-container: #155130;
-    --color-tertiary: #ebbe92;
-    --color-tertiary-container: #5f401e;
-    --color-error: #d49a9a;
-
-    --color-on-surface: #e3e2e4;
-    --color-on-surface-variant: #c2c7cc;
-    --color-outline: #8c9297;
-    --color-outline-variant: #42484c;
-
-    --color-border: #2a2a2e;
-    --color-border-subtle: #1e1e22;
-    --color-accent-subtle: #1e2a30;
-    --color-surface-tint: #a9cbe0;
-
-    /* Dark mode shadows - more subtle */
-    --shadow-sm: 4px 4px 8px rgba(0, 0, 0, 0.3), -2px -2px 6px rgba(50, 50, 55, 0.5);
-    --shadow-md: 6px 6px 14px rgba(0, 0, 0, 0.35), -3px -3px 10px rgba(50, 50, 55, 0.4);
-    --shadow-lg: 8px 8px 20px rgba(0, 0, 0, 0.4), -4px -4px 14px rgba(50, 50, 55, 0.3);
-    --shadow-inset: inset 2px 2px 5px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(50, 50, 55, 0.3);
-    --shadow-glow: 0 4px 14px rgba(169, 203, 224, 0.2);
-  }
-}
-
-/* Font faces */
-@font-face {
-  font-family: "Aspekta";
-  src: url("/fonts/Aspekta-Variable.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Commit Mono";
-  src: url("/fonts/CommitMono-Variable.woff2") format("woff2");
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-}
-```
-
-### Usage Examples
-
-```html
-<!-- Neumorphic card -->
-<div class="bg-surface border-border-subtle p-lg rounded-lg border shadow-[var(--shadow-sm)]">
-  <!-- Primary button with glow -->
-  <button
-    class="bg-primary text-on-primary px-lg py-sm rounded-md shadow-[var(--shadow-glow)] transition-all duration-150 hover:scale-[1.02] active:scale-[0.98] active:shadow-[var(--shadow-inset)]"
-  >
-    <!-- Recessed input (chat) -->
-    <input
-      class="bg-surface-container-low border-border-subtle px-md py-sm text-on-surface placeholder:text-outline-variant focus:border-primary rounded-full border shadow-[var(--shadow-inset)] focus:shadow-none"
-    />
-
-    <!-- User message bubble -->
-    <div class="bg-accent-subtle text-on-surface px-lg py-md ml-auto max-w-[80%] rounded-[16px_16px_4px_16px]">
-      <!-- Assistant message bubble -->
-      <div
-        class="bg-surface border-border-subtle text-on-surface px-lg py-md max-w-[85%] rounded-[16px_16px_16px_4px] border"
-      >
-        <!-- Tool badge -->
-        <div
-          class="bg-surface-container-low border-border-subtle px-sm py-xs text-on-surface-variant rounded-md border font-mono text-xs"
-        >
-          <!-- Quick action pill -->
-          <button class="border-primary text-primary px-md py-xs hover:bg-accent-subtle rounded-full border text-xs">
-            <!-- Nav item (active) -->
-            <a class="bg-accent-subtle text-primary px-md py-sm gap-md flex items-center rounded-lg">
-              <!-- Nav item (inactive) -->
-              <a
-                class="text-on-surface-variant px-md py-sm gap-md hover:bg-surface-container-high flex items-center rounded-lg"
-              >
-                <!-- Map overlay card -->
-                <div
-                  class="bg-surface/90 border-border-subtle p-sm rounded-lg border shadow-[var(--shadow-md)] backdrop-blur-sm"
-                ></div></a
-            ></a>
-          </button>
-        </div>
-      </div>
-    </div>
-  </button>
-</div>
-```
-
-### Font Setup
-
-1. **Aspekta**: Download from [uncut.wtf](https://uncut.wtf/sans-serif/aspekta/) and place in `/public/fonts/`
-2. **Commit Mono**: Download from [uncut.wtf](https://uncut.wtf/monospace/commit-mono/) and place in `/public/fonts/`
-3. **Mingcute Icons**: Install via npm (`@iconify-json/mingcute`) or use CDN
+- **User bubble:** `.neu-raised bg-accent-subtle rounded-[16px_16px_5px_16px] border border-border-subtle`. Right-aligned, max-width 80%. Padding: 12px 16px.
+- **Assistant bubble:** `.neu-raised bg-surface rounded-[16px_16px_16px_5px] border border-border-subtle`. Left-aligned, max-width 85%. Contains structured content blocks (`bg-surface-container-low rounded-lg p-3`) and tool badges.
+- **Tool badges:** `bg-surface-container-low border border-border-subtle rounded-md font-mono text-xs`. Padding: 4px 8px.
+- **Quick-action pills:** `border border-primary text-primary rounded-full text-xs`. Hover: `bg-accent-subtle`.
+- **Message entrance:** `animate-message-in` — 200ms ease-out, opacity 0→1 + translateY(6px→0).
+
+### Signature: Thinking Orb
+
+A spinning gradient sphere that appears during agent processing. Conic-gradient from `primary-container` through `primary` through white-tinted primary, with a neumorphic inner shadow and highlight dot. Reduced-motion: static at 112deg angle.
+
+## Do's and Don'ts
+
+### Do:
+
+- **Do** use `.neu-panel` / `.neu-raised` / `.neu-inset` for composed surfaces — they carry the full edge-highlight + multi-shadow recipe.
+- **Do** use `--muted` for placeholder and meta text to maintain WCAG AA contrast.
+- **Do** apply `border border-border-subtle` alongside every neumorphic shadow — the border anchors the edge highlight.
+- **Do** use `--neu-ease` (cubic-bezier 0.16, 1, 0.3, 1) for panel animations — it gives the "molded" feel of elements settling into place.
+- **Do** respect `prefers-reduced-motion` — all animations collapse to instant, reveal elements show immediately.
+- **Do** use `[data-theme="dark"]` for theme switching, not `prefers-color-scheme` media query.
+
+### Don't:
+
+- **Don't** mix Tier 1 (Tailwind shadow utilities) and Tier 2 (`.neu-*` classes) on the same element.
+- **Don't** use pure black in shadows — warm gray in light mode, deep neutral in dark mode.
+- **Don't** add `backdrop-filter` to elements that don't need layering hierarchy — glass is for panels that float over other content, not for everything.
+- **Don't** use `--outline` or `--outline-variant` for text that must pass AA contrast on light surfaces — use `--muted` instead.
+- **Don't** apply neumorphic depth to text content itself — depth frames the content, the content stays flat and readable.
+- **Don't** animate shadow values directly (GPU-expensive) — animate `transform` and switch shadow classes via state.
