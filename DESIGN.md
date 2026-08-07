@@ -262,8 +262,7 @@ A hybrid layer for surfaces that need translucency + depth. Applied via `.glass-
 - `backdrop-filter: blur(12–18px) saturate(1.08–1.16)`
 - Semi-transparent `background-color` via `color-mix()`
 - Diagonal gradient overlays (135–145deg) blending `surface-bright` → `surface` → `accent-subtle`
-- Mixed border colors from `--neu-edge` + `--border-subtle`
-- Composed shadow underneath
+- Composed shadow underneath (no border — shadow alone defines the edge)
 
 | Class                | Opacity                   | Blur | Use                            |
 | -------------------- | ------------------------- | ---- | ------------------------------ |
@@ -291,7 +290,11 @@ Fallback: `@supports not (backdrop-filter: blur(1px))` → solid `var(--surface)
 - **Pills:** `rounded-full` — chat input, action chips, dots, avatars, quick-action pills
 - **Chat bubbles:** Asymmetric — user: `16px 16px 5px 16px` (flat bottom-right), assistant: `16px 16px 16px 5px` (flat bottom-left)
 
-**Border treatment:** 1px `border-subtle` on neumorphic surfaces. The border is structural scaffolding for the shadow system — it anchors the edge highlight and prevents shadow from floating.
+**Border treatment:** No borders on neumorphic surfaces. The `inset 0 1px 0 var(--neu-edge)` highlight in box-shadow provides the only edge definition. Surfaces emerge from soft shadow alone — no hard lines. Borders exist only on:
+
+- Section dividers (`border-t`/`border-b` hairlines between content sections)
+- Outline-style action pills (`border-primary` for interactive affordance)
+- State indicators (`border-error` for validation)
 
 ## Components
 
@@ -306,13 +309,13 @@ Molded, pressable, dimensional. State communicates through shadow change + micro
 
 ### Cards / Containers
 
-- **Standard card:** `bg-surface border border-border-subtle rounded-2xl`. Shadow: `.neu-panel` or `.glass-neu-strong`. Padding: 12–16px.
-- **Chat panel:** `.neu-panel .glass-neu-strong bg-surface rounded-2xl border`. Internal: header bar (surface-bright, border-bottom), message well (`.chat-message-well` — recessed with inset shadows), composer area (border-top).
+- **Standard card:** `bg-surface rounded-2xl`. Shadow: `.neu-panel` or `.glass-neu-strong`. No border. Padding: 12–16px.
+- **Chat panel:** `.glass-neu-strong bg-surface rounded-2xl`. Internal: header bar (border-bottom separator only), message well (`.chat-message-well` — recessed with inset shadows), composer area.
 
 ### Inputs / Fields
 
-- **Chat input:** Pill-shaped (`rounded-full`). `bg-surface-container-low border border-border-subtle`. Shadow: `--elevation-inset` at rest. Focus: remove inset shadow, add primary border + ring glow. Internal: attach button left, send button right (circular, primary).
-- **Composer thinking state:** Animated conic-gradient border (`thinking-border-orbit` at 2.4s) with expanded neumorphic glow. A `thinking-orb` (spinning gradient sphere with inset shadow) replaces the send button.
+- **Chat input:** Rounded (`rounded-2xl`). `bg-surface-container-low`. Shadow: `neu-inset` at rest. Focus: ring glow via box-shadow (no border change). Internal: send button right (circular, primary).
+- **Composer thinking state:** Animated conic-gradient border mask (`thinking-border-orbit` at 2.4s) with expanded neumorphic glow. A `thinking-orb` (spinning gradient sphere with inset shadow) replaces the send button.
 
 ### Navigation
 
@@ -336,9 +339,9 @@ A spinning gradient sphere that appears during agent processing. Conic-gradient 
 
 ### Do:
 
-- **Do** use `.neu-panel` / `.neu-raised` / `.neu-inset` for composed surfaces — they carry the full edge-highlight + multi-shadow recipe.
+- **Do** use `.neu-panel` / `.neu-raised` / `.neu-inset` for composed surfaces — they carry the full edge-highlight + multi-shadow recipe. No `border` class needed.
 - **Do** use `--muted` for placeholder and meta text to maintain WCAG AA contrast.
-- **Do** apply `border border-border-subtle` alongside every neumorphic shadow — the border anchors the edge highlight.
+- **Do** let shadow alone define surface edges — the `inset 0 1px 0 var(--neu-edge)` highlight is sufficient.
 - **Do** use `--neu-ease` (cubic-bezier 0.16, 1, 0.3, 1) for panel animations — it gives the "molded" feel of elements settling into place.
 - **Do** respect `prefers-reduced-motion` — all animations collapse to instant, reveal elements show immediately.
 - **Do** use `[data-theme="dark"]` for theme switching, not `prefers-color-scheme` media query.
@@ -346,6 +349,7 @@ A spinning gradient sphere that appears during agent processing. Conic-gradient 
 ### Don't:
 
 - **Don't** mix Tier 1 (Tailwind shadow utilities) and Tier 2 (`.neu-*` classes) on the same element.
+- **Don't** add `border` to any element with a `.neu-*` or `.glass-neu-*` class — shadows define edges, borders create hard lines that break the softness.
 - **Don't** use pure black in shadows — warm gray in light mode, deep neutral in dark mode.
 - **Don't** add `backdrop-filter` to elements that don't need layering hierarchy — glass is for panels that float over other content, not for everything.
 - **Don't** use `--outline` or `--outline-variant` for text that must pass AA contrast on light surfaces — use `--muted` instead.
