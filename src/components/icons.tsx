@@ -56,6 +56,8 @@ const BODIES = {
     '<path fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M9.949 5.365L11 3l1.051 2.365a12 12 0 0 0 5.083 5.585L19 12l-1.866 1.05a12 12 0 0 0-5.083 5.585L11 21l-1.051-2.365a12 12 0 0 0-5.083-5.585L3 12l1.866-1.05A12 12 0 0 0 9.95 5.365Z"/><path fill="none" stroke="currentColor" stroke-width="2" d="M19 3.745c.335.467.73.889 1.175 1.255c-.444.366-.84.787-1.175 1.254A6.7 6.7 0 0 0 17.824 5c.445-.366.84-.787 1.176-1.255Z"/>',
   checkCircle:
     '<path fill="currentColor" d="M8.464 11.21a1 1 0 0 0-1.414 1.414l.707-.707zm2.122 3.535l-.707.707a1 1 0 0 0 1.414 0zm6.364-4.95a1 1 0 0 0-1.415-1.414l.707.707zM21 12h-1a8 8 0 0 1-8 8v2c5.523 0 10-4.477 10-10zm-9 9v-1a8 8 0 0 1-8-8H2c0 5.523 4.477 10 10 10zm-9-9h1a8 8 0 0 1 8-8V2C6.477 2 2 6.477 2 12zm9-9v1a8 8 0 0 1 8 8h2c0-5.523-4.477-10-10-10zm-4.243 8.917l-.707.707l2.829 2.828l.707-.707l.707-.707l-2.829-2.828zm2.829 2.828l.707.707l5.657-5.657l-.707-.707l-.708-.707l-5.656 5.657z"/>',
+  computer:
+    '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Zm5 15h8m-4-4v4"/>',
 } as const;
 
 export type IconName = keyof typeof BODIES;

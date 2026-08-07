@@ -4,18 +4,10 @@
 // and sign out. The menu stays mounted so closing can fade cleanly.
 import { useAppAuth } from "@/src/components/auth/app-auth";
 import { Icon } from "@/src/components/icons";
-import { useTheme, type ThemeMode } from "@/src/components/providers";
 import { useEffect, useRef, useState } from "react";
-
-const THEME_OPTIONS: Array<{ mode: ThemeMode; label: string }> = [
-  { mode: "light", label: "Light" },
-  { mode: "system", label: "Auto" },
-  { mode: "dark", label: "Dark" },
-];
 
 export function UserMenu() {
   const auth = useAppAuth();
-  const { mode, setMode } = useTheme();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -74,32 +66,6 @@ export function UserMenu() {
           <p className="text-body-sm text-on-surface mt-0.5 truncate" title={auth.user?.username}>
             {auth.user?.username ?? "Signed in"}
           </p>
-        </div>
-
-        <div className="bg-border-subtle my-1 h-px" />
-
-        <div className="px-2.5 py-2">
-          <div className="text-on-surface mb-2 flex items-center gap-2 text-sm font-medium">
-            <Icon name={mode === "dark" ? "moon" : "sun"} size={16} className="text-primary" />
-            Appearance
-          </div>
-          <div className="bg-surface-container-low grid grid-cols-3 gap-1 rounded-xl p-1">
-            {THEME_OPTIONS.map((option) => (
-              <button
-                key={option.mode}
-                type="button"
-                onClick={() => setMode(option.mode)}
-                aria-pressed={mode === option.mode}
-                className={`h-8 rounded-lg text-xs font-medium transition-all duration-150 ${
-                  mode === option.mode
-                    ? "bg-surface text-primary shadow-sm"
-                    : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         <div className="bg-border-subtle my-1 h-px" />

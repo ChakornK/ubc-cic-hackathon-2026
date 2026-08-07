@@ -3,6 +3,7 @@
 import { useAppAuth } from "@/src/components/auth/app-auth";
 import { AuthForm } from "@/src/components/auth/auth-form";
 import { Icon } from "@/src/components/icons";
+import { ThemeToggle } from "@/src/components/theme-toggle";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect } from "react";
@@ -40,6 +41,9 @@ function SignupContent() {
           <AuthForm mode="signup" />
         </div>
       </div>
+      <footer className="flex items-center justify-center pb-2">
+        <ThemeToggle />
+      </footer>
     </div>
   );
 }

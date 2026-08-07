@@ -9,6 +9,7 @@ import { Icon } from "@/src/components/icons";
 import { MapBottomSheet, MapPanel } from "@/src/components/map/map-panel";
 import { SessionSidebar } from "@/src/components/shell/session-sidebar";
 import { UserMenu } from "@/src/components/shell/user-menu";
+import { ThemeToggle } from "@/src/components/theme-toggle";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -161,6 +162,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Icon name="map" size={19} />
             </button>
+            <ThemeToggle className="hidden sm:grid" />
             <UserMenu />
           </div>
         </header>

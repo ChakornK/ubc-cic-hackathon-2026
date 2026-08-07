@@ -11,6 +11,7 @@
  */
 
 :root {
+  color-scheme: light;
   --background: #f8f8f6;
   --surface-container-lowest: #ffffff;
   --surface-container-low: #f4f3f5;
@@ -56,6 +57,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --background: #121214;
   --surface-container-lowest: #0e0e10;
   --surface-container-low: #1a1a1e;

@@ -7,6 +7,7 @@ import { Icon } from "@/src/components/icons";
 import { ProductMock } from "@/src/components/landing/product-mock";
 import { useReveal } from "@/src/components/landing/reveal";
 import { TopoTexture } from "@/src/components/landing/topo-texture";
+import { ThemeToggle } from "@/src/components/theme-toggle";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -154,12 +155,15 @@ export function Landing() {
               </span>
               <span className="text-base font-medium tracking-[-0.02em]">Reogent</span>
             </a>
-            <Link
-              href="/login"
-              className="neu-button bg-surface text-on-surface-variant hover:text-on-surface flex h-9 items-center rounded-xl px-4 text-sm font-medium"
-            >
-              Sign in
-            </Link>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Link
+                href="/login"
+                className="neu-button bg-surface text-on-surface-variant hover:text-on-surface flex h-9 items-center rounded-xl px-4 text-sm font-medium"
+              >
+                Sign in
+              </Link>
+            </div>
           </div>
         </header>
 
