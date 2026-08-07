@@ -535,7 +535,23 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
     if (!handles || status !== "ready") return;
     if (appliedStyleRef.current !== theme) {
       appliedStyleRef.current = theme;
-      handles.map.setStyle(STYLE_URLS[theme]);
+      const el = containerRef.current;
+      const fade = !prefersReducedMotion() && el;
+      if (fade) {
+        el.style.transition = "opacity 200ms ease-out";
+        el.style.opacity = "0";
+      }
+      // ponytail: swap after fade-out completes (or immediately if reduced motion)
+      const apply = () => {
+        handles.map.setStyle(STYLE_URLS[theme]);
+        handles.map.once("style.load", () => {
+          if (fade) {
+            el.style.opacity = "1";
+          }
+        });
+      };
+      if (fade) setTimeout(apply, 200);
+      else apply();
     }
   }, [theme, status]);
 

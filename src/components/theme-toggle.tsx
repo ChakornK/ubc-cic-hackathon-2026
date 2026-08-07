@@ -10,9 +10,24 @@ const OPTIONS: Array<{ mode: ThemeMode; label: string; icon: IconName }> = [
   { mode: "dark", label: "Dark", icon: "moon" },
 ];
 
+/** Apply theme with a ripple view-transition from click origin, or instant fallback. */
+function applyWithRipple(e: React.MouseEvent, apply: () => void) {
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => void };
+  if (!doc.startViewTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    apply();
+    return;
+  }
+  // Set ripple origin as CSS variables on the root so the mask-gradient picks them up
+  const x = e.clientX;
+  const y = e.clientY;
+  document.documentElement.style.setProperty("--ripple-x", `${x}px`);
+  document.documentElement.style.setProperty("--ripple-y", `${y}px`);
+  doc.startViewTransition(apply);
+}
+
 /**
- * Compact segmented theme toggle with proper ARIA radiogroup semantics
- * and roving tabindex for keyboard navigation.
+ * Compact icon-only segmented theme toggle with ARIA radiogroup semantics,
+ * roving tabindex, and a ripple view-transition on click.
  */
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const { mode, setMode } = useTheme();
@@ -31,7 +46,6 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       }
       e.preventDefault();
       setMode(OPTIONS[next].mode);
-      // Move focus to the newly active radio
       const buttons = groupRef.current?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
       buttons?.[next]?.focus();
     },
@@ -57,7 +71,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
             aria-checked={selected}
             aria-label={option.label}
             tabIndex={selected ? 0 : -1}
-            onClick={() => setMode(option.mode)}
+            onClick={(e) => applyWithRipple(e, () => setMode(option.mode))}
             className={`flex h-7 w-8 items-center justify-center rounded-lg text-xs font-medium transition-all duration-150 ${
               selected
                 ? "bg-surface text-primary shadow-sm"

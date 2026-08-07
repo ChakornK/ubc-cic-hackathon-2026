@@ -303,6 +303,52 @@ html[data-auth-pending] .landing-root {
   display: none;
 }
 
+/* ---- Theme ripple transition ---- */
+
+@property --ripple-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* The new snapshot expands as a feathered circle from the click origin */
+::view-transition-new(root) {
+  animation: ripple-in 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  -webkit-mask: radial-gradient(
+    circle at var(--ripple-x, 50%) var(--ripple-y, 50%),
+    #000 calc(var(--ripple-r) - 24px),
+    transparent var(--ripple-r)
+  );
+  mask: radial-gradient(
+    circle at var(--ripple-x, 50%) var(--ripple-y, 50%),
+    #000 calc(var(--ripple-r) - 24px),
+    transparent var(--ripple-r)
+  );
+}
+
+::view-transition-old(root) {
+  animation: none;
+}
+
+@keyframes ripple-in {
+  from {
+    --ripple-r: 0px;
+  }
+  to {
+    --ripple-r: 160vmax;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-new(root),
+  ::view-transition-old(root) {
+    /* biome-ignore lint/complexity/noImportantStyles: a11y override */
+    animation: none !important;
+    -webkit-mask: none;
+    mask: none;
+  }
+}
+
 html:not([data-auth-pending]) .auth-splash {
   display: none;
 }
