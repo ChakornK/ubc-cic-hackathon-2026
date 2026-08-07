@@ -39,7 +39,7 @@ function GlassButton({
       aria-label={label}
       title={label}
       aria-pressed={pressed}
-      className={`border-border-subtle bg-surface/90 flex size-10 items-center justify-center rounded-lg border shadow-sm backdrop-blur-sm transition-colors duration-150 ${
+      className={`glass-neu-compact border-border-subtle flex size-10 items-center justify-center rounded-lg border transition-colors duration-150 ${
         pressed ? "text-primary" : "text-on-surface-variant hover:text-primary"
       }`}
     >
@@ -52,7 +52,7 @@ function RouteInfoCard() {
   const { highlight } = useChatShell();
   if (!highlight) return null;
   return (
-    <div className="border-border-subtle bg-surface/90 flex items-center gap-2.5 rounded-lg border px-3 py-2 shadow-md backdrop-blur-sm">
+    <div className="glass-neu-compact border-border-subtle flex items-center gap-2.5 rounded-lg border px-3 py-2">
       <span className="bg-secondary-container text-on-secondary-container flex size-8 items-center justify-center rounded-md">
         <Icon name={highlight.kind === "route" ? "walk" : "location"} size={18} />
       </span>
@@ -93,12 +93,12 @@ function MapFallback() {
         </p>
       )}
       {highlight?.kind === "buildings" && (
-        <p className="max-w-60 text-sm text-on-surface">
+        <p className="text-on-surface max-w-60 text-sm">
           {highlight.buildings.map((b) => `${b.name} (${b.code})`).join(", ")}
         </p>
       )}
       {highlight?.kind === "places" && (
-        <p className="max-w-60 text-sm text-on-surface">
+        <p className="text-on-surface max-w-60 text-sm">
           {highlight.places.map((p) => p.name).join(", ")}
           {highlight.near ? ` — near ${highlight.near}` : ""}
         </p>
@@ -147,7 +147,7 @@ function MapSurface() {
           </div>
 
           {/* Zoom — floating bottom-right */}
-          <div className="border-border-subtle bg-surface/90 absolute right-3 bottom-6 z-10 flex flex-col overflow-hidden rounded-lg border shadow-sm backdrop-blur-sm">
+          <div className="glass-neu-compact border-border-subtle absolute right-3 bottom-6 z-10 flex flex-col overflow-hidden rounded-lg border">
             <button
               type="button"
               aria-label="Zoom in"
@@ -293,7 +293,7 @@ export function MapBottomSheet() {
         role="dialog"
         aria-modal="true"
         aria-label="Campus map"
-        className={`border-border-subtle bg-surface fixed inset-x-0 bottom-0 z-50 flex h-[80vh] flex-col overflow-hidden rounded-t-2xl border-t shadow-lg transition-transform duration-300 ease-out ${
+        className={`neu-panel border-border-subtle bg-surface fixed inset-x-0 bottom-0 z-50 flex h-[80vh] flex-col overflow-hidden rounded-t-2xl border-t transition-transform duration-300 [transition-timing-function:var(--neu-ease)] ${
           mobileMapOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
