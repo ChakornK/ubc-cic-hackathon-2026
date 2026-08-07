@@ -74,7 +74,7 @@ export interface IndexDef<TRaw = any> {
     sortableAttributes?: string[];
   };
   read(s3: S3Reader): AsyncIterable<TRaw>;
-  transform(raw: TRaw): { id: string; doc: Record<string, unknown> } | null;
+  transform(raw: TRaw): { id: string; doc: Record<string, unknown> | object } | null;
   derive?(s3: S3Writer): Promise<void>;
 }
 

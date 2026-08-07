@@ -27,12 +27,12 @@ const WP_SOURCES: [source: string, key: string][] = [
   ["news", "campus-services/news.json"],
 ];
 
-export function transformPage(tagged: TaggedPage): { _id: string; doc: PageDoc } | null {
+export function transformPage(tagged: TaggedPage): { id: string; doc: PageDoc } | null {
   const { source, shape, row } = tagged;
   if (shape === "drupal") {
     if (!row.title || !row.id) return null;
     return {
-      _id: `${source}#${row.id}`,
+      id: `${source}#${row.id}`,
       doc: {
         source,
         title: String(row.title),
@@ -50,14 +50,14 @@ export function transformPage(tagged: TaggedPage): { _id: string; doc: PageDoc }
       .join(" ")
       .slice(0, MAX_TEXT);
     return {
-      _id: `${source}#${row.id}`,
+      id: `${source}#${row.id}`,
       doc: { source, title, url: String(row.link ?? ""), text, date: row.modified_gmt ?? row.date_gmt ?? null },
     };
   }
   // report: an index entry for a published PDF — searchable title, direct download URL
   if (!row.url) return null;
   return {
-    _id: `${source}#${row.url}`,
+    id: `${source}#${row.url}`,
     doc: {
       source,
       title: String(row.page_title || row.filename),
@@ -73,14 +73,9 @@ export const pages: DatasetModule = {
   indices: [
     {
       index: "pages",
-      mappings: {
-        properties: {
-          source: { type: "keyword" },
-          title: { type: "text" },
-          url: { type: "keyword" },
-          text: { type: "text" },
-          date: { type: "keyword" },
-        },
+      settings: {
+        searchableAttributes: ["title", "text"],
+        filterableAttributes: ["source"],
       },
       async *read(s3) {
         for (const row of (await s3.getJson("academic-calendar/vancouver/pages.json")) as Row[]) {
@@ -120,25 +115,22 @@ export const pages: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const filter = input.source ? [{ term: { source: String(input.source) } }] : [];
-        const res = await os.search({
-          index: "pages",
-          body: {
-            query: {
-              bool: {
-                must: [{ multi_match: { query: String(input.query), fields: ["title^2", "text"] } }],
-                filter,
-              },
-            },
-            size: Math.min(Number(input.limit) || 5, 20),
-            _source: ["source", "title", "url", "date"], // bodies stay out of the model context
-            highlight: { fields: { text: { fragment_size: 250, number_of_fragments: 3 } } },
-          },
+      async execute(input, search) {
+        const filter = input.source ? `source = '${String(input.source)}'` : undefined;
+        const res = await search.index("pages").search(String(input.query), {
+          filter,
+          limit: Math.min(Number(input.limit) || 5, 20),
+          attributesToHighlight: ["text"],
         });
-        const hits = res.body.hits.hits;
+        const hits = res.hits;
         if (hits.length === 0) throw new Error(`No UBC pages matched "${input.query}"`);
-        return { pages: hits.map((h) => ({ ...(h._source as PageDoc), snippets: h.highlight?.text ?? [] })) };
+        return {
+          pages: hits.map((h) => {
+            const doc = h as unknown as PageDoc & { _formatted?: { text?: string } };
+            const snippets = doc._formatted?.text ? [doc._formatted.text.slice(0, 750)] : [];
+            return { source: doc.source, title: doc.title, url: doc.url, date: doc.date, snippets };
+          }),
+        };
       },
     },
   ],

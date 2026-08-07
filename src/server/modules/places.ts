@@ -1,5 +1,5 @@
 import { ESTIMATE_DETOUR, haversineMetersObj, WALK_SPEED_M_PER_MIN } from "@/src/shared/types";
-import type { DatasetModule, OsClient } from "../core/types";
+import type { DatasetModule, SearchClient } from "../core/types";
 import { resolveBuilding, type BuildingDoc } from "./buildings";
 
 export interface PoiDoc {
@@ -18,13 +18,13 @@ export interface PoiDoc {
 // biome-ignore lint/suspicious/noExplicitAny: raw GeoJSON features
 type Feature = Record<string, any>;
 
-export function transformPoi(f: Feature): { _id: string; doc: PoiDoc } | null {
+export function transformPoi(f: Feature): { id: string; doc: PoiDoc } | null {
   const p = f?.properties ?? {};
   const coords = f?.geometry?.coordinates;
   if (!p.PLACENAME || !Array.isArray(coords)) return null;
   if (p.STATUS && p.STATUS !== "Current") return null;
   return {
-    _id: String(p.POI_ID ?? p.OBJECTID),
+    id: String(p.POI_ID ?? p.OBJECTID),
     doc: {
       id: String(p.POI_ID ?? p.OBJECTID),
       name: String(p.PLACENAME),
@@ -44,7 +44,7 @@ export function transformPoi(f: Feature): { _id: string; doc: PoiDoc } | null {
  *  factor and speed as the routing fallback (src/server/routing.ts). Ranking
  *  stays on haversine deliberately; only walking_distance/api-route use the
  *  path network. */
-// ponytail: haversine over ≤500 docs sorted in JS, no geo_point mapping; move to OpenSearch geo queries if datasets grow
+// ponytail: haversine over ≤500 docs sorted in JS, no geo_point mapping; move to geo queries if datasets grow
 export function nearestFirst<T extends { lat: number; lon: number }>(
   items: T[],
   from: BuildingDoc,
@@ -58,25 +58,22 @@ export function nearestFirst<T extends { lat: number; lon: number }>(
 }
 
 export async function searchNearable<T extends { lat: number; lon: number }>(
-  os: OsClient,
+  search: SearchClient,
   index: string,
-  must: Record<string, unknown>[],
-  filter: Record<string, unknown>[],
+  queryText: string,
+  filter: string | undefined,
   nearBuilding: unknown,
   limit: number,
 ): Promise<{ results: T[]; near?: BuildingDoc; truncated_before_sort?: boolean }> {
   const NEAR_FETCH_CAP = 500;
-  const res = await os.search({
-    index,
-    body: {
-      query: { bool: { must: must.length > 0 ? must : [{ match_all: {} }], filter } },
-      size: nearBuilding ? NEAR_FETCH_CAP : limit,
-    },
+  const res = await search.index(index).search(queryText, {
+    filter,
+    limit: nearBuilding ? NEAR_FETCH_CAP : limit,
   });
-  let results = res.body.hits.hits.map((h) => h._source as T);
+  let results = res.hits as unknown as T[];
   if (!nearBuilding) return { results };
   const truncated_before_sort = results.length >= NEAR_FETCH_CAP;
-  const near = await resolveBuilding(os, String(nearBuilding));
+  const near = await resolveBuilding(search, String(nearBuilding));
   results = nearestFirst(results, near).slice(0, limit);
   return { results, near, ...(truncated_before_sort ? { truncated_before_sort } : {}) };
 }
@@ -86,19 +83,9 @@ export const places: DatasetModule = {
   indices: [
     {
       index: "poi",
-      mappings: {
-        properties: {
-          id: { type: "keyword" },
-          name: { type: "text" },
-          abbreviation: { type: "text" },
-          service_type: { type: "keyword" },
-          url: { type: "keyword" },
-          contact: { type: "text" },
-          hours: { type: "text" },
-          photo: { type: "keyword", index: false },
-          lat: { type: "float" },
-          lon: { type: "float" },
-        },
+      settings: {
+        searchableAttributes: ["name", "abbreviation"],
+        filterableAttributes: ["service_type"],
       },
       async *read(s3) {
         yield* ((await s3.getJson("geospatial/ubcv/locations/geojson/ubcv_poi.geojson")) as { features: Feature[] })
@@ -133,17 +120,16 @@ export const places: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const must: Record<string, unknown>[] = [];
-        if (input.query) must.push({ multi_match: { query: String(input.query), fields: ["name^2", "abbreviation"] } });
-        const filter: Record<string, unknown>[] = [];
-        if (input.service_type) filter.push({ term: { service_type: String(input.service_type) } });
+      async execute(input, search) {
+        const queryText = input.query ? String(input.query) : "";
+        const filters: string[] = [];
+        if (input.service_type) filters.push(`service_type = '${String(input.service_type)}'`);
         const limit = Math.min(Number(input.limit) || 10, 30);
         const { results, near, truncated_before_sort } = await searchNearable<PoiDoc>(
-          os,
+          search,
           "poi",
-          must,
-          filter,
+          queryText,
+          filters.length > 0 ? filters.join(" AND ") : undefined,
           input.near_building,
           limit,
         );

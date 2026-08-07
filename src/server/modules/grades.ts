@@ -1,4 +1,4 @@
-import type { DatasetModule, OsClient, S3Reader } from "../core/types";
+import type { DatasetModule, S3Reader, SearchClient } from "../core/types";
 
 interface GradeRow {
   subject: string;
@@ -24,25 +24,10 @@ export const grades: DatasetModule = {
   indices: [
     {
       index: "grades",
-      mappings: {
-        properties: {
-          subject: { type: "keyword" },
-          course: { type: "keyword" },
-          section: { type: "keyword" },
-          year: { type: "integer" },
-          session: { type: "keyword" },
-          title: { type: "text" },
-          professor: { type: "text", fields: { keyword: { type: "keyword" } } },
-          enrolled: { type: "integer" },
-          avg: { type: "float" },
-          median: { type: "float" },
-          std_dev: { type: "float" },
-          percentile_25: { type: "float" },
-          percentile_75: { type: "float" },
-          high: { type: "float" },
-          low: { type: "float" },
-          distribution: { type: "object", enabled: true },
-        },
+      settings: {
+        searchableAttributes: ["title", "professor"],
+        filterableAttributes: ["subject", "course", "section", "year", "session", "avg"],
+        sortableAttributes: ["year"],
       },
       async *read(s3: S3Reader) {
         const rows = (await s3.getJson("grades/distributions.json")) as GradeRow[];
@@ -50,8 +35,8 @@ export const grades: DatasetModule = {
       },
       transform(raw: GradeRow) {
         if (raw.avg === null) return null;
-        const _id = `${raw.subject}-${raw.course}-${raw.section}-${raw.year}${raw.session}`;
-        return { _id, doc: raw };
+        const id = `${raw.subject}-${raw.course}-${raw.section}-${raw.year}${raw.session}`;
+        return { id, doc: raw };
       },
     },
   ],
@@ -74,29 +59,26 @@ export const grades: DatasetModule = {
           },
         },
       },
-      async execute(input: Record<string, unknown>, os: OsClient) {
+      async execute(input: Record<string, unknown>, search: SearchClient) {
         const code = String(input.course_code ?? "")
           .trim()
           .toUpperCase();
         const [subject, course] = code.split(/\s+/);
         if (!subject || !course) throw new Error(`Invalid course_code "${input.course_code}"`);
 
-        const filter: Record<string, unknown>[] = [{ term: { subject } }, { term: { course } }];
-        if (input.year !== undefined) filter.push({ term: { year: input.year } });
-        if (input.session) filter.push({ term: { session: String(input.session).toUpperCase() } });
-        if (input.professor) filter.push({ match: { professor: String(input.professor) } });
-
-        const res = await os.search({
-          index: "grades",
-          body: {
-            query: { bool: { filter } },
-            sort: [{ year: "desc" }],
-            size: 50,
-          },
+        const filters: string[] = [`subject = '${subject}'`, `course = '${course}'`];
+        if (input.year !== undefined) filters.push(`year = ${input.year}`);
+        if (input.session) filters.push(`session = '${String(input.session).toUpperCase()}'`);
+        // professor is a searchable attribute, so use the query text for it
+        const queryText = input.professor ? String(input.professor) : "";
+        const res = await search.index("grades").search(queryText, {
+          filter: filters.join(" AND "),
+          sort: ["year:desc"],
+          limit: 50,
         });
-        const hits = res.body.hits.hits;
+        const hits = res.hits;
         if (hits.length === 0) throw new Error(`No grade records found for "${input.course_code}"`);
-        return { grades: hits.map((h) => h._source) };
+        return { grades: hits };
       },
     },
     {
@@ -118,33 +100,21 @@ export const grades: DatasetModule = {
           },
         },
       },
-      async execute(input: Record<string, unknown>, os: OsClient) {
-        const filter: Record<string, unknown>[] = [];
-        if (input.subject) filter.push({ term: { subject: String(input.subject).toUpperCase() } });
-        if (input.year !== undefined) filter.push({ term: { year: input.year } });
-        if (input.min_avg !== undefined || input.max_avg !== undefined) {
-          const range: Record<string, unknown> = {};
-          if (input.min_avg !== undefined) range.gte = input.min_avg;
-          if (input.max_avg !== undefined) range.lte = input.max_avg;
-          filter.push({ range: { avg: range } });
-        }
+      async execute(input: Record<string, unknown>, search: SearchClient) {
+        const filters: string[] = [];
+        if (input.subject) filters.push(`subject = '${String(input.subject).toUpperCase()}'`);
+        if (input.year !== undefined) filters.push(`year = ${input.year}`);
+        if (input.min_avg !== undefined) filters.push(`avg >= ${input.min_avg}`);
+        if (input.max_avg !== undefined) filters.push(`avg <= ${input.max_avg}`);
 
-        const res = await os.search({
-          index: "grades",
-          body: {
-            query: {
-              bool: {
-                must: [{ multi_match: { query: String(input.query), fields: ["title^2", "professor"] } }],
-                filter,
-              },
-            },
-            sort: [{ year: "desc" }],
-            size: Math.min(Number(input.limit) || 20, 50),
-          },
+        const res = await search.index("grades").search(String(input.query), {
+          filter: filters.length > 0 ? filters.join(" AND ") : undefined,
+          sort: ["year:desc"],
+          limit: Math.min(Number(input.limit) || 20, 50),
         });
-        const hits = res.body.hits.hits;
+        const hits = res.hits;
         if (hits.length === 0) throw new Error(`No grade records matched "${input.query}"`);
-        return { grades: hits.map((h) => h._source) };
+        return { grades: hits };
       },
     },
   ],

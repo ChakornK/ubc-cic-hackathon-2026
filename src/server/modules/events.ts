@@ -17,12 +17,12 @@ export interface EventDoc {
 // biome-ignore lint/suspicious/noExplicitAny: raw dataset rows
 type Row = Record<string, any>;
 
-export function transformEvent(row: Row): { _id: string; doc: EventDoc } | null {
+export function transformEvent(row: Row): { id: string; doc: EventDoc } | null {
   const id = row.global_id ?? row.id;
   if (id == null || !row.title) return null;
   const venue = Array.isArray(row.venue) ? row.venue[0] : row.venue; // TEC API: object, array, or absent
   return {
-    _id: String(id),
+    id: String(id),
     doc: {
       id: String(id),
       title: stripHtml(row.title),
@@ -45,19 +45,10 @@ export const events: DatasetModule = {
   indices: [
     {
       index: "events",
-      mappings: {
-        properties: {
-          id: { type: "keyword" },
-          title: { type: "text" },
-          text: { type: "text" },
-          url: { type: "keyword" },
-          start_date: { type: "date", format: "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd", ignore_malformed: true },
-          end_date: { type: "date", format: "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd", ignore_malformed: true },
-          all_day: { type: "boolean" },
-          venue: { type: "text" },
-          venue_address: { type: "text" },
-          categories: { type: "keyword" },
-        },
+      settings: {
+        searchableAttributes: ["title", "text", "venue"],
+        filterableAttributes: ["categories", "start_date"],
+        sortableAttributes: ["start_date"],
       },
       async *read(s3) {
         yield* (await s3.getJson("events/events.json")) as Row[];
@@ -85,37 +76,22 @@ export const events: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const must: Record<string, unknown>[] = [];
-        if (input.query)
-          must.push({ multi_match: { query: String(input.query), fields: ["title^2", "text", "venue"] } });
-        const filter: Record<string, unknown>[] = [];
-        if (input.from_date || input.to_date) {
-          filter.push({
-            range: {
-              start_date: {
-                ...(input.from_date ? { gte: String(input.from_date) } : {}),
-                ...(input.to_date ? { lte: String(input.to_date) } : {}),
-                format: "yyyy-MM-dd",
-              },
-            },
-          });
-        }
-        if (input.category) filter.push({ term: { categories: String(input.category) } });
-        const res = await os.search({
-          index: "events",
-          body: {
-            query: { bool: { must: must.length > 0 ? must : [{ match_all: {} }], filter } },
-            size: Math.min(Number(input.limit) || 10, 30),
-            // upcoming-first when a window is given; otherwise newest-first (the archive is mostly past events)
-            sort: [{ start_date: { order: input.from_date ? "asc" : "desc", missing: "_last" } }],
-          },
+      async execute(input, search) {
+        const filters: string[] = [];
+        if (input.from_date) filters.push(`start_date >= '${String(input.from_date)}'`);
+        if (input.to_date) filters.push(`start_date <= '${String(input.to_date)}'`);
+        if (input.category) filters.push(`categories = '${String(input.category)}'`);
+        const res = await search.index("events").search(input.query ? String(input.query) : "", {
+          filter: filters.length > 0 ? filters.join(" AND ") : undefined,
+          limit: Math.min(Number(input.limit) || 10, 30),
+          // upcoming-first when a window is given; otherwise newest-first (the archive is mostly past events)
+          sort: [input.from_date ? "start_date:asc" : "start_date:desc"],
         });
-        const hits = res.body.hits.hits;
+        const hits = res.hits;
         if (hits.length === 0) throw new Error(`No events matched "${input.query ?? ""}"`);
         return {
           events: hits.map((h) => {
-            const e = h._source as EventDoc;
+            const e = h as unknown as EventDoc;
             return { ...e, text: e.text.slice(0, 400) };
           }),
         };

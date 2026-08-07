@@ -40,10 +40,10 @@ export interface StudentFeeDoc {
 // biome-ignore lint/suspicious/noExplicitAny: raw dataset rows
 type Row = Record<string, any>;
 
-export function transformCostEstimate(row: Row): { _id: string; doc: CostEstimateDoc } | null {
+export function transformCostEstimate(row: Row): { id: string; doc: CostEstimateDoc } | null {
   if (row.program_id == null || !row.program) return null;
   return {
-    _id: String(row.program_id),
+    id: String(row.program_id),
     doc: {
       program_id: row.program_id,
       program: String(row.program),
@@ -62,7 +62,7 @@ export function transformCostEstimate(row: Row): { _id: string; doc: CostEstimat
   };
 }
 
-export function transformLivingCost(row: Row): { _id: string; doc: LivingCostDoc } | null {
+export function transformLivingCost(row: Row): { id: string; doc: LivingCostDoc } | null {
   if (!row.item || typeof row.amount !== "number") return null;
   const doc: LivingCostDoc = {
     item: String(row.item),
@@ -70,10 +70,10 @@ export function transformLivingCost(row: Row): { _id: string; doc: LivingCostDoc
     amount: row.amount,
     basis: row.basis ?? null,
   };
-  return { _id: slugify(`${doc.item}-${doc.variant ?? ""}`), doc };
+  return { id: slugify(`${doc.item}-${doc.variant ?? ""}`), doc };
 }
 
-export function transformStudentFee(row: Row): { _id: string; doc: StudentFeeDoc } | null {
+export function transformStudentFee(row: Row): { id: string; doc: StudentFeeDoc } | null {
   if (!row.item || typeof row.amount !== "number") return null;
   const doc: StudentFeeDoc = {
     section: row.section ?? null,
@@ -90,7 +90,7 @@ export function transformStudentFee(row: Row): { _id: string; doc: StudentFeeDoc
   return {
     // divider + amount_text are needed for uniqueness: some tables repeat the
     // same item across sub-rows, and one Dentistry pair differs only in amount
-    _id: [row.page, doc.section, doc.item, doc.student_type, doc.cohort_year, row.column, doc.divider, doc.amount_text]
+    id: [row.page, doc.section, doc.item, doc.student_type, doc.cohort_year, row.column, doc.divider, doc.amount_text]
       .map((p) => slugify(String(p ?? "")))
       .join("#"),
     doc,
@@ -102,22 +102,9 @@ export const costs: DatasetModule = {
   indices: [
     {
       index: "program_cost_estimates",
-      mappings: {
-        properties: {
-          program_id: { type: "integer" },
-          program: { type: "text" },
-          degrees: { type: "text" },
-          url: { type: "keyword" },
-          area: { type: "keyword" },
-          matched_by: { type: "keyword" },
-          tuition_domestic: { type: "float" },
-          tuition_international: { type: "float" },
-          student_fees: { type: "float" },
-          books_supplies: { type: "float" },
-          educational_total_domestic: { type: "float" },
-          educational_total_international: { type: "float" },
-          custom_tuition_message: { type: "text" },
-        },
+      settings: {
+        searchableAttributes: ["program", "degrees"],
+        filterableAttributes: ["area"],
       },
       async *read(s3) {
         yield* (await s3.getJson("finances/program_cost_estimates.json")) as Row[];
@@ -126,13 +113,9 @@ export const costs: DatasetModule = {
     },
     {
       index: "living_costs",
-      mappings: {
-        properties: {
-          item: { type: "text" },
-          variant: { type: "keyword" },
-          amount: { type: "float" },
-          basis: { type: "keyword" },
-        },
+      settings: {
+        searchableAttributes: ["item"],
+        filterableAttributes: ["variant", "basis"],
       },
       async *read(s3) {
         yield* (await s3.getJson("finances/living_costs.json")) as Row[];
@@ -141,19 +124,9 @@ export const costs: DatasetModule = {
     },
     {
       index: "student_fees",
-      mappings: {
-        properties: {
-          section: { type: "text" },
-          item: { type: "text" },
-          divider: { type: "text" },
-          context: { type: "text" },
-          student_type: { type: "keyword" },
-          cohort_year: { type: "integer" },
-          unit: { type: "keyword" },
-          amount: { type: "float" },
-          amount_text: { type: "keyword" },
-          url: { type: "keyword" },
-        },
+      settings: {
+        searchableAttributes: ["item", "divider", "section", "context"],
+        filterableAttributes: ["student_type"],
       },
       async *read(s3) {
         yield* (await s3.getJson("finances/student_fees.json")) as Row[];
@@ -177,12 +150,9 @@ export const costs: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const res = await os.search({
-          index: "program_cost_estimates",
-          body: { query: { match: { program: String(input.program) } }, size: 1 },
-        });
-        const doc = res.body.hits.hits[0]?._source as CostEstimateDoc | undefined;
+      async execute(input, search) {
+        const res = await search.index("program_cost_estimates").search(String(input.program), { limit: 1 });
+        const doc = res.hits[0] as unknown as CostEstimateDoc | undefined;
         if (!doc) {
           throw new Error(`No published cost estimate for "${input.program}" — UBC has no estimate for some programs`);
         }
@@ -205,12 +175,11 @@ export const costs: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const query = input.item ? { match: { item: String(input.item) } } : { match_all: {} };
-        const res = await os.search({ index: "living_costs", body: { query, size: 50 } });
-        const hits = res.body.hits.hits;
+      async execute(input, search) {
+        const res = await search.index("living_costs").search(input.item ? String(input.item) : "", { limit: 50 });
+        const hits = res.hits;
         if (hits.length === 0) throw new Error(`No living-cost figures matched "${input.item}"`);
-        return { living_costs: hits.map((h) => h._source as LivingCostDoc) };
+        return { living_costs: hits as unknown as LivingCostDoc[] };
       },
     },
     {
@@ -229,25 +198,15 @@ export const costs: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const filter = input.student_type ? [{ term: { student_type: String(input.student_type).toLowerCase() } }] : [];
-        const res = await os.search({
-          index: "student_fees",
-          body: {
-            query: {
-              bool: {
-                must: [
-                  { multi_match: { query: String(input.query), fields: ["item^2", "divider", "section", "context"] } },
-                ],
-                filter,
-              },
-            },
-            size: 20,
-          },
+      async execute(input, search) {
+        const filter = input.student_type ? `student_type = '${String(input.student_type).toLowerCase()}'` : undefined;
+        const res = await search.index("student_fees").search(String(input.query), {
+          filter,
+          limit: 20,
         });
-        const hits = res.body.hits.hits;
+        const hits = res.hits;
         if (hits.length === 0) throw new Error(`No student fees matched "${input.query}"`);
-        return { fees: hits.map((h) => h._source as StudentFeeDoc) };
+        return { fees: hits as unknown as StudentFeeDoc[] };
       },
     },
   ],

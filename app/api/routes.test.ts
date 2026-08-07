@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+process.env.JWT_SECRET = "test-secret";
+
 const verify = vi.fn();
-vi.mock("aws-jwt-verify", () => ({
-  CognitoJwtVerifier: { create: () => ({ verify }) },
+vi.mock("jose", () => ({
+  jwtVerify: (...args: unknown[]) => verify(...args),
+  SignJWT: vi.fn(),
 }));
 
 vi.mock("@/src/server/sessions/store", () => ({
@@ -16,7 +19,7 @@ vi.mock("@/src/server/sessions/store", () => ({
 }));
 
 const converse = vi.fn();
-vi.mock("@/src/server/bedrock", () => ({
+vi.mock("@/src/server/llm", () => ({
   converse: (...args: unknown[]) => converse(...args),
   converseStream: vi.fn(),
 }));
@@ -26,7 +29,7 @@ vi.mock("@/src/server/agent/stream", () => ({
   streamAgent: (...args: unknown[]) => streamAgent(...args),
 }));
 
-vi.mock("@/src/server/search", () => ({ getOsClient: () => ({}) }));
+vi.mock("@/src/server/search", () => ({ getSearch: () => ({}) }));
 
 const { POST: chatPost } = await import("./chat/route");
 const { GET: sessionsGet } = await import("./sessions/route");
@@ -40,7 +43,7 @@ const req = (init: RequestInit & { auth?: boolean } = {}) =>
   });
 
 beforeEach(() => {
-  verify.mockReset().mockResolvedValue({ sub: "u1", email: "u@example.com" });
+  verify.mockReset().mockResolvedValue({ payload: { sub: "u1", username: "testuser" } });
   converse.mockReset();
   streamAgent.mockReset();
 });

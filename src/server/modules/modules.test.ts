@@ -42,11 +42,11 @@ describe("ingest document IDs", () => {
     fc.assert(
       fc.property(tuitionRow, tuitionRow, (a, b) => {
         const ta = transformTuition(a);
-        expect(ta?._id).toBe(transformTuition(a)?._id); // deterministic
+        expect(ta?.id).toBe(transformTuition(a)?.id); // deterministic
         const tb = transformTuition(b);
         const keyOf = (r: typeof a) =>
           `${transformTuition(r)?.doc.program_slug}#${r.student_type}#${r.cohort_year}#${r.cohort_rule}`;
-        if (ta && tb && keyOf(a) !== keyOf(b)) expect(ta._id).not.toBe(tb._id);
+        if (ta && tb && keyOf(a) !== keyOf(b)) expect(ta.id).not.toBe(tb.id);
       }),
       { numRuns: 200 },
     );
@@ -67,7 +67,7 @@ describe("ingest document IDs", () => {
       },
     };
     const t = transformBuilding(f);
-    expect(t?._id).toBe("ICCS");
+    expect(t?.id).toBe("ICCS");
     expect(t?.doc.lat).toBeCloseTo(49.2603, 3);
     expect(transformBuilding({ properties: {}, geometry: f.geometry })).toBeNull();
   });

@@ -1,5 +1,5 @@
 import { formatSeconds } from "../core/time";
-import type { DatasetModule, OsClient } from "../core/types";
+import type { DatasetModule, SearchClient } from "../core/types";
 
 export interface CourseSection {
   section: string;
@@ -138,15 +138,19 @@ const upSubject = (s: string) => {
   return up.includes("_") ? up : `${up}_V`;
 };
 
-async function findByCode(os: OsClient, courseCode: string): Promise<CourseDoc | null> {
+async function findByCode(search: SearchClient, courseCode: string): Promise<CourseDoc | null> {
   const norm = courseCode.trim().toUpperCase().replace(/\s+/g, " ");
   const [subject = "", number = ""] = norm.split(" ");
   const candidates = [...new Set([norm, `${upSubject(subject)} ${number}`])];
-  const res = await os.search({
-    index: "courses",
-    body: { query: { terms: { code: candidates } }, size: 1 },
-  });
-  return (res.body.hits.hits[0]?._source as CourseDoc) ?? null;
+  // Try each candidate as an exact filter match
+  for (const code of candidates) {
+    const res = await search.index("courses").search("", {
+      filter: `code = '${code}'`,
+      limit: 1,
+    });
+    if (res.hits[0]) return res.hits[0] as unknown as CourseDoc;
+  }
+  return null;
 }
 
 export const courses: DatasetModule = {
@@ -154,28 +158,10 @@ export const courses: DatasetModule = {
   indices: [
     {
       index: "courses",
-      mappings: {
-        properties: {
-          code: { type: "keyword" },
-          subject: { type: "keyword" },
-          number: { type: "keyword" },
-          title: { type: "text" },
-          description: { type: "text" },
-          credits: { type: "float" },
-          prerequisite: { type: "text" },
-          corequisite: { type: "text" },
-          sections: {
-            properties: {
-              section: { type: "keyword" },
-              term: { type: "text" },
-              days: { type: "keyword" },
-              start_seconds: { type: "integer" },
-              end_seconds: { type: "integer" },
-              instructor: { type: "text" },
-              status: { type: "keyword" },
-            },
-          },
-        },
+      settings: {
+        searchableAttributes: ["title", "description", "code", "subject", "number"],
+        filterableAttributes: ["code", "subject", "credits", "prerequisite"],
+        sortableAttributes: ["code"],
       },
       async *read(s3) {
         const [calCourses, calSubjects, schedCourses, sections, terms, statuses] = (await Promise.all([
@@ -189,7 +175,7 @@ export const courses: DatasetModule = {
         yield* joinCourses({ calCourses, calSubjects, schedCourses, sections, terms, statuses });
       },
       transform(doc: CourseDoc) {
-        return { _id: doc.code, doc };
+        return { id: doc.code, doc };
       },
     },
   ],
@@ -214,28 +200,19 @@ export const courses: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const { query, subject, credits, term, has_no_prereqs, limit } = input;
-        const filter: Record<string, unknown>[] = [];
-        if (subject) filter.push({ term: { subject: upSubject(String(subject)) } });
-        if (credits !== undefined) filter.push({ term: { credits } });
-        if (term) filter.push({ match: { "sections.term": { query: String(term), operator: "and" } } });
-        if (has_no_prereqs) filter.push({ bool: { must_not: { exists: { field: "prerequisite" } } } });
-        const res = await os.search({
-          index: "courses",
-          body: {
-            query: {
-              bool: {
-                must: [{ multi_match: { query: String(query), fields: ["title^2", "description", "code^3"] } }],
-                filter,
-              },
-            },
-            size: Math.min(Number(limit) || 20, 50),
-          },
+      async execute(input, search) {
+        const { query, subject, credits, has_no_prereqs, limit } = input;
+        const filters: string[] = [];
+        if (subject) filters.push(`subject = '${upSubject(String(subject))}'`);
+        if (credits !== undefined) filters.push(`credits = ${credits}`);
+        if (has_no_prereqs) filters.push("prerequisite IS NULL");
+        const res = await search.index("courses").search(String(query), {
+          filter: filters.length > 0 ? filters.join(" AND ") : undefined,
+          limit: Math.min(Number(limit) || 20, 50),
         });
-        const hits = res.body.hits.hits;
+        const hits = res.hits;
         if (hits.length === 0) throw new Error(`No courses matched "${query}"`);
-        return { courses: hits.map((h) => presentCourse(h._source as CourseDoc, 10)) };
+        return { courses: hits.map((h) => presentCourse(h as unknown as CourseDoc, 10)) };
       },
     },
     {
@@ -253,8 +230,8 @@ export const courses: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const doc = await findByCode(os, String(input.course_code ?? ""));
+      async execute(input, search) {
+        const doc = await findByCode(search, String(input.course_code ?? ""));
         if (!doc) throw new Error(`No course found with code "${input.course_code}"`);
         return presentCourse(doc);
       },

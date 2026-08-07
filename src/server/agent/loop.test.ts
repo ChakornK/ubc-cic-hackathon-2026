@@ -1,9 +1,9 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import type { ConverseMessage, DatasetModule, OsClient } from "../core/types";
+import type { ConverseMessage, DatasetModule, SearchClient } from "../core/types";
 import { ITERATION_LIMIT, runAgentLoop, SYSTEM_PROMPT } from "./loop";
 
-const os = {} as OsClient;
+const search = {} as SearchClient;
 
 interface ToolUseStep {
   stop: "tool_use";
@@ -81,7 +81,7 @@ describe("agent loop", () => {
     await fc.assert(
       fc.asyncProperty(scriptArb, async (script) => {
         const scripted = makeScriptedConverse(script);
-        const result = await runAgentLoop(userMessages, { converse: scripted.converse, modules, os });
+        const result = await runAgentLoop(userMessages, { converse: scripted.converse, modules, search });
         const firstEnd = script.findIndex((s) => s.stop === "end_turn");
         const expectedCalls = firstEnd === -1 || firstEnd >= ITERATION_LIMIT ? ITERATION_LIMIT : firstEnd + 1;
         expect(scripted.calls()).toBe(expectedCalls);
@@ -97,7 +97,7 @@ describe("agent loop", () => {
     await fc.assert(
       fc.asyncProperty(scriptArb, async (script) => {
         const scripted = makeScriptedConverse(script); // asserts toolResult ids per call
-        const result = await runAgentLoop(userMessages, { converse: scripted.converse, modules, os });
+        const result = await runAgentLoop(userMessages, { converse: scripted.converse, modules, search });
         const requested = script.slice(0, scripted.calls()).flatMap((s) => (s.stop === "tool_use" ? s.uses : []));
         expect(result.tool_calls.map(({ name, input }) => ({ name, input }))).toEqual(requested);
         for (const call of result.tool_calls) expect(call.result).toEqual({ echoed: call.input });

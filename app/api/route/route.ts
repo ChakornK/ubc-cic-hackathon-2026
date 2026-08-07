@@ -1,7 +1,7 @@
 import { requireUser } from "@/src/server/auth";
 import { resolveBuilding } from "@/src/server/modules/buildings";
 import { route } from "@/src/server/routing";
-import { getOsClient } from "@/src/server/search";
+import { getSearch } from "@/src/server/search";
 import { json, serverError } from "../http";
 
 /** GET /api/route?from=ICCS&to=NEST — walking route between two buildings,
@@ -15,11 +15,11 @@ export async function GET(request: Request): Promise<Response> {
     const toQuery = url.searchParams.get("to");
     if (!fromQuery || !toQuery) return json({ error: "Query params 'from' and 'to' are required" }, 400);
 
-    const os = getOsClient();
+    const search = getSearch();
     let from: Awaited<ReturnType<typeof resolveBuilding>>;
     let to: Awaited<ReturnType<typeof resolveBuilding>>;
     try {
-      [from, to] = await Promise.all([resolveBuilding(os, fromQuery), resolveBuilding(os, toQuery)]);
+      [from, to] = await Promise.all([resolveBuilding(search, fromQuery), resolveBuilding(search, toQuery)]);
     } catch (e) {
       return json({ error: e instanceof Error ? e.message : "Unknown building" }, 404);
     }

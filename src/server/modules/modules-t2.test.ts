@@ -46,7 +46,7 @@ describe("tuition keeps every billing unit", () => {
     const row = { program: "MBA", student_type: "domestic", amount: 12000, unit: "per_instalment" };
     const t = transformTuition(row);
     expect(t?.doc).toMatchObject({ unit: "per_instalment", amount_cad: 12000 });
-    expect(t?._id).not.toBe(transformTuition({ ...row, unit: "per_credit" })?._id);
+    expect(t?.id).not.toBe(transformTuition({ ...row, unit: "per_credit" })?.id);
     expect(transformTuition({ program: "X", amount: "n/a", unit: "per_credit" })).toBeNull();
   });
 
@@ -81,7 +81,7 @@ describe("pages transform", () => {
       row: { id: "abc", title: "Withdrawal", alias: "/w", body: { processed: "<p>Rules</p>" } },
     });
     expect(drupal).toMatchObject({
-      _id: "calendar#abc",
+      id: "calendar#abc",
       doc: { title: "Withdrawal", url: "https://vancouver.calendar.ubc.ca/w", text: "Rules" },
     });
 
@@ -95,14 +95,14 @@ describe("pages transform", () => {
         content: { rendered: "<b>Money</b>" },
       },
     });
-    expect(wp).toMatchObject({ _id: "admissions#7", doc: { title: "Financial aid", text: "Money" } });
+    expect(wp).toMatchObject({ id: "admissions#7", doc: { title: "Financial aid", text: "Money" } });
 
     const report = transformPage({
       source: "reports",
       shape: "report",
       row: { url: "https://x/y.pdf", filename: "y.pdf", page_title: "Budget" },
     });
-    expect(report).toMatchObject({ _id: "reports#https://x/y.pdf", doc: { title: "Budget", url: "https://x/y.pdf" } });
+    expect(report).toMatchObject({ id: "reports#https://x/y.pdf", doc: { title: "Budget", url: "https://x/y.pdf" } });
 
     expect(transformPage({ source: "calendar", shape: "drupal", row: { id: "x" } })).toBeNull();
   });
@@ -150,8 +150,8 @@ describe("admissions", () => {
       advisory: false,
     };
     const a = transformRequirement(row);
-    expect(a?._id).toBe(transformRequirement(row)?._id);
-    expect(a?._id).not.toBe(transformRequirement({ ...row, requirement: "Math 12" })?._id);
+    expect(a?.id).toBe(transformRequirement(row)?.id);
+    expect(a?.id).not.toBe(transformRequirement({ ...row, requirement: "Math 12" })?.id);
     expect(a?.doc.advisory).toBe(false);
   });
 });
@@ -159,7 +159,7 @@ describe("admissions", () => {
 describe("costs transforms", () => {
   it("living cost and student fee IDs are deterministic", () => {
     const lc = transformLivingCost({ item: "Housing", variant: "shared", amount: 800, basis: "per month" });
-    expect(lc?._id).toBe("housing-shared");
+    expect(lc?.id).toBe("housing-shared");
     const fee = transformStudentFee({
       page: "fees",
       section: "Health",
@@ -167,9 +167,9 @@ describe("costs transforms", () => {
       student_type: "domestic",
       amount: 46,
     });
-    expect(fee?._id).toBe(
+    expect(fee?.id).toBe(
       transformStudentFee({ page: "fees", section: "Health", item: "U-Pass", student_type: "domestic", amount: 46 })
-        ?._id,
+        ?.id,
     );
     expect(transformStudentFee({ item: "no amount" })).toBeNull();
   });
@@ -181,7 +181,7 @@ describe("calendar transforms", () => {
     const h = transformHoliday({ name: "Thanksgiving", date: "2026-10-12", ubc_specific: false });
     expect(d?.doc.kind).toBe("academic");
     expect(h?.doc).toMatchObject({ kind: "holiday", start: "2026-10-12", ubc_specific: false });
-    expect(d?._id).not.toBe(h?._id);
+    expect(d?.id).not.toBe(h?.id);
   });
 });
 
@@ -226,7 +226,7 @@ describe("spaces transforms", () => {
       start: "2026-08-06T10:00",
       minutes: 60,
     });
-    expect(slot?._id).toBe("8#2026-08-06T10:00");
+    expect(slot?.id).toBe("8#2026-08-06T10:00");
     expect(slot?.doc.state).toBe("booked");
   });
 });

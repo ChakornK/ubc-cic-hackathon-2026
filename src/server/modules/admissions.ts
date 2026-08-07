@@ -59,7 +59,7 @@ export function joinPrograms(tables: {
     });
 }
 
-export function transformRequirement(row: Row): { _id: string; doc: RequirementDoc } | null {
+export function transformRequirement(row: Row): { id: string; doc: RequirementDoc } | null {
   if (!row.requirement_key || row.location_term_id == null || !row.requirement) return null;
   const doc: RequirementDoc = {
     requirement_key: String(row.requirement_key),
@@ -74,7 +74,7 @@ export function transformRequirement(row: Row): { _id: string; doc: RequirementD
     advisory: Boolean(row.advisory),
   };
   return {
-    _id: [
+    id: [
       doc.requirement_key,
       doc.location_term_id,
       doc.program_group ?? "",
@@ -91,18 +91,9 @@ export const admissions: DatasetModule = {
   indices: [
     {
       index: "admission_programs",
-      mappings: {
-        properties: {
-          id: { type: "integer" },
-          name: { type: "text" },
-          summary: { type: "text" },
-          url: { type: "keyword" },
-          degrees: { type: "text" },
-          interests: { type: "text" },
-          duration: { type: "keyword" },
-          requirement_key: { type: "keyword" },
-          note: { type: "text" },
-        },
+      settings: {
+        searchableAttributes: ["name", "summary", "interests", "degrees"],
+        filterableAttributes: ["degrees", "requirement_key"],
       },
       async *read(s3) {
         const [programs, programRequirements, interests] = (await Promise.all([
@@ -113,24 +104,15 @@ export const admissions: DatasetModule = {
         yield* joinPrograms({ programs, programRequirements, interests });
       },
       transform(doc: AdmissionProgramDoc) {
-        return { _id: String(doc.id), doc };
+        return { id: String(doc.id), doc };
       },
     },
     {
       index: "admission_requirements",
-      mappings: {
-        properties: {
-          requirement_key: { type: "keyword" },
-          curriculum: { type: "keyword" },
-          location: { type: "text" },
-          location_slug: { type: "keyword" },
-          location_term_id: { type: "integer" },
-          program_group: { type: "keyword" },
-          kind: { type: "keyword" },
-          position: { type: "integer" },
-          requirement: { type: "text" },
-          advisory: { type: "boolean" },
-        },
+      settings: {
+        searchableAttributes: ["location", "requirement"],
+        filterableAttributes: ["requirement_key", "location_term_id", "advisory", "kind", "curriculum"],
+        sortableAttributes: ["position"],
       },
       async *read(s3) {
         yield* (await s3.getJson("admissions/requirements/required_courses.json")) as Row[];
@@ -156,25 +138,15 @@ export const admissions: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const filter = input.degree ? [{ match: { degrees: { query: String(input.degree), operator: "and" } } }] : [];
-        const res = await os.search({
-          index: "admission_programs",
-          body: {
-            query: {
-              bool: {
-                must: [{ multi_match: { query: String(input.query), fields: ["name^2", "summary", "interests"] } }],
-                filter,
-              },
-            },
-            size: Math.min(Number(input.limit) || 10, 30),
-          },
+      async execute(input, search) {
+        const res = await search.index("admission_programs").search(String(input.query), {
+          limit: Math.min(Number(input.limit) || 10, 30),
         });
-        const hits = res.body.hits.hits;
+        const hits = res.hits;
         if (hits.length === 0) throw new Error(`No UBC programs matched "${input.query}"`);
         return {
           programs: hits.map((h) => {
-            const p = h._source as AdmissionProgramDoc;
+            const p = h as unknown as AdmissionProgramDoc;
             return { ...p, summary: p.summary.slice(0, 300) };
           }),
         };
@@ -204,13 +176,10 @@ export const admissions: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
+      async execute(input, search) {
         const programQuery = String(input.program ?? "");
-        const progRes = await os.search({
-          index: "admission_programs",
-          body: { query: { multi_match: { query: programQuery, fields: ["name^2", "summary"] } }, size: 1 },
-        });
-        const program = progRes.body.hits.hits[0]?._source as AdmissionProgramDoc | undefined;
+        const progRes = await search.index("admission_programs").search(programQuery, { limit: 1 });
+        const program = progRes.hits[0] as unknown as AdmissionProgramDoc | undefined;
         if (!program) throw new Error(`No UBC program matched "${programQuery}"`);
         if (!program.requirement_key) {
           throw new Error(
@@ -220,32 +189,25 @@ export const admissions: DatasetModule = {
         // Resolve the location to its unique term id first — location_slug alone
         // is ambiguous ("basic" exists in both province and country curricula).
         const locQuery = String(input.location ?? "");
-        const locRes = await os.search({
-          index: "admission_requirements",
-          body: {
-            query: {
-              bool: {
-                must: [{ match: { location: locQuery } }],
-                filter: [{ term: { requirement_key: program.requirement_key } }],
-              },
-            },
-            size: 1,
-          },
+        const locRes = await search.index("admission_requirements").search(locQuery, {
+          filter: `requirement_key = '${program.requirement_key}'`,
+          limit: 1,
         });
-        const loc = locRes.body.hits.hits[0]?._source as RequirementDoc | undefined;
+        const loc = locRes.hits[0] as unknown as RequirementDoc | undefined;
         if (!loc) {
           throw new Error(`No admission requirements found for applicants from "${locQuery}" (${program.name})`);
         }
-        const filter: Record<string, unknown>[] = [
-          { term: { requirement_key: program.requirement_key } },
-          { term: { location_term_id: loc.location_term_id } },
+        const filters: string[] = [
+          `requirement_key = '${program.requirement_key}'`,
+          `location_term_id = ${loc.location_term_id}`,
         ];
-        if (!input.include_advisory) filter.push({ term: { advisory: false } });
-        const res = await os.search({
-          index: "admission_requirements",
-          body: { query: { bool: { filter } }, size: 200, sort: [{ position: "asc" }] },
+        if (!input.include_advisory) filters.push("advisory = false");
+        const res = await search.index("admission_requirements").search("", {
+          filter: filters.join(" AND "),
+          sort: ["position:asc"],
+          limit: 200,
         });
-        const rows = res.body.hits.hits.map((h) => h._source as RequirementDoc);
+        const rows = res.hits as unknown as RequirementDoc[];
         if (rows.length === 0) {
           throw new Error(`No requirement lines found for "${program.name}" from "${loc.location}"`);
         }

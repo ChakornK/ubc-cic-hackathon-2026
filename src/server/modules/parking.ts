@@ -24,12 +24,12 @@ type Feature = Record<string, any>;
 
 const flag = (v: unknown) => v === "1" || v === 1 || v === true; // source booleans are "0"/"1" strings
 
-export function transformParking(f: Feature): { _id: string; doc: ParkingDoc } | null {
+export function transformParking(f: Feature): { id: string; doc: ParkingDoc } | null {
   const p = f?.properties ?? {};
   const coords = f?.geometry?.coordinates;
   if (p.FAC_ID == null || !p.FAC_DESCRIPTION || !Array.isArray(coords)) return null;
   return {
-    _id: String(p.FAC_ID),
+    id: String(p.FAC_ID),
     doc: {
       id: String(p.FAC_ID),
       name: String(p.FAC_DESCRIPTION),
@@ -55,24 +55,9 @@ export const parking: DatasetModule = {
   indices: [
     {
       index: "parking",
-      mappings: {
-        properties: {
-          id: { type: "keyword" },
-          name: { type: "text" },
-          hours: { type: "text" },
-          rate: { type: "text" },
-          rate_evening: { type: "text" },
-          rate_holiday: { type: "text" },
-          accessible_stalls: { type: "boolean" },
-          motorcycle: { type: "boolean" },
-          bike_cage: { type: "boolean" },
-          elevator: { type: "boolean" },
-          ev_charging: { type: "boolean" },
-          permit_required: { type: "boolean" },
-          payment_link: { type: "keyword" },
-          lat: { type: "float" },
-          lon: { type: "float" },
-        },
+      settings: {
+        searchableAttributes: ["name"],
+        filterableAttributes: ["ev_charging", "accessible_stalls", "motorcycle", "bike_cage"],
       },
       async *read(s3) {
         yield* (
@@ -106,17 +91,16 @@ export const parking: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const must: Record<string, unknown>[] = [];
-        if (input.query) must.push({ match: { name: String(input.query) } });
-        const filter: Record<string, unknown>[] = [];
-        if (input.ev_charging) filter.push({ term: { ev_charging: true } });
+      async execute(input, search) {
+        const queryText = input.query ? String(input.query) : "";
+        const filters: string[] = [];
+        if (input.ev_charging) filters.push("ev_charging = true");
         const limit = Math.min(Number(input.limit) || 5, 20);
         const { results, near, truncated_before_sort } = await searchNearable<ParkingDoc>(
-          os,
+          search,
           "parking",
-          must,
-          filter,
+          queryText,
+          filters.length > 0 ? filters.join(" AND ") : undefined,
           input.near_building,
           limit,
         );

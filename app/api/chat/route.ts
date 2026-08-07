@@ -3,7 +3,7 @@ import { requireUser } from "@/src/server/auth";
 import type { InterstitialBlock } from "@/src/server/core/types";
 import { validateChatRequest } from "@/src/server/core/validate";
 import { modules } from "@/src/server/modules";
-import { getOsClient } from "@/src/server/search";
+import { getSearch } from "@/src/server/search";
 import { appendExchange } from "@/src/server/sessions/store";
 import { json, serverError } from "../http";
 
@@ -35,7 +35,7 @@ export async function POST(request: Request): Promise<Response> {
           } | null = null;
           const interstitial: InterstitialBlock[] = [];
 
-          for await (const event of streamAgent(parsed.value.messages, { modules, os: getOsClient() })) {
+          for await (const event of streamAgent(parsed.value.messages, { modules, search: getSearch() })) {
             controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
             if (event.type === "thinking") {
               const last = interstitial[interstitial.length - 1];

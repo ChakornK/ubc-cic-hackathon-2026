@@ -28,7 +28,7 @@ export function slugify(s: string): string {
  *  `program_slug` (4.2). The ID extends the design's 4-part key with
  *  applies_to, the column qualifier, and the unit — real data has per-year,
  *  per-course-level, and per-unit rate variants. */
-export function transformTuition(row: Row): { _id: string; doc: TuitionDoc } | null {
+export function transformTuition(row: Row): { id: string; doc: TuitionDoc } | null {
   if (typeof row.amount !== "number" || !row.program) return null;
   const qualifier = String(row.column ?? "").match(/\(([^)]+)\)\s*$/)?.[1] ?? null;
   const doc: TuitionDoc = {
@@ -43,7 +43,7 @@ export function transformTuition(row: Row): { _id: string; doc: TuitionDoc } | n
     amount_cad: row.amount,
     instalments: null,
   };
-  return { _id: tuitionId(doc), doc };
+  return { id: tuitionId(doc), doc };
 }
 
 export function tuitionId(doc: TuitionDoc): string {
@@ -66,7 +66,7 @@ export function meltTuition(rows: Row[]): TuitionDoc[] {
   for (const row of rows) {
     const t = transformTuition(row);
     if (!t) continue;
-    groups.set(t._id, [...(groups.get(t._id) ?? []), t.doc]);
+    groups.set(t.id, [...(groups.get(t.id) ?? []), t.doc]);
   }
   return [...groups.values()].map((g) =>
     g.length === 1
@@ -96,25 +96,15 @@ export const tuition: DatasetModule = {
   indices: [
     {
       index: "tuition",
-      mappings: {
-        properties: {
-          program: { type: "text" },
-          program_slug: { type: "keyword" },
-          student_type: { type: "keyword" },
-          cohort_year: { type: "integer" },
-          cohort_rule: { type: "keyword" },
-          applies_to: { type: "keyword" },
-          rate_type: { type: "keyword" },
-          unit: { type: "keyword" },
-          amount_cad: { type: "float" },
-          instalments: { type: "float" },
-        },
+      settings: {
+        searchableAttributes: ["program", "program_slug"],
+        filterableAttributes: ["program_slug", "student_type", "cohort_year", "cohort_rule"],
       },
       async *read(s3) {
         yield* meltTuition((await s3.getJson("finances/tuition.json")) as Row[]);
       },
       transform(doc: TuitionDoc) {
-        return { _id: tuitionId(doc), doc };
+        return { id: tuitionId(doc), doc };
       },
     },
   ],
@@ -142,37 +132,26 @@ export const tuition: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
+      async execute(input, search) {
         const slug = slugify(String(input.program_slug ?? ""));
         const studentType = String(input.student_type ?? "").toLowerCase();
         const cohortYear = Number(input.cohort_year);
-        const bySlug = async (s: string) =>
-          (
-            await os.search({
-              index: "tuition",
-              body: {
-                query: { bool: { filter: [{ term: { program_slug: s } }, { term: { student_type: studentType } }] } },
-                size: 50,
-              },
-            })
-          ).body.hits.hits.map((h) => h._source as TuitionDoc);
+        const bySlug = async (s: string) => {
+          const res = await search.index("tuition").search("", {
+            filter: `program_slug = '${s}' AND student_type = '${studentType}'`,
+            limit: 50,
+          });
+          return res.hits as unknown as TuitionDoc[];
+        };
 
         let rows = await bySlug(slug);
         if (rows.length === 0) {
           // fall back to a fuzzy program-name match, then requery by that slug
-          const fuzzy = await os.search({
-            index: "tuition",
-            body: {
-              query: {
-                bool: {
-                  must: [{ match: { program: slug.replace(/-/g, " ") } }],
-                  filter: [{ term: { student_type: studentType } }],
-                },
-              },
-              size: 1,
-            },
+          const fuzzy = await search.index("tuition").search(slug.replace(/-/g, " "), {
+            filter: `student_type = '${studentType}'`,
+            limit: 1,
           });
-          const best = fuzzy.body.hits.hits[0]?._source as TuitionDoc | undefined;
+          const best = fuzzy.hits[0] as unknown as TuitionDoc | undefined;
           if (best) rows = await bySlug(best.program_slug);
         }
         // resolve the cohort within each rate variant (per-year / per-course-level / billing unit)

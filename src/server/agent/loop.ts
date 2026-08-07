@@ -5,7 +5,7 @@ import type {
   ConverseFn,
   ConverseMessage,
   DatasetModule,
-  OsClient,
+  SearchClient,
   ToolCall,
 } from "../core/types";
 import { executeTool, isToolError } from "./executor";
@@ -47,7 +47,7 @@ export function systemPrompt(now = new Date()): string {
 export interface AgentDeps {
   converse: ConverseFn;
   modules: DatasetModule[];
-  os: OsClient;
+  search: SearchClient;
 }
 
 /** The tool-calling loop against the Converse API (Requirements 2.2–2.7). */
@@ -77,7 +77,7 @@ export async function runAgentLoop(messages: ChatMessage[], deps: AgentDeps): Pr
     for (const block of res.message.content ?? []) {
       if (!block.toolUse) continue;
       const { toolUseId, name, input } = block.toolUse;
-      const result = await executeTool(deps.modules, name, input, deps.os);
+      const result = await executeTool(deps.modules, name, input, deps.search);
       toolCalls.push({ name, input, result });
       results.push({
         toolResult: {

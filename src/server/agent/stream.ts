@@ -1,7 +1,7 @@
 // Streaming agent loop: yields NDJSON events as the model generates text
 // and executes tools. The non-streaming loop in loop.ts remains for property tests.
 
-import type { ChatMessage, ContentBlock, ConverseMessage, DatasetModule, OsClient, ToolCall } from "../core/types";
+import type { ChatMessage, ContentBlock, ConverseMessage, DatasetModule, SearchClient, ToolCall } from "../core/types";
 import { converseStream } from "../llm";
 import { executeTool, isToolError } from "./executor";
 import { ITERATION_LIMIT, systemPrompt } from "./loop";
@@ -19,7 +19,7 @@ export type StreamEvent =
 
 export interface StreamAgentDeps {
   modules: DatasetModule[];
-  os: OsClient;
+  search: SearchClient;
 }
 
 /** Runs the agent loop, yielding StreamEvents via an async generator. */
@@ -83,7 +83,7 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
     const results: ContentBlock[] = [];
     for (const { toolUseId, name, input } of toolUses) {
       yield { type: "tool_start", name, input };
-      const result = await executeTool(deps.modules, name, input, deps.os);
+      const result = await executeTool(deps.modules, name, input, deps.search);
       toolCalls.push({ name, input, result });
       yield { type: "tool_end", name, result };
       results.push({

@@ -15,7 +15,7 @@ export interface KeyDateDoc {
 // biome-ignore lint/suspicious/noExplicitAny: raw dataset rows
 type Row = Record<string, any>;
 
-export function transformAcademicDate(row: Row): { _id: string; doc: KeyDateDoc } | null {
+export function transformAcademicDate(row: Row): { id: string; doc: KeyDateDoc } | null {
   if (!row.event) return null;
   const doc: KeyDateDoc = {
     kind: "academic",
@@ -28,7 +28,7 @@ export function transformAcademicDate(row: Row): { _id: string; doc: KeyDateDoc 
     source_url: row.source_url ?? null,
   };
   return {
-    _id: [
+    id: [
       "academic",
       slugify(doc.name),
       slugify(String(row.section ?? "")),
@@ -38,7 +38,7 @@ export function transformAcademicDate(row: Row): { _id: string; doc: KeyDateDoc 
   };
 }
 
-export function transformHoliday(row: Row): { _id: string; doc: KeyDateDoc } | null {
+export function transformHoliday(row: Row): { id: string; doc: KeyDateDoc } | null {
   if (!row.name || !row.date) return null;
   const doc: KeyDateDoc = {
     kind: "holiday",
@@ -50,7 +50,7 @@ export function transformHoliday(row: Row): { _id: string; doc: KeyDateDoc } | n
     ubc_specific: Boolean(row.ubc_specific),
     source_url: row.source_url ?? null,
   };
-  return { _id: ["holiday", slugify(doc.name), doc.start].join("#"), doc };
+  return { id: ["holiday", slugify(doc.name), doc.start].join("#"), doc };
 }
 
 export const calendar: DatasetModule = {
@@ -58,17 +58,10 @@ export const calendar: DatasetModule = {
   indices: [
     {
       index: "key_dates",
-      mappings: {
-        properties: {
-          kind: { type: "keyword" },
-          name: { type: "text" },
-          applies_to: { type: "text" },
-          date_text: { type: "text" },
-          start: { type: "keyword" },
-          end: { type: "keyword" },
-          ubc_specific: { type: "boolean" },
-          source_url: { type: "keyword" },
-        },
+      settings: {
+        searchableAttributes: ["name", "applies_to", "date_text"],
+        filterableAttributes: ["kind"],
+        sortableAttributes: ["start"],
       },
       async *read(s3) {
         for (const row of (await s3.getJson("academic-calendar/vancouver/dates.json")) as Row[]) {
@@ -107,22 +100,16 @@ export const calendar: DatasetModule = {
           },
         },
       },
-      async execute(input, os) {
-        const must = input.query
-          ? [{ multi_match: { query: String(input.query), fields: ["name^2", "applies_to", "date_text"] } }]
-          : [{ match_all: {} }];
-        const filter = input.kind ? [{ term: { kind: String(input.kind) } }] : [];
-        const res = await os.search({
-          index: "key_dates",
-          body: {
-            query: { bool: { must, filter } },
-            size: Math.min(Number(input.limit) || 20, 66), // the whole index is 66 rows
-            sort: [{ start: { order: "asc", missing: "_last" } }],
-          },
+      async execute(input, search) {
+        const filter = input.kind ? `kind = '${String(input.kind)}'` : undefined;
+        const res = await search.index("key_dates").search(input.query ? String(input.query) : "", {
+          filter,
+          sort: ["start:asc"],
+          limit: Math.min(Number(input.limit) || 20, 66), // the whole index is 66 rows
         });
-        const hits = res.body.hits.hits;
+        const hits = res.hits;
         if (hits.length === 0) throw new Error(`No key dates matched "${input.query}"`);
-        return { dates: hits.map((h) => h._source as KeyDateDoc) };
+        return { dates: hits as unknown as KeyDateDoc[] };
       },
     },
   ],
