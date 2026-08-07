@@ -69,9 +69,6 @@ export function UserMessage({ message }: { message: DisplayMessage }) {
 
 function ThinkingBlock({ content }: { content: string }) {
   const [open, setOpen] = useState(false);
-  const statusMatch = content.match(/<\|status\|>(.*?)<\|status\|>/);
-  const label = statusMatch?.[1]?.trim() || "Reasoning";
-  const displayContent = content.replace(/<\|status\|>.*?<\|status\|>\n?/, "").trim();
   return (
     <details
       open={open}
@@ -80,12 +77,12 @@ function ThinkingBlock({ content }: { content: string }) {
     >
       <summary className="text-muted flex cursor-pointer items-center gap-2 px-3 py-2 text-xs font-medium select-none">
         <Icon name="bling" size={14} className="text-outline shrink-0" />
-        <span className="truncate">{label}</span>
+        <span className="truncate">Thinking…</span>
         <Icon name="down" size={12} className="ml-auto shrink-0 transition-transform group-open:rotate-180" />
       </summary>
-      {open && displayContent && (
+      {open && content && (
         <div className="border-border-subtle border-t px-3 py-2">
-          <p className="text-muted text-xs leading-relaxed whitespace-pre-wrap">{displayContent}</p>
+          <p className="text-muted text-xs leading-relaxed whitespace-pre-wrap">{content}</p>
         </div>
       )}
     </details>
