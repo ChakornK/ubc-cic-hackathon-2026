@@ -166,23 +166,16 @@ export function Landing() {
         </header>
 
         <main id="top">
-          <section className="relative flex min-h-svh items-center justify-center px-5 pt-24 pb-16">
-            <div
-              className="bg-background shadow-inset pointer-events-none absolute top-1/2 left-1/2 size-[min(82vw,44rem)] -translate-x-1/2 -translate-y-1/2 rounded-full"
-              aria-hidden="true"
-            />
+          <section className="relative flex min-h-svh items-center justify-center px-5 pt-24 pb-20">
             <div ref={parallaxRef} className="text-outline pointer-events-none absolute inset-[-15%] opacity-[0.28]">
               <TopoTexture className="h-full w-full opacity-10" />
             </div>
 
             <div className="relative flex max-w-3xl flex-col items-center text-center">
-              <span className="neu-raised bg-surface text-primary mb-8 flex size-14 items-center justify-center rounded-2xl border">
-                <Icon name="school" size={27} />
-              </span>
               <h1 className="max-w-[12ch] text-[clamp(3rem,8vw,5.75rem)] leading-[0.98] font-medium tracking-[-0.04em] text-balance">
                 Know your campus.
               </h1>
-              <p className="text-on-surface-variant mt-7 max-w-xl text-base leading-relaxed">
+              <p className="text-on-surface-variant mt-8 max-w-xl text-base leading-relaxed">
                 Courses, prerequisites, tuition, walking routes—answered instantly from real UBC data.
               </p>
               <div id="sign-in" className="mt-10 flex w-full scroll-mt-24 items-center justify-center gap-3">
@@ -199,11 +192,6 @@ export function Landing() {
                   Sign in
                 </Link>
               </div>
-              <p className="text-body-sm text-muted mt-4">Free to use · No credit card required</p>
-            </div>
-
-            <div className="animate-scroll-hint text-muted absolute bottom-8" aria-hidden="true">
-              <Icon name="down" size={20} />
             </div>
           </section>
 
@@ -240,7 +228,7 @@ export function Landing() {
                 {CAPABILITIES.map((cap) => (
                   <article
                     key={cap.label}
-                    className="not-last:border-border-subtle flex flex-col items-start px-6 py-7 not-last:border-b sm:not-last:border-r sm:not-last:border-b-0"
+                    className="not-last:border-border-subtle flex flex-col items-start px-6 py-8 not-last:border-b sm:not-last:border-r sm:not-last:border-b-0"
                   >
                     <span className="neu-inset bg-surface-container-low flex size-12 items-center justify-center rounded-xl border">
                       {cap.glyph}
@@ -254,13 +242,13 @@ export function Landing() {
           </section>
 
           <section className="px-5 pb-20 sm:pb-28">
-            <div className="neu-raised bg-surface text-body-sm text-muted mx-auto flex max-w-4xl flex-col items-center justify-center gap-3 rounded-2xl border px-6 py-5 text-center sm:flex-row sm:gap-5">
+            <p className="text-muted mx-auto flex max-w-4xl items-center justify-center gap-3 text-center text-xs sm:gap-5">
               <span>Built on UBC course data</span>
-              <span className="bg-outline-variant hidden size-1 rounded-full sm:block" aria-hidden="true" />
+              <span className="bg-outline-variant size-1 rounded-full" aria-hidden="true" />
               <span>Updated each term</span>
-              <span className="bg-outline-variant hidden size-1 rounded-full sm:block" aria-hidden="true" />
+              <span className="bg-outline-variant size-1 rounded-full" aria-hidden="true" />
               <span>Powered by Amazon Bedrock</span>
-            </div>
+            </p>
           </section>
 
           <section className="relative px-5 pb-12 sm:px-8">
