@@ -319,21 +319,39 @@ html.vt-active *::after {
 }
 
 ::view-transition-new(root) {
-  animation: ripple-in 400ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  will-change: clip-path;
+  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="white"/></svg>')
+    var(--ripple-x, 50%) var(--ripple-y, 50%) / 0 no-repeat;
+  animation: vt-scale 400ms
+    linear(
+      0 0%,
+      0.1684 2.66%,
+      0.3165 5.49%,
+      0.446 8.52%,
+      0.5581 11.78%,
+      0.6535 15.29%,
+      0.7341 19.11%,
+      0.8011 23.3%,
+      0.8557 27.93%,
+      0.8962 32.68%,
+      0.9283 38.01%,
+      0.9529 44.08%,
+      0.9711 51.14%,
+      0.9833 59.06%,
+      0.9915 68.74%,
+      1 100%
+    );
+  animation-fill-mode: both;
 }
 
 ::view-transition-old(root) {
   animation: none;
-  will-change: auto;
+  animation-fill-mode: both;
+  z-index: -1;
 }
 
-@keyframes ripple-in {
-  from {
-    clip-path: circle(0px at var(--ripple-x, 50%) var(--ripple-y, 50%));
-  }
+@keyframes vt-scale {
   to {
-    clip-path: circle(150vmax at var(--ripple-x, 50%) var(--ripple-y, 50%));
+    mask-size: 200vmax;
   }
 }
 
@@ -342,7 +360,7 @@ html.vt-active *::after {
   ::view-transition-old(root) {
     /* biome-ignore lint/complexity/noImportantStyles: a11y override */
     animation: none !important;
-    clip-path: none;
+    mask: none;
   }
 }
 
