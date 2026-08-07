@@ -1,8 +1,8 @@
 // Streaming agent loop: yields NDJSON events as the model generates text
 // and executes tools. The non-streaming loop in loop.ts remains for property tests.
 
-import { converseStream } from "../bedrock";
 import type { ChatMessage, ContentBlock, ConverseMessage, DatasetModule, OsClient, ToolCall } from "../core/types";
+import { converseStream } from "../llm";
 import { executeTool, isToolError } from "./executor";
 import { ITERATION_LIMIT, systemPrompt } from "./loop";
 

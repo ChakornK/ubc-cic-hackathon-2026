@@ -27,23 +27,11 @@ Bottom-up migration: replace each AWS service adapter one at a time, keeping the
   - [x] 3.4 Rewrite `src/server/sessions/store.ts` — SQL queries, added createUser/getUserByUsername
   - Deleted `src/server/sessions/keys.ts`
 
-- [ ] 4. Authentication (JWT + password)
-  - [ ] 4.1 Rewrite `src/server/auth.ts`
-    - Replace Cognito verifier with `jose` JWT verification
-    - `requireUser()` reads `Authorization: Bearer <jwt>`, verifies signature + expiry
-    - When `AUTH_ENABLED=false`, return default user without checking token
-    - _Requirements: 5.3, 5.4, 5.5_
-  - [ ] 4.2 Create auth API routes
-    - `app/api/auth/register/route.ts` — hash password with bcryptjs, insert user, return JWT
-    - `app/api/auth/login/route.ts` — verify password, return JWT
-    - _Requirements: 5.1, 5.2_
-  - [ ] 4.3 Replace client-side auth
-    - Remove `src/components/auth/app-auth.tsx` OIDC logic
-    - Remove `src/lib/auth-config.ts`
-    - Create simple login/register form component
-    - Store JWT in localStorage, send as Bearer token (reuse existing `api.ts` pattern)
-    - Remove `react-oidc-context` `AuthProvider` from providers
-    - _Requirements: 5.2, 5.3_
+- [x] 4. Authentication (JWT + password)
+  - [x] 4.1 Rewrite `src/server/auth.ts` — jose JWT verification + signToken
+  - [x] 4.2 Create auth API routes (`/api/auth/register`, `/api/auth/login`)
+  - [x] 4.3 Replace client-side auth — removed OIDC, created login/register form
+  - Deleted `src/lib/auth-config.ts`
 
 - [ ] 5. LLM adapter (OpenAI-compatible)
   - [ ] 5.1 Create `src/server/llm.ts` replacing `src/server/bedrock.ts`
