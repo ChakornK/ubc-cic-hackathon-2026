@@ -1,4 +1,4 @@
-# Product
+# Reogent
 
 <!-- impeccable:product-schema 1 -->
 
@@ -12,7 +12,7 @@ UBC students planning courses, checking tuition, and navigating campus. Primary 
 
 ## Product Purpose
 
-AI assistant that answers university-specific questions (courses, prerequisites, tuition, walking distances) grounded in real UBC data, with a map that visualizes campus routes. Replaces scattered lookups across multiple university systems with a single conversational interface.
+Reogent is an AI assistant that answers university-specific questions (courses, prerequisites, tuition, walking distances) grounded in real UBC data, with a map that visualizes campus routes. Replaces scattered lookups across multiple university systems with a single conversational interface.
 
 ## Positioning
 

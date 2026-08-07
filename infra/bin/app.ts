@@ -1,5 +1,5 @@
 import { App } from "aws-cdk-lib";
-import { CampusAiStack } from "../lib/campus-ai-stack.js";
+import { ReogentStack } from "../lib/campus-ai-stack.js";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -22,7 +22,7 @@ function resolveBedrockModelId(): string {
 
 const app = new App();
 
-new CampusAiStack(app, "CampusAiAssistant", {
+new ReogentStack(app, "ReogentStack", {
   googleClientId: requireEnv("GOOGLE_CLIENT_ID"),
   googleClientSecret: requireEnv("GOOGLE_CLIENT_SECRET"),
   bedrockModelId: resolveBedrockModelId(),
