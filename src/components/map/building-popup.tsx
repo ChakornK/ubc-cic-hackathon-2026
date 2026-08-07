@@ -27,7 +27,7 @@ function Carousel({ label, children }: { label: string; children: React.ReactNod
   const scrollBy = (dir: -1 | 1) =>
     scroller.current?.scrollBy({ left: dir * scroller.current.clientWidth, behavior: "smooth" });
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1" role="region" aria-roledescription="carousel" aria-label={label}>
       <button
         type="button"
         aria-label={`Previous ${label}`}
@@ -135,6 +135,7 @@ export function BuildingPopup({ building, onClose }: { building: SelectedBuildin
   const api = useApi();
   const [details, setDetails] = useState<BuildingDetails | null>(null);
   const [failed, setFailed] = useState(false);
+  const popupRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -153,9 +154,28 @@ export function BuildingPopup({ building, onClose }: { building: SelectedBuildin
     };
   }, [api, building.code]);
 
+  // Focus trap + Escape to close
+  useEffect(() => {
+    const el = popupRef.current;
+    if (!el) return;
+    const closeBtn = el.querySelector<HTMLElement>('[aria-label="Close building details"]');
+    closeBtn?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    el.addEventListener("keydown", onKeyDown);
+    return () => el.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
+
   const availability = details?.availability;
   return (
     <aside
+      ref={popupRef}
+      role="dialog"
+      aria-modal="false"
       aria-label={`${building.name} details`}
       className="glass-neu-compact border-border-subtle absolute top-3 bottom-6 left-3 z-20 flex w-80 max-w-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-2xl border"
     >

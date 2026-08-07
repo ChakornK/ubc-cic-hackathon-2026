@@ -90,7 +90,7 @@ function SidebarDrawer() {
         role="dialog"
         aria-modal="true"
         aria-label="Chat sessions"
-        className={`fixed inset-y-0 left-0 z-50 w-[18.5rem] p-3 transition-transform duration-250 [transition-timing-function:var(--neu-ease)] ${
+        className={`fixed inset-y-0 left-0 z-50 w-[min(18.5rem,calc(100vw-3rem))] p-3 transition-transform duration-250 [transition-timing-function:var(--neu-ease)] ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

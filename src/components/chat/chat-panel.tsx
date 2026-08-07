@@ -272,7 +272,11 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         </span>
       </div>
 
-      <div ref={scrollRef} className="chat-message-well min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+      <div
+        ref={scrollRef}
+        aria-busy={historyState === "loading" || sending}
+        className="chat-message-well min-h-0 flex-1 overflow-y-auto p-4 sm:p-5"
+      >
         {historyState === "loading" && (
           <output aria-label="Loading conversation" className="flex flex-col gap-5">
             <div className="neu-inset bg-surface-container h-12 w-3/5 animate-pulse self-end rounded-[16px_16px_5px_16px]" />
@@ -350,7 +354,10 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                 <TypingIndicator slow={slowResponse} />
               )}
             {sendError && (
-              <div className="animate-message-in border-error/30 bg-error-container/40 flex flex-col items-start justify-between gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center">
+              <div
+                role="alert"
+                className="animate-message-in border-error/30 bg-error-container/40 flex flex-col items-start justify-between gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center"
+              >
                 <p id="send-error-msg" className="text-on-surface flex items-center gap-2 text-sm">
                   <Icon name="alert" size={16} className="text-error shrink-0" />
                   {sendError}

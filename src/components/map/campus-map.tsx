@@ -319,9 +319,10 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
     let start: number | undefined;
     const tick = (now: number) => {
       start ??= now;
-      const t = Math.min(1, (now - start) / ROUTE_DRAW_MS);
+      const raw = Math.min(1, (now - start) / ROUTE_DRAW_MS);
+      const t = 1 - Math.pow(1 - raw, 3); // ease-out cubic
       setDrawProgress(t);
-      if (t < 1) frame = requestAnimationFrame(tick);
+      if (raw < 1) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);

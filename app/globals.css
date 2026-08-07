@@ -896,9 +896,11 @@ html:not([data-auth-pending]) .auth-splash {
   .glass-neu-strong,
   .glass-neu-compact {
     background: var(--surface);
+    border-color: var(--border);
   }
 
   .glass-neu-inset {
     background: var(--surface-container-low);
+    border-color: var(--border);
   }
 }

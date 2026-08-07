@@ -11,14 +11,16 @@ import { useEffect, useRef, useState } from "react";
 
 function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    setMounted(true);
     const media = window.matchMedia(query);
     setMatches(media.matches);
     const onChange = (event: MediaQueryListEvent) => setMatches(event.matches);
     media.addEventListener("change", onChange);
     return () => media.removeEventListener("change", onChange);
   }, [query]);
-  return matches;
+  return mounted ? matches : false;
 }
 
 function GlassButton({
@@ -83,9 +85,12 @@ function RouteInfoCard() {
 function MapFallback() {
   const { highlight } = useChatShell();
   return (
-    <div className="bg-surface-container-low flex h-full flex-col items-center justify-center gap-2 px-6 text-center">
+    <div
+      role="status"
+      className="bg-surface-container-low flex h-full flex-col items-center justify-center gap-2 px-6 text-center"
+    >
       <Icon name="wifiOff" size={32} className="text-outline" />
-      <p className="text-body-sm text-on-surface-variant">Map unavailable</p>
+      <p className="text-body-sm text-on-surface-variant">Map couldn&apos;t load. Route details are shown below.</p>
       {highlight?.kind === "route" && (
         <p className="text-on-surface max-w-60 text-sm">
           {formatMeters(highlight.meters)}, about {formatMinutes(highlight.minutes)} walking from {highlight.from} to{" "}
@@ -114,7 +119,7 @@ function MapSurface() {
   const controls = useRef<MapControls | null>(null);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full" aria-busy={status === "loading"}>
       {status === "error" ? (
         <MapFallback />
       ) : (
@@ -295,17 +300,17 @@ export function MapBottomSheet() {
         role="dialog"
         aria-modal="true"
         aria-label="Campus map"
-        className={`neu-panel border-border-subtle bg-surface fixed inset-x-0 bottom-0 z-50 flex h-[80vh] flex-col overflow-hidden rounded-t-2xl border-t transition-transform duration-300 [transition-timing-function:var(--neu-ease)] ${
+        className={`neu-panel border-border-subtle bg-surface fixed inset-x-0 bottom-0 z-50 flex h-[80vh] flex-col overflow-hidden rounded-t-2xl border-t pb-[env(safe-area-inset-bottom)] transition-transform duration-300 [transition-timing-function:var(--neu-ease)] ${
           mobileMapOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
         <div
-          className="flex shrink-0 cursor-grab touch-none flex-col items-center gap-2 px-4 pt-2 pb-3"
+          className="flex shrink-0 cursor-grab touch-none flex-col items-center gap-2 px-4 pt-3 pb-3"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
         >
-          <span className="bg-border h-1 w-8 rounded-full" aria-hidden="true" />
+          <span className="bg-outline/40 h-1.5 w-10 rounded-full" aria-hidden="true" />
           <div className="flex w-full items-center justify-between">
             <span className="min-w-0">
               <span className="text-on-surface block truncate text-base font-medium">

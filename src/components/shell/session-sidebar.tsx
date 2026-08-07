@@ -70,7 +70,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
         <button
           type="button"
           onClick={newConversation}
-          className="neu-primary-button bg-primary text-on-primary flex h-10 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium"
+          className="neu-primary-button bg-primary text-on-primary flex h-10 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium active:scale-[0.98] active:brightness-110"
         >
           <Icon name="add" size={18} />
           New conversation
@@ -79,6 +79,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
 
       <nav
         aria-label="Chat sessions"
+        aria-busy={sessionsLoading}
         className="bg-surface-container-low/60 border-border-subtle min-h-0 flex-1 overflow-y-auto rounded-xl border p-2"
       >
         {sessionsLoading && (
@@ -90,8 +91,8 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
         )}
 
         {!sessionsLoading && sessionsError && (
-          <div className="text-body-sm text-on-surface-variant px-1 py-2">
-            <p>Couldn&apos;t load your conversations.</p>
+          <div role="alert" className="text-body-sm text-on-surface-variant px-1 py-2">
+            <p>Couldn&apos;t load your conversations. Check your connection and try again.</p>
             <button
               type="button"
               onClick={refreshSessions}
@@ -124,7 +125,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
                         onClick={() => openSession(session.session_id)}
                         aria-current={active ? "page" : undefined}
                         title={session.title}
-                        className={`flex h-9 w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-150 ${
+                        className={`focus-visible:ring-primary/40 flex h-9 w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-150 focus-visible:ring-2 focus-visible:ring-offset-1 ${
                           active
                             ? "bg-accent-subtle text-primary"
                             : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"

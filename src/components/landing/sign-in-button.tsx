@@ -31,6 +31,7 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
   return (
     <form
       onSubmit={handleSubmit}
+      aria-busy={pending}
       className={`flex w-full flex-col items-center gap-3 ${wide ? "max-w-80" : "max-w-72"}`}
     >
       <input
@@ -40,6 +41,8 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         required
+        aria-invalid={!!error}
+        aria-describedby={error ? "auth-error" : undefined}
         className="neu-inset bg-surface-container-low text-on-surface focus-visible:ring-primary/40 h-10 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
       />
       <input
@@ -50,6 +53,8 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
         onChange={(e) => setPassword(e.target.value)}
         required
         minLength={6}
+        aria-invalid={!!error}
+        aria-describedby={error ? "auth-error" : undefined}
         className="neu-inset bg-surface-container-low text-on-surface focus-visible:ring-primary/40 h-10 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
       />
       <button
@@ -67,7 +72,7 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
             : "Create account"}
       </button>
       {error && (
-        <p role="alert" aria-live="polite" className="text-error text-center text-xs">
+        <p id="auth-error" role="alert" aria-live="assertive" className="text-error text-center text-xs">
           {error}
         </p>
       )}

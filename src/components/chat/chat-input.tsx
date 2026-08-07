@@ -70,7 +70,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
             autosize();
           }}
           onKeyDown={onKeyDown}
-          placeholder="Ask about courses, campus, or academic rules…"
+          placeholder="Ask about courses, campus…"
           aria-label="Message the assistant"
           className="text-on-surface placeholder:text-muted relative z-10 block max-h-24 min-h-9 min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none disabled:opacity-60"
         />
@@ -78,7 +78,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
           type="submit"
           disabled={!canSend}
           aria-label="Send message"
-          className="neu-primary-button bg-primary text-on-primary relative z-10 flex size-9 shrink-0 items-center justify-center rounded-xl disabled:pointer-events-none disabled:opacity-45"
+          className="neu-primary-button bg-primary text-on-primary relative z-10 flex size-11 shrink-0 items-center justify-center rounded-xl disabled:pointer-events-none disabled:opacity-45 sm:size-9"
         >
           <Icon name="arrowUp" size={18} />
         </button>
