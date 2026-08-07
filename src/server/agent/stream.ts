@@ -35,14 +35,13 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
   for (let i = 0; ; i++) {
     if (i > 0) yield { type: "turn_start" as const };
 
-    // After soft limit, nudge model to wrap up and remove tools
-    const currentToolSpecs = i >= ITERATION_LIMIT ? [] : toolSpecs;
+    // After soft limit, nudge model to wrap up but keep tools available
     if (i === ITERATION_LIMIT) {
       convo.push({
         role: "user",
         content: [
           {
-            text: "You have used many tool calls. Please provide your final answer now based on the information you have gathered so far.",
+            text: "You have used many tool calls. Please provide your final answer now based on the information you have gathered so far. Do not call more tools unless absolutely necessary.",
           },
         ],
       });
@@ -59,7 +58,7 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
     for await (const event of converseStream({
       messages: convo,
       system: systemPrompt(),
-      toolSpecs: currentToolSpecs,
+      toolSpecs,
     })) {
       if (event.type === "thinking") {
         yield { type: "thinking", delta: event.delta };

@@ -13,7 +13,7 @@ import { executeTool, isToolError } from "./executor";
 export const ITERATION_LIMIT = 8;
 
 const NUDGE =
-  "You have used many tool calls. Please provide your final answer now based on the information you have gathered so far.";
+  "You have used many tool calls. Please provide your final answer now based on the information you have gathered so far. Do not call more tools unless absolutely necessary.";
 
 export const SYSTEM_PROMPT = `You are the UBC Vancouver campus assistant. Answer questions about courses, admissions, tuition and costs, campus buildings and walking routes, study spaces and library room bookings, food and services, parking, events, key dates, and university policies.
 
@@ -70,13 +70,12 @@ export async function runAgentLoop(messages: ChatMessage[], deps: AgentDeps): Pr
   let lastText = "";
 
   for (let i = 0; ; i++) {
-    // After hitting the soft limit, nudge the model to wrap up without tools
-    const currentToolSpecs = i >= ITERATION_LIMIT ? [] : toolSpecs;
+    // After hitting the soft limit, nudge the model to wrap up but keep tools available
     if (i === ITERATION_LIMIT) {
       convo.push({ role: "user", content: [{ text: NUDGE }] });
     }
 
-    const res = await deps.converse({ messages: convo, system: systemPrompt(), toolSpecs: currentToolSpecs });
+    const res = await deps.converse({ messages: convo, system: systemPrompt(), toolSpecs });
     convo.push(res.message);
     const text = (res.message.content ?? [])
       .map((b) => b.text)
