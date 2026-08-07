@@ -36,32 +36,45 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
       <input
         type="text"
         placeholder="Username"
+        aria-label="Username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         required
-        className="neu-inset bg-surface-container-low text-on-surface h-10 w-full rounded-lg border px-3 text-sm"
+        className="neu-inset bg-surface-container-low text-on-surface focus-visible:ring-primary/40 h-10 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
       />
       <input
         type="password"
         placeholder="Password"
+        aria-label="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
         minLength={6}
-        className="neu-inset bg-surface-container-low text-on-surface h-10 w-full rounded-lg border px-3 text-sm"
+        className="neu-inset bg-surface-container-low text-on-surface focus-visible:ring-primary/40 h-10 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
       />
       <button
         type="submit"
         disabled={pending}
-        className="neu-primary-button bg-primary text-on-primary flex h-12 w-full items-center justify-center rounded-xl text-base font-medium disabled:pointer-events-none disabled:opacity-60"
+        aria-busy={pending}
+        className="neu-primary-button bg-primary text-on-primary flex h-12 w-full items-center justify-center rounded-xl text-base font-medium disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {pending ? "Working…" : mode === "login" ? "Sign in" : "Create account"}
+        {pending
+          ? mode === "login"
+            ? "Signing in…"
+            : "Creating account…"
+          : mode === "login"
+            ? "Sign in"
+            : "Create account"}
       </button>
-      {error && <p className="text-error text-center text-xs">{error}</p>}
+      {error && (
+        <p role="alert" aria-live="polite" className="text-error text-center text-xs">
+          {error}
+        </p>
+      )}
       <button
         type="button"
         onClick={() => setMode(mode === "login" ? "register" : "login")}
-        className="text-muted text-xs underline"
+        className="text-muted focus-visible:outline-primary text-xs underline focus-visible:outline-2 focus-visible:outline-offset-2"
       >
         {mode === "login" ? "Create an account" : "Already have an account? Sign in"}
       </button>

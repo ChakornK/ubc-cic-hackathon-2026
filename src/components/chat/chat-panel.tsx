@@ -314,7 +314,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
             <span className="bg-surface text-primary border-border-subtle flex size-16 items-center justify-center rounded-2xl border">
               <Icon name="chat1" size={30} />
             </span>
-            <h2 className="text-on-surface mt-6 text-2xl font-medium tracking-[-0.025em]">Ask me about UBC</h2>
+            <h2 className="text-on-surface mt-6 text-[1.25rem] font-medium tracking-[-0.025em]">Ask me about UBC</h2>
             <p className="text-on-surface-variant mt-2 max-w-80 text-sm leading-relaxed">
               I can help with courses, prerequisites, tuition costs, and walking routes between campus buildings.
             </p>
@@ -324,7 +324,8 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                   key={suggestion}
                   type="button"
                   onClick={() => send(suggestion)}
-                  className="border-primary text-primary hover:bg-accent-subtle rounded-full border px-3.5 py-2 text-left text-xs font-medium transition-colors duration-150"
+                  disabled={sending}
+                  className="border-primary text-primary hover:bg-accent-subtle focus-visible:ring-primary/40 min-h-[44px] rounded-full border px-3.5 py-2.5 text-left text-xs font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                 >
                   {suggestion}
                 </button>
@@ -349,15 +350,17 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                 <TypingIndicator slow={slowResponse} />
               )}
             {sendError && (
-              <div className="border-error/30 bg-error-container/40 flex flex-col items-start justify-between gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center">
-                <p className="text-on-surface flex items-center gap-2 text-sm">
+              <div className="animate-message-in border-error/30 bg-error-container/40 flex flex-col items-start justify-between gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center">
+                <p id="send-error-msg" className="text-on-surface flex items-center gap-2 text-sm">
                   <Icon name="alert" size={16} className="text-error shrink-0" />
                   {sendError}
                 </p>
                 <button
                   type="button"
                   onClick={retry}
-                  className="neu-button bg-surface text-on-surface flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium"
+                  disabled={sending}
+                  aria-describedby="send-error-msg"
+                  className="neu-button bg-surface text-on-surface flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium disabled:pointer-events-none disabled:opacity-60"
                 >
                   <Icon name="refresh2" size={14} />
                   Retry

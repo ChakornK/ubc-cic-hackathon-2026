@@ -32,7 +32,7 @@ function Carousel({ label, children }: { label: string; children: React.ReactNod
         type="button"
         aria-label={`Previous ${label}`}
         onClick={() => scrollBy(-1)}
-        className="bg-surface-container text-on-surface-variant hover:text-primary flex size-6 shrink-0 items-center justify-center rounded-full transition-colors duration-150"
+        className="bg-surface-container text-on-surface-variant hover:text-primary flex size-8 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full transition-colors duration-150"
       >
         <Icon name="left" size={14} />
       </button>
@@ -46,7 +46,7 @@ function Carousel({ label, children }: { label: string; children: React.ReactNod
         type="button"
         aria-label={`Next ${label}`}
         onClick={() => scrollBy(1)}
-        className="bg-surface-container text-on-surface-variant hover:text-primary flex size-6 shrink-0 items-center justify-center rounded-full transition-colors duration-150"
+        className="bg-surface-container text-on-surface-variant hover:text-primary flex size-8 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-full transition-colors duration-150"
       >
         <Icon name="right" size={14} />
       </button>
@@ -178,7 +178,7 @@ export function BuildingPopup({ building, onClose }: { building: SelectedBuildin
           type="button"
           onClick={onClose}
           aria-label="Close building details"
-          className="text-on-surface-variant hover:bg-surface-container-high hover:text-primary flex size-7 shrink-0 items-center justify-center rounded-md transition-colors duration-150"
+          className="text-on-surface-variant hover:bg-surface-container-high hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-md transition-colors duration-150"
         >
           <Icon name="close" size={16} />
         </button>

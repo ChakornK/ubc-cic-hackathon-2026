@@ -11,19 +11,11 @@
 //
 // maplibre + deck are imported dynamically inside the init effect so the ~1 MB
 // of map code stays out of the initial bundle (and out of SSR).
-
 import type { MapHighlight } from "@/src/components/chat/chat-shell-context";
 import { BuildingPopup, type SelectedBuilding } from "@/src/components/map/building-popup";
-import { useApi } from "@/src/components/providers";
-import { useTheme, type ResolvedTheme } from "@/src/components/providers";
+import { useApi, useTheme, type ResolvedTheme } from "@/src/components/providers";
 import { formatMeters, formatMinutes } from "@/src/lib/format";
-import {
-  featureCentroid,
-  featuresBounds,
-  findBuilding,
-  type BuildingFeature,
-  type LngLat,
-} from "@/src/lib/geo";
+import { featureCentroid, featuresBounds, findBuilding, type BuildingFeature, type LngLat } from "@/src/lib/geo";
 import type { FeatureCollection } from "geojson";
 import { useEffect, useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -63,7 +55,13 @@ const STYLE_URLS: Record<ResolvedTheme, string> = {
 
 type Rgba = [number, number, number, number];
 
-const MAP_COLORS: Record<ResolvedTheme, Record<"fill" | "line" | "fillHighlight" | "lineHighlight" | "route" | "routeCasing" | "label" | "labelBg" | "walkway", Rgba>> = {
+const MAP_COLORS: Record<
+  ResolvedTheme,
+  Record<
+    "fill" | "line" | "fillHighlight" | "lineHighlight" | "route" | "routeCasing" | "label" | "labelBg" | "walkway",
+    Rgba
+  >
+> = {
   light: {
     fill: [216, 220, 222, 170],
     line: [154, 162, 166, 200],
@@ -339,9 +337,7 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
     const route = resolveRoute(buildings, highlight);
     const focusedBuildings = highlight?.kind === "buildings" ? highlight.buildings : [];
     const highlightedCodes = new Set(
-      [route?.from, route?.to]
-        .map((f) => (f?.properties?.BLDG_CODE ?? "").toString().toUpperCase())
-        .filter(Boolean),
+      [route?.from, route?.to].map((f) => (f?.properties?.BLDG_CODE ?? "").toString().toUpperCase()).filter(Boolean),
     );
     for (const b of focusedBuildings) highlightedCodes.add(b.code.toUpperCase());
     if (selected) highlightedCodes.add(selected.code.toUpperCase());
@@ -606,16 +602,22 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
 
   return (
     <div className="relative h-full w-full">
-      <div ref={containerRef} className="h-full w-full" />
+      <div
+        ref={containerRef}
+        className="h-full w-full"
+        role="application"
+        aria-label="Interactive campus map"
+        aria-roledescription="map"
+      />
       {selected && <BuildingPopup building={selected} onClose={() => setSelected(null)} />}
       {picked && (picked.name || picked.code) && (
         <div
-          className="pointer-events-none absolute z-10 max-w-60 rounded-lg border border-border bg-surface-bright px-3 py-2 shadow-md"
+          className="border-border bg-surface-bright pointer-events-none absolute z-10 max-w-60 rounded-lg border px-3 py-2 shadow-md"
           style={{ left: picked.x + 12, top: picked.y + 12 }}
           role="status"
         >
-          {picked.name && <p className="text-sm font-medium leading-snug text-on-surface">{picked.name}</p>}
-          {picked.code && <p className="mt-0.5 font-mono text-xs text-on-surface-variant">{picked.code}</p>}
+          {picked.name && <p className="text-on-surface text-sm leading-snug font-medium">{picked.name}</p>}
+          {picked.code && <p className="text-on-surface-variant mt-0.5 font-mono text-xs">{picked.code}</p>}
         </div>
       )}
       {highlight && (

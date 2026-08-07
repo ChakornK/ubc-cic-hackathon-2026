@@ -184,7 +184,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               aria-controls="desktop-session-panel"
               aria-expanded={!sessionsCollapsed}
               title="Expand sessions"
-              className="sessions-menu-trigger glass-neu-compact text-on-surface-variant hover:text-primary border-border-subtle absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl border"
+              className="sessions-menu-trigger glass-neu-compact text-on-surface-variant hover:text-primary border-border-subtle absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl border transition-colors duration-150"
             >
               <Icon name="menu" size={20} />
             </button>

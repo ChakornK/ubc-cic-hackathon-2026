@@ -63,7 +63,7 @@ export function AppAuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ username, password }),
     });
     const body = await res.json();
-    if (!res.ok) return { error: body.error ?? "Login failed" };
+    if (!res.ok) return { error: body.error ?? "Login failed. Check your username and password." };
     localStorage.setItem(TOKEN_KEY, body.token);
     const authUser: AppAuthUser = { username: body.username, userId: body.userId };
     localStorage.setItem(USER_KEY, JSON.stringify(authUser));
@@ -78,7 +78,7 @@ export function AppAuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ username, password }),
     });
     const body = await res.json();
-    if (!res.ok) return { error: body.error ?? "Registration failed" };
+    if (!res.ok) return { error: body.error ?? "Registration failed. The username may already be taken." };
     localStorage.setItem(TOKEN_KEY, body.token);
     const authUser: AppAuthUser = { username: body.username, userId: body.userId };
     localStorage.setItem(USER_KEY, JSON.stringify(authUser));

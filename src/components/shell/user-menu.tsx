@@ -61,6 +61,7 @@ export function UserMenu() {
         inert={!open}
         aria-hidden={!open}
         role="dialog"
+        aria-modal="true"
         aria-label="Account"
         className={`profile-menu-surface glass-neu absolute top-12 right-0 z-50 w-64 max-w-[calc(100vw-2rem)] origin-top-right rounded-2xl border p-2.5 ${
           open
@@ -106,7 +107,7 @@ export function UserMenu() {
         <button
           type="button"
           onClick={() => auth.signOut()}
-          className="text-on-surface hover:bg-surface-container flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sm transition-colors duration-150"
+          className="text-on-surface hover:bg-error/10 hover:text-error flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sm transition-colors duration-150"
         >
           <Icon name="exit" size={16} className="text-on-surface-variant" />
           Sign out

@@ -199,8 +199,9 @@ export function MapPanel() {
           type="button"
           onClick={() => setMapOpen(false)}
           aria-label="Collapse campus map to tab"
+          aria-expanded={true}
           title="Collapse map"
-          className="glass-neu-compact text-on-surface-variant hover:text-primary border-border-subtle absolute top-3 left-3 z-20 flex size-9 items-center justify-center rounded-xl border"
+          className="glass-neu-compact text-on-surface-variant hover:text-primary border-border-subtle absolute top-3 left-3 z-20 flex size-9 items-center justify-center rounded-xl border transition-colors duration-150"
         >
           <Icon name="right" size={17} />
         </button>
@@ -219,8 +220,9 @@ export function MapPanel() {
           onClick={() => setMapOpen(true)}
           tabIndex={mapOpen ? -1 : 0}
           aria-label="Expand campus map"
+          aria-expanded={false}
           title="Expand campus map"
-          className="glass-neu-compact text-primary hover:text-on-surface border-border-subtle flex size-9 items-center justify-center rounded-xl border"
+          className="glass-neu-compact text-primary hover:text-on-surface border-border-subtle flex size-9 items-center justify-center rounded-xl border transition-colors duration-150"
         >
           <Icon name="fullscreen" size={17} />
         </button>

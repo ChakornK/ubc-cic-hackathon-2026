@@ -53,6 +53,7 @@ function ToolBadge({ call }: { call: ToolCall }) {
         {call.name}
         {summary ? `(${summary})` : "()"}
       </span>
+      {failed && <span className="sr-only">(failed)</span>}
     </span>
   );
 }

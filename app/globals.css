@@ -620,7 +620,7 @@ html:not([data-auth-pending]) .auth-splash {
   border-radius: 0.35rem;
   color: var(--on-surface);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.82em;
+  font-size: 0.875em;
   padding: 0.12rem 0.35rem;
 }
 
@@ -640,7 +640,7 @@ html:not([data-auth-pending]) .auth-splash {
   border: 0;
   color: var(--on-surface);
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   line-height: 1.6;
   padding: 0;
   white-space: pre;
@@ -674,13 +674,13 @@ html:not([data-auth-pending]) .auth-splash {
 .assistant-markdown th {
   background: var(--surface-container-low);
   color: var(--on-surface);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .assistant-markdown td {
   color: var(--on-surface-variant);
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
 }
 
 .assistant-markdown .contains-task-list {
