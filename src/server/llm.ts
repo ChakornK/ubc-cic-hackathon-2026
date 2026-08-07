@@ -131,6 +131,13 @@ export async function* converseStream(req: {
     const delta = chunk.choices[0]?.delta;
     if (!delta) continue;
 
+    // Reasoning/thinking tokens (provider-dependent field name)
+    const reasoning =
+      (delta as Record<string, unknown>).reasoning_content ?? (delta as Record<string, unknown>).reasoning;
+    if (typeof reasoning === "string" && reasoning) {
+      yield { type: "thinking", delta: reasoning };
+    }
+
     if (delta.content) {
       yield { type: "text", delta: delta.content };
     }
