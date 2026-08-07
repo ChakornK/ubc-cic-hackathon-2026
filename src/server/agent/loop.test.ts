@@ -33,17 +33,22 @@ const stepArb: fc.Arbitrary<Step> = fc.oneof(
 // Scripts always long enough that the loop, not the script, decides when to stop.
 const scriptArb = fc.array(stepArb, { minLength: ITERATION_LIMIT, maxLength: ITERATION_LIMIT + 4 });
 
-/** A converse mock that replays the script and asserts every pending toolUse
- *  got a matching toolResult before the next call. */
+/** A converse mock that replays the script. After ITERATION_LIMIT calls,
+ *  always returns end_turn (simulates the model obeying the nudge). */
 function makeScriptedConverse(script: Step[]) {
   let call = 0;
   let pendingIds: string[] = [];
   const converse = async ({ messages }: { messages: ConverseMessage[] }) => {
     if (pendingIds.length > 0) {
-      const last = messages[messages.length - 1];
-      expect(last.role).toBe("user");
-      const resultIds = last.content.map((b) => b.toolResult?.toolUseId);
+      const resultMsg = messages.findLast((m) => m.role === "user" && m.content.some((b) => b.toolResult));
+      const resultIds = resultMsg?.content.filter((b) => b.toolResult).map((b) => b.toolResult?.toolUseId) ?? [];
       expect(resultIds).toEqual(pendingIds);
+    }
+    pendingIds = [];
+    // Past limit: model obeys the nudge
+    if (call >= ITERATION_LIMIT) {
+      call++;
+      return { stopReason: "end_turn", message: { role: "assistant" as const, content: [{ text: "nudged answer" }] } };
     }
     const step = script[call];
     const message: ConverseMessage =
@@ -76,17 +81,18 @@ const modules: DatasetModule[] = [
 const userMessages = [{ role: "user" as const, content: "q" }];
 
 describe("agent loop", () => {
-  // Feature: reogent, Property 2: Agent loop terminates with the correct call count
-  it("Property 2: makes exactly min(firstEndTurn+1, 8) converse calls; warning iff no end_turn", async () => {
+  // Feature: reogent, Property 2: Agent loop terminates correctly
+  it("Property 2: makes min(firstEndTurn+1, LIMIT+1) converse calls; nudge forces answer after limit", async () => {
     await fc.assert(
       fc.asyncProperty(scriptArb, async (script) => {
         const scripted = makeScriptedConverse(script);
         const result = await runAgentLoop(userMessages, { converse: scripted.converse, modules, search });
         const firstEnd = script.findIndex((s) => s.stop === "end_turn");
-        const expectedCalls = firstEnd === -1 || firstEnd >= ITERATION_LIMIT ? ITERATION_LIMIT : firstEnd + 1;
+        // If end_turn is within limit, stops at firstEnd+1 calls.
+        // Otherwise, makes ITERATION_LIMIT calls then one more (nudge) = LIMIT+1.
+        const expectedCalls = firstEnd >= 0 && firstEnd < ITERATION_LIMIT ? firstEnd + 1 : ITERATION_LIMIT + 1;
         expect(scripted.calls()).toBe(expectedCalls);
-        const limitHit = firstEnd === -1 || firstEnd >= ITERATION_LIMIT;
-        expect(result.warning !== undefined).toBe(limitHit);
+        expect(result.message.length).toBeGreaterThan(0);
       }),
       { numRuns: 150 },
     );
@@ -96,9 +102,13 @@ describe("agent loop", () => {
   it("Property 3: every toolUse gets a matching toolResult and tool_calls lists them in order", async () => {
     await fc.assert(
       fc.asyncProperty(scriptArb, async (script) => {
-        const scripted = makeScriptedConverse(script); // asserts toolResult ids per call
+        const scripted = makeScriptedConverse(script);
         const result = await runAgentLoop(userMessages, { converse: scripted.converse, modules, search });
-        const requested = script.slice(0, scripted.calls()).flatMap((s) => (s.stop === "tool_use" ? s.uses : []));
+        // Tool calls only happen in the first ITERATION_LIMIT iterations (nudge call has no tools)
+        const toolIterations = Math.min(scripted.calls(), ITERATION_LIMIT);
+        const firstEnd = script.findIndex((s) => s.stop === "end_turn");
+        const effectiveEnd = firstEnd >= 0 && firstEnd < toolIterations ? firstEnd : toolIterations;
+        const requested = script.slice(0, effectiveEnd).flatMap((s) => (s.stop === "tool_use" ? s.uses : []));
         expect(result.tool_calls.map(({ name, input }) => ({ name, input }))).toEqual(requested);
         for (const call of result.tool_calls) expect(call.result).toEqual({ echoed: call.input });
       }),

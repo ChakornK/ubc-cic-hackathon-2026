@@ -12,6 +12,9 @@ import { executeTool, isToolError } from "./executor";
 
 export const ITERATION_LIMIT = 8;
 
+const NUDGE =
+  "You have used many tool calls. Please provide your final answer now based on the information you have gathered so far.";
+
 export const SYSTEM_PROMPT = `You are the UBC Vancouver campus assistant. Answer questions about courses, admissions, tuition and costs, campus buildings and walking routes, study spaces and library room bookings, food and services, parking, events, key dates, and university policies.
 
 Always use the provided tools to look up facts instead of answering from memory. If a tool returns an error or no results, say what you could not find rather than guessing.
@@ -60,8 +63,14 @@ export async function runAgentLoop(messages: ChatMessage[], deps: AgentDeps): Pr
   const toolCalls: ToolCall[] = [];
   let lastText = "";
 
-  for (let i = 0; i < ITERATION_LIMIT; i++) {
-    const res = await deps.converse({ messages: convo, system: systemPrompt(), toolSpecs });
+  for (let i = 0; ; i++) {
+    // After hitting the soft limit, nudge the model to wrap up without tools
+    const currentToolSpecs = i >= ITERATION_LIMIT ? [] : toolSpecs;
+    if (i === ITERATION_LIMIT) {
+      convo.push({ role: "user", content: [{ text: NUDGE }] });
+    }
+
+    const res = await deps.converse({ messages: convo, system: systemPrompt(), toolSpecs: currentToolSpecs });
     convo.push(res.message);
     const text = (res.message.content ?? [])
       .map((b) => b.text)
@@ -89,10 +98,4 @@ export async function runAgentLoop(messages: ChatMessage[], deps: AgentDeps): Pr
     }
     convo.push({ role: "user", content: results });
   }
-
-  return {
-    message: lastText,
-    tool_calls: toolCalls,
-    warning: `Stopped after ${ITERATION_LIMIT} model calls without a final answer.`,
-  };
 }

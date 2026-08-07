@@ -32,8 +32,21 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
   const toolCalls: ToolCall[] = [];
   let fullText = "";
 
-  for (let i = 0; i < ITERATION_LIMIT; i++) {
+  for (let i = 0; ; i++) {
     if (i > 0) yield { type: "turn_start" as const };
+
+    // After soft limit, nudge model to wrap up and remove tools
+    const currentToolSpecs = i >= ITERATION_LIMIT ? [] : toolSpecs;
+    if (i === ITERATION_LIMIT) {
+      convo.push({
+        role: "user",
+        content: [
+          {
+            text: "You have used many tool calls. Please provide your final answer now based on the information you have gathered so far.",
+          },
+        ],
+      });
+    }
 
     let iterText = "";
     const toolUses: { toolUseId: string; name: string; input: Record<string, unknown> }[] = [];
@@ -43,7 +56,11 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
     // Stream thinking immediately. Stream text optimistically as the answer.
     // If a tool_use block appears after text, emit text_clear to retract it
     // and re-emit the text as thinking.
-    for await (const event of converseStream({ messages: convo, system: systemPrompt(), toolSpecs })) {
+    for await (const event of converseStream({
+      messages: convo,
+      system: systemPrompt(),
+      toolSpecs: currentToolSpecs,
+    })) {
       if (event.type === "thinking") {
         yield { type: "thinking", delta: event.delta };
       } else if (event.type === "text") {
@@ -96,11 +113,4 @@ export async function* streamAgent(messages: ChatMessage[], deps: StreamAgentDep
     }
     convo.push({ role: "user", content: results });
   }
-
-  yield {
-    type: "done",
-    message: fullText,
-    tool_calls: toolCalls,
-    warning: `Stopped after ${ITERATION_LIMIT} model calls without a final answer.`,
-  };
 }
