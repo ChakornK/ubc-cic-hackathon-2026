@@ -39,7 +39,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
       return;
     }
     if (auth.status === "signedOut") {
-      router.replace("/");
+      router.replace("/login");
     }
   }, [auth, router]);
 

@@ -1,17 +1,24 @@
 "use client";
 
 import { useAppAuth } from "@/src/components/auth/app-auth";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-export function SignInButton({ wide = false }: { wide?: boolean }) {
+interface AuthFormProps {
+  mode: "login" | "signup";
+}
+
+export function AuthForm({ mode }: AuthFormProps) {
   const auth = useAppAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
-  const [mode, setMode] = useState<"login" | "register">("login");
+
+  const redirect = searchParams.get("redirect") || "/chat";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,16 +31,12 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
     if (result.error) {
       setError(result.error);
     } else {
-      router.push("/chat");
+      router.push(redirect);
     }
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      aria-busy={pending}
-      className={`flex w-full flex-col items-center gap-3 ${wide ? "max-w-80" : "max-w-72"}`}
-    >
+    <form onSubmit={handleSubmit} aria-busy={pending} className="flex w-full max-w-80 flex-col items-center gap-3">
       <input
         type="text"
         placeholder="Username"
@@ -43,7 +46,7 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
         required
         aria-invalid={!!error}
         aria-describedby={error ? "auth-error" : undefined}
-        className="neu-inset bg-surface-container-low text-on-surface focus-visible:ring-primary/40 h-10 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
+        className="neu-inset bg-surface-container-low text-on-surface focus-visible:ring-primary/40 h-11 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
       />
       <input
         type="password"
@@ -55,7 +58,7 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
         minLength={6}
         aria-invalid={!!error}
         aria-describedby={error ? "auth-error" : undefined}
-        className="neu-inset bg-surface-container-low text-on-surface focus-visible:ring-primary/40 h-10 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
+        className="neu-inset bg-surface-container-low text-on-surface focus-visible:ring-primary/40 h-11 w-full rounded-lg border px-3 text-sm focus-visible:ring-2"
       />
       <button
         type="submit"
@@ -76,13 +79,23 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
           {error}
         </p>
       )}
-      <button
-        type="button"
-        onClick={() => setMode(mode === "login" ? "register" : "login")}
-        className="text-muted focus-visible:outline-primary text-xs underline focus-visible:outline-2 focus-visible:outline-offset-2"
-      >
-        {mode === "login" ? "Create an account" : "Already have an account? Sign in"}
-      </button>
+      <p className="text-muted text-xs">
+        {mode === "login" ? (
+          <>
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="text-primary underline">
+              Sign up
+            </Link>
+          </>
+        ) : (
+          <>
+            Already have an account?{" "}
+            <Link href="/login" className="text-primary underline">
+              Sign in
+            </Link>
+          </>
+        )}
+      </p>
     </form>
   );
 }

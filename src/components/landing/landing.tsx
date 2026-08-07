@@ -6,8 +6,8 @@ import { useAppAuth } from "@/src/components/auth/app-auth";
 import { Icon } from "@/src/components/icons";
 import { ProductMock } from "@/src/components/landing/product-mock";
 import { useReveal } from "@/src/components/landing/reveal";
-import { SignInButton } from "@/src/components/landing/sign-in-button";
 import { TopoTexture } from "@/src/components/landing/topo-texture";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -185,10 +185,21 @@ export function Landing() {
               <p className="text-on-surface-variant mt-7 max-w-xl text-base leading-relaxed">
                 Courses, prerequisites, tuition, walking routes—answered instantly from real UBC data.
               </p>
-              <div id="sign-in" className="mt-10 flex w-full scroll-mt-24 justify-center">
-                <SignInButton />
+              <div id="sign-in" className="mt-10 flex w-full scroll-mt-24 items-center justify-center gap-3">
+                <Link
+                  href="/signup"
+                  className="neu-primary-button bg-primary text-on-primary flex h-12 items-center justify-center rounded-xl px-7 text-base font-medium"
+                >
+                  Get started
+                </Link>
+                <Link
+                  href="/login"
+                  className="neu-button bg-surface text-on-surface-variant hover:text-on-surface flex h-12 items-center justify-center rounded-xl px-7 text-base font-medium"
+                >
+                  Sign in
+                </Link>
               </div>
-              <p className="text-body-sm text-muted mt-4">Free to use · Create an account to start</p>
+              <p className="text-body-sm text-muted mt-4">Free to use · No credit card required</p>
             </div>
 
             <div className="animate-scroll-hint text-muted absolute bottom-8" aria-hidden="true">
@@ -262,10 +273,21 @@ export function Landing() {
                   Ready to ask?
                 </h2>
                 <p className="text-on-surface-variant mt-4 text-base">Your courses, your campus, one conversation.</p>
-                <div className="mt-9 flex w-full justify-center">
-                  <SignInButton wide />
+                <div className="mt-9 flex items-center justify-center gap-3">
+                  <Link
+                    href="/signup"
+                    className="neu-primary-button bg-primary text-on-primary flex h-12 items-center justify-center rounded-xl px-7 text-base font-medium"
+                  >
+                    Create account
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="neu-button bg-surface text-on-surface-variant hover:text-on-surface flex h-12 items-center justify-center rounded-xl px-7 text-base font-medium"
+                  >
+                    Sign in
+                  </Link>
                 </div>
-                <p className="text-body-sm text-muted mt-4">Create an account or sign in. Free to use.</p>
+                <p className="text-body-sm text-muted mt-4">Free to use · No credit card required</p>
               </div>
             </div>
             <p className="text-muted mt-10 text-center text-xs">Built for UBC CIC Hackathon 2026</p>
