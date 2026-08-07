@@ -20,22 +20,12 @@ Bottom-up migration: replace each AWS service adapter one at a time, keeping the
   - Updated imports in `routing.ts`, `modules/buildings.ts`, `scripts/ingest.ts`
   - Deleted `src/server/s3.ts`
 
-- [ ] 3. Database layer (PostgreSQL)
-  - [ ] 3.1 Create `src/server/db.ts`
-    - PostgreSQL connection pool via `pg`, reads `DATABASE_URL` env var
-    - _Requirements: 2.1_
-  - [ ] 3.2 Create `src/server/db/schema.sql`
-    - Define `users`, `sessions`, `messages`, `profiles` tables
-    - _Requirements: 2.1, 5.1_
-  - [ ] 3.3 Create `src/server/db/migrate.ts`
-    - Startup script that applies schema.sql if tables don't exist
-    - _Requirements: 2.5_
-  - [ ] 3.4 Rewrite `src/server/sessions/store.ts`
-    - Replace DynamoDB calls with SQL queries against the new schema
-    - Keep exported function signatures identical: `listSessions`, `getSessionMessages`, `appendExchange`, `getProfile`, `putProfile`
-    - Add `createUser`, `getUserByUsername` for auth
-    - Delete `src/server/sessions/keys.ts` (DynamoDB key helpers no longer needed)
-    - _Requirements: 2.2, 2.3, 2.4, 5.1_
+- [x] 3. Database layer (PostgreSQL)
+  - [x] 3.1 Create `src/server/db.ts` — pg pool from DATABASE_URL
+  - [x] 3.2 Create `src/server/db/schema.sql` — users, sessions, messages, profiles
+  - [x] 3.3 Create `src/server/db/migrate.ts` — applies schema on startup
+  - [x] 3.4 Rewrite `src/server/sessions/store.ts` — SQL queries, added createUser/getUserByUsername
+  - Deleted `src/server/sessions/keys.ts`
 
 - [ ] 4. Authentication (JWT + password)
   - [ ] 4.1 Rewrite `src/server/auth.ts`
