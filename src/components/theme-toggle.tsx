@@ -12,17 +12,20 @@ const OPTIONS: Array<{ mode: ThemeMode; label: string; icon: IconName }> = [
 
 /** Apply theme with a ripple view-transition from click origin, or instant fallback. */
 function applyWithRipple(e: React.MouseEvent, apply: () => void) {
-  const doc = document as Document & { startViewTransition?: (cb: () => void) => void };
+  const doc = document as Document & {
+    startViewTransition?: (cb: () => void) => { finished: Promise<void> };
+  };
   if (!doc.startViewTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     apply();
     return;
   }
-  // Set ripple origin as CSS variables on the root so the mask-gradient picks them up
-  const x = e.clientX;
-  const y = e.clientY;
-  document.documentElement.style.setProperty("--ripple-x", `${x}px`);
-  document.documentElement.style.setProperty("--ripple-y", `${y}px`);
-  doc.startViewTransition(apply);
+  const root = document.documentElement;
+  root.style.setProperty("--ripple-x", `${e.clientX}px`);
+  root.style.setProperty("--ripple-y", `${e.clientY}px`);
+  // Suppress per-element transitions so only the clip-path ripple animates
+  root.classList.add("vt-active");
+  const transition = doc.startViewTransition(apply);
+  transition.finished.then(() => root.classList.remove("vt-active"));
 }
 
 /**
