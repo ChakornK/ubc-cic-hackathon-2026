@@ -4,6 +4,16 @@ A conversational AI for UBC students. Ask about courses, tuition, walking routes
 
 Built with Next.js 16, React 19, Amazon Bedrock (Claude), and deployed serverlessly via CDK.
 
+## Preview
+
+|                                                                                                                       |                                                                                                                       |                                                                                                                       |
+| --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| ![Screenshot 1](https://github.com/ChakornK/reogent-archive/releases/download/video/Screenshot_2026-08-06_171441.png) | ![Screenshot 2](https://github.com/ChakornK/reogent-archive/releases/download/video/Screenshot_2026-08-06_171502.png) | ![Screenshot 3](https://github.com/ChakornK/reogent-archive/releases/download/video/Screenshot_2026-08-06_171540.png) |
+| ![Screenshot 4](https://github.com/ChakornK/reogent-archive/releases/download/video/Screenshot_2026-08-06_171552.png) | ![Screenshot 5](https://github.com/ChakornK/reogent-archive/releases/download/video/Screenshot_2026-08-06_171644.png) | ![Screenshot 6](https://github.com/ChakornK/reogent-archive/releases/download/video/Screenshot_2026-08-06_171649.png) |
+| ![Screenshot 7](https://github.com/ChakornK/reogent-archive/releases/download/video/Screenshot_2026-08-06_171655.png) | ![Screenshot 8](https://github.com/ChakornK/reogent-archive/releases/download/video/Screenshot_2026-08-06_171700.png) | ![Screenshot 9](https://github.com/ChakornK/reogent-archive/releases/download/video/Screenshot_2026-08-06_171705.png) |
+
+[Video demo](https://github.com/ChakornK/reogent-archive/releases/download/video/2026-08-06.17-18-48.mp4)
+
 ## Architecture
 
 ```
