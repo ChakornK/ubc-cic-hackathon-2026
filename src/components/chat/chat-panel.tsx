@@ -324,7 +324,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                   key={suggestion}
                   type="button"
                   onClick={() => send(suggestion)}
-                  className="neu-button bg-surface text-primary rounded-xl px-3.5 py-2 text-left text-xs font-medium"
+                  className="border-primary text-primary hover:bg-accent-subtle rounded-full border px-3.5 py-2 text-left text-xs font-medium transition-colors duration-150"
                 >
                   {suggestion}
                 </button>
