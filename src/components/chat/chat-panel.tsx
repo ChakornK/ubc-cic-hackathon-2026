@@ -259,7 +259,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
   return (
     <section
       aria-label="Conversation"
-      className="neu-panel glass-neu-strong bg-surface flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border"
+      className="glass-neu-strong flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border"
     >
       <div className="border-border-subtle flex shrink-0 items-center justify-between border-b bg-transparent px-4 py-3.5">
         <div className="min-w-0">

@@ -43,7 +43,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
   }
 
   return (
-    <div className="neu-inset glass-neu-inset bg-surface-container-low flex h-full w-full flex-col overflow-hidden rounded-2xl border p-2">
+    <div className="glass-neu-inset flex h-full w-full flex-col overflow-hidden rounded-2xl border p-2">
       <div className="flex items-center gap-3 px-2 pt-2 pb-4">
         <span className="neu-raised bg-surface text-primary flex size-10 shrink-0 items-center justify-center rounded-xl border">
           <Icon name="school" size={20} />
@@ -59,7 +59,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
             onClick={onCollapse}
             aria-label="Collapse session history"
             title="Collapse sessions"
-            className="neu-button glass-neu-compact bg-surface text-on-surface-variant hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-xl"
+            className="glass-neu-compact text-on-surface-variant hover:text-primary border-border-subtle flex size-9 shrink-0 items-center justify-center rounded-xl border"
           >
             <Icon name="left" size={18} />
           </button>

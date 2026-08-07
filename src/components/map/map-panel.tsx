@@ -190,7 +190,7 @@ export function MapPanel() {
         inert={!mapOpen}
         aria-hidden={!mapOpen}
         aria-label="Campus map"
-        className={`map-surface-layer neu-panel glass-neu-strong bg-surface absolute inset-0 flex min-w-0 overflow-hidden rounded-2xl border ${
+        className={`map-surface-layer glass-neu-strong absolute inset-0 flex min-w-0 overflow-hidden rounded-2xl border ${
           mapOpen ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-3 opacity-0"
         }`}
       >
@@ -200,7 +200,7 @@ export function MapPanel() {
           onClick={() => setMapOpen(false)}
           aria-label="Collapse campus map to tab"
           title="Collapse map"
-          className="neu-button glass-neu-compact bg-surface/95 text-on-surface-variant hover:text-primary absolute top-3 left-3 z-20 flex size-9 items-center justify-center rounded-xl backdrop-blur-sm"
+          className="glass-neu-compact text-on-surface-variant hover:text-primary border-border-subtle absolute top-3 left-3 z-20 flex size-9 items-center justify-center rounded-xl border"
         >
           <Icon name="right" size={17} />
         </button>
@@ -210,7 +210,7 @@ export function MapPanel() {
         inert={mapOpen}
         aria-hidden={mapOpen}
         aria-label="Collapsed campus map"
-        className={`map-tab-layer neu-panel glass-neu bg-surface text-on-surface-variant absolute inset-y-0 right-0 flex w-[3.25rem] cursor-default flex-col items-center rounded-2xl border py-2.5 ${
+        className={`map-tab-layer glass-neu text-on-surface-variant absolute inset-y-0 right-0 flex w-[3.25rem] cursor-default flex-col items-center rounded-2xl border py-2.5 ${
           mapOpen ? "pointer-events-none translate-x-2 opacity-0" : "translate-x-0 opacity-100"
         }`}
       >
@@ -220,7 +220,7 @@ export function MapPanel() {
           tabIndex={mapOpen ? -1 : 0}
           aria-label="Expand campus map"
           title="Expand campus map"
-          className="neu-button glass-neu-compact bg-surface text-primary hover:text-on-surface flex size-9 items-center justify-center rounded-xl"
+          className="glass-neu-compact text-primary hover:text-on-surface border-border-subtle flex size-9 items-center justify-center rounded-xl border"
         >
           <Icon name="fullscreen" size={17} />
         </button>

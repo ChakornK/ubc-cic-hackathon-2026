@@ -5,7 +5,7 @@ export function ProductMock() {
   return (
     <div
       aria-hidden="true"
-      className="neu-panel glass-neu-strong bg-background mx-auto w-full max-w-[940px] overflow-hidden rounded-[1.75rem] border p-2 sm:p-2.5"
+      className="glass-neu-strong mx-auto w-full max-w-[940px] overflow-hidden rounded-[1.75rem] border p-2 sm:p-2.5"
     >
       <div className="border-border-subtle bg-surface overflow-hidden rounded-[1.25rem] border">
         <div className="border-border-subtle bg-surface flex h-12 items-center justify-between border-b px-3 sm:px-4">

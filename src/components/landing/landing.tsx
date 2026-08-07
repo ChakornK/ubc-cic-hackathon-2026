@@ -146,7 +146,7 @@ export function Landing() {
           <div
             className={`glass-neu pointer-events-auto mx-auto flex h-14 max-w-6xl items-center justify-between rounded-2xl border px-3 transition-all duration-200 sm:px-4 ${
               scrolled
-                ? "neu-panel border-border-subtle bg-background/90 backdrop-blur-md"
+                ? "border-border-subtle bg-background/90 backdrop-blur-md"
                 : "bg-background/55 border-transparent backdrop-blur-sm"
             }`}
           >
