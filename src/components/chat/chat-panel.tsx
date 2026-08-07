@@ -282,7 +282,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
 
         {historyState === "failed" && (
           <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-center">
-            <span className="neu-raised bg-surface text-error flex size-16 items-center justify-center rounded-2xl border">
+            <span className="bg-surface text-error border-border-subtle flex size-16 items-center justify-center rounded-2xl border">
               <Icon name="alert" size={30} />
             </span>
             <div>
@@ -311,7 +311,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
 
         {historyState === "ready" && messages.length === 0 && !sending && (
           <div className="flex h-full flex-col items-center justify-center px-3 text-center sm:px-6">
-            <span className="neu-raised bg-surface text-primary flex size-16 items-center justify-center rounded-2xl border">
+            <span className="bg-surface text-primary border-border-subtle flex size-16 items-center justify-center rounded-2xl border">
               <Icon name="chat1" size={30} />
             </span>
             <h2 className="text-on-surface mt-6 text-2xl font-medium tracking-[-0.025em]">Ask me about UBC</h2>
@@ -349,7 +349,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                 <TypingIndicator slow={slowResponse} />
               )}
             {sendError && (
-              <div className="neu-raised border-error/30 bg-error-container/40 flex flex-col items-start justify-between gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center">
+              <div className="border-error/30 bg-error-container/40 flex flex-col items-start justify-between gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center">
                 <p className="text-on-surface flex items-center gap-2 text-sm">
                   <Icon name="alert" size={16} className="text-error shrink-0" />
                   {sendError}

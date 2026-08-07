@@ -59,7 +59,7 @@ function AssistantMarkdown({ content }: { content: string }) {
 export function UserMessage({ message }: { message: DisplayMessage }) {
   return (
     <div className="animate-message-in flex flex-col items-end">
-      <div className="neu-raised bg-accent-subtle text-on-surface border-border-subtle max-w-[90%] rounded-[16px_16px_5px_16px] border px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap sm:max-w-[80%]">
+      <div className="bg-accent-subtle text-on-surface border-border-subtle max-w-[90%] rounded-[16px_16px_5px_16px] border px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap sm:max-w-[80%]">
         {message.content}
       </div>
       <span className="text-muted mt-1.5 px-1 text-xs">You</span>
@@ -174,14 +174,14 @@ export function AssistantMessage({ message, isLatest }: { message: DisplayMessag
   return (
     <div className="animate-message-in">
       <div className="mb-2 flex items-center gap-2">
-        <span className="neu-raised bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg border text-[11px] font-medium">
+        <span className="bg-primary-container text-on-primary-container border-border-subtle flex size-7 items-center justify-center rounded-lg border text-[11px] font-medium">
           U
         </span>
         <span className="text-muted text-xs font-medium">Reogent</span>
       </div>
-      <div className="neu-raised bg-surface max-w-[94%] rounded-[16px_16px_16px_5px] border px-4 py-3.5 sm:max-w-[88%]">
+      <div className="bg-surface border-border-subtle max-w-[94%] rounded-[16px_16px_16px_5px] border px-4 py-3.5 sm:max-w-[88%]">
         {message.warning && (
-          <div className="neu-inset bg-tertiary-container text-body-sm text-on-tertiary-container mb-3 flex items-start gap-2 rounded-xl border px-3 py-2">
+          <div className="bg-tertiary-container text-body-sm text-on-tertiary-container border-border-subtle mb-3 flex items-start gap-2 rounded-xl border px-3 py-2">
             <Icon name="alert" size={16} className="mt-0.5 shrink-0" />
             <span>{message.warning}</span>
           </div>
@@ -210,12 +210,12 @@ export function TypingIndicator({ slow }: { slow: boolean }) {
   return (
     <div role="status" aria-label="The assistant is thinking">
       <div className="mb-2 flex items-center gap-2">
-        <span className="neu-raised bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg border text-[11px] font-medium">
+        <span className="bg-primary-container text-on-primary-container border-border-subtle flex size-7 items-center justify-center rounded-lg border text-[11px] font-medium">
           U
         </span>
         <span className="text-muted text-xs font-medium">Reogent</span>
       </div>
-      <div className="neu-raised bg-surface inline-flex items-center gap-3 rounded-[16px_16px_16px_5px] border px-3.5 py-3">
+      <div className="bg-surface border-border-subtle inline-flex items-center gap-3 rounded-[16px_16px_16px_5px] border px-3.5 py-3">
         <span className="thinking-orb" aria-hidden="true" />
         <span className="text-on-surface text-sm font-medium">{slow ? "Still working" : "Thinking"}</span>
       </div>
