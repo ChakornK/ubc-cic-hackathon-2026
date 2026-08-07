@@ -231,13 +231,8 @@ export function MapPanel() {
         >
           <Icon name="fullscreen" size={17} />
         </button>
-        <span className="bg-border my-3 h-px w-5" aria-hidden="true" />
-        <span className="text-xs font-medium tracking-[0.06em] select-none [writing-mode:vertical-rl]">Campus map</span>
-        <span
-          className="neu-inset bg-surface-container-low text-on-surface-variant mt-auto flex size-8 items-center justify-center rounded-lg border"
-          aria-hidden="true"
-        >
-          <Icon name="map" size={17} />
+        <span className="mt-4 text-xs font-medium tracking-[0.06em] select-none [writing-mode:vertical-rl]">
+          Campus map
         </span>
       </aside>
     </div>

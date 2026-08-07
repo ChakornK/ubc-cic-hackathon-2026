@@ -32,13 +32,11 @@ function LoginContent() {
       </nav>
       <div className="flex flex-1 flex-col items-center justify-center py-12">
         <div className="flex w-full max-w-sm flex-col items-center">
-          <Link href="/" className="mb-6 flex flex-col items-center gap-2">
-            <span className="neu-raised bg-surface text-primary flex size-14 items-center justify-center rounded-2xl border">
-              <Icon name="school" size={27} />
-            </span>
-          </Link>
+          <span className="neu-raised bg-surface text-primary mb-8 flex size-14 items-center justify-center rounded-2xl border">
+            <Icon name="school" size={27} />
+          </span>
           <h1 className="text-on-surface mb-2 text-2xl font-medium tracking-[-0.02em]">Welcome back</h1>
-          <p className="text-muted mb-8 text-sm">Sign in to continue to Reogent</p>
+          <p className="text-muted mb-6 text-sm">Sign in to continue to Reogent</p>
           <AuthForm mode="login" />
         </div>
       </div>

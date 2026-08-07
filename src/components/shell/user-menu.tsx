@@ -69,7 +69,7 @@ export function UserMenu() {
             : "pointer-events-none invisible -translate-y-1.5 scale-[0.97] opacity-0 blur-[2px]"
         }`}
       >
-        <div className="rounded-xl px-2.5 py-2">
+        <div className="px-2.5 py-2">
           <p className="text-muted text-xs font-medium">Signed in as</p>
           <p className="text-body-sm text-on-surface mt-0.5 truncate" title={auth.user?.username}>
             {auth.user?.username ?? "Signed in"}
@@ -78,8 +78,8 @@ export function UserMenu() {
 
         <div className="bg-border-subtle my-1 h-px" />
 
-        <div className="px-1 py-2">
-          <div className="text-on-surface mb-2 flex items-center gap-2 px-1 text-sm font-medium">
+        <div className="px-2.5 py-2">
+          <div className="text-on-surface mb-2 flex items-center gap-2 text-sm font-medium">
             <Icon name={mode === "dark" ? "moon" : "sun"} size={16} className="text-primary" />
             Appearance
           </div>
@@ -107,7 +107,7 @@ export function UserMenu() {
         <button
           type="button"
           onClick={() => auth.signOut()}
-          className="text-on-surface hover:bg-error/10 hover:text-error flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sm transition-colors duration-150"
+          className="text-on-surface hover:bg-error/10 hover:text-error flex h-10 w-full items-center gap-2 rounded-xl px-2.5 text-sm transition-colors duration-150"
         >
           <Icon name="exit" size={16} className="text-on-surface-variant" />
           Sign out

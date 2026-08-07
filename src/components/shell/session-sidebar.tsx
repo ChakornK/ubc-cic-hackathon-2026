@@ -44,13 +44,9 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
 
   return (
     <div className="glass-neu-inset flex h-full w-full flex-col overflow-hidden rounded-2xl border p-2">
-      <div className="flex items-center gap-3 px-2 pt-2 pb-4">
-        <span className="bg-surface text-primary border-border-subtle flex size-10 shrink-0 items-center justify-center rounded-xl border">
-          <Icon name="school" size={20} />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="text-on-surface block text-base leading-tight font-medium tracking-[-0.02em]">Sessions</span>
-          <span className="text-body-sm text-muted block truncate">Your conversation history</span>
+      <div className="flex items-center gap-3 px-2 pt-3 pb-3">
+        <span className="text-on-surface min-w-0 flex-1 text-base leading-tight font-medium tracking-[-0.02em]">
+          Sessions
         </span>
         {onCollapse && (
           <button
