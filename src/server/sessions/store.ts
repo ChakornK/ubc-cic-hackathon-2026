@@ -1,139 +1,101 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import type { ChatMessage, InterstitialBlock, Profile, SessionSummary, ToolCall } from "../core/types";
-import { messageSk, MSG_MARKER, sessionSk, userPk } from "./keys";
+import { getPool } from "../db";
 
-let doc: DynamoDBDocumentClient | undefined;
-
-function ddb(): DynamoDBDocumentClient {
-  doc ??= DynamoDBDocumentClient.from(new DynamoDBClient({}), {
-    marshallOptions: { removeUndefinedValues: true },
-  });
-  return doc;
+/** Sessions for this user, most recently updated first. */
+export async function listSessions(userId: string): Promise<SessionSummary[]> {
+  const { rows } = await getPool().query(
+    `SELECT id, title, updated_at FROM sessions WHERE user_id = $1 ORDER BY updated_at DESC`,
+    [userId],
+  );
+  return rows.map((r) => ({
+    session_id: r.id,
+    title: r.title,
+    updatedAt: r.updated_at.toISOString(),
+  }));
 }
 
-const table = () => {
-  const t = process.env.TABLE_NAME;
-  if (!t) throw new Error("TABLE_NAME env var is not set");
-  return t;
-};
+/** Chronological message history, or null if the session doesn't belong to this user. */
+export async function getSessionMessages(userId: string, sessionId: string): Promise<ChatMessage[] | null> {
+  const session = await getPool().query(`SELECT id FROM sessions WHERE id = $1 AND user_id = $2`, [sessionId, userId]);
+  if (session.rows.length === 0) return null;
 
-/** The caller's sessions, most recently updated first (5.2). */
-export async function listSessions(sub: string): Promise<SessionSummary[]> {
-  const res = await ddb().send(
-    new QueryCommand({
-      TableName: table(),
-      KeyConditionExpression: "PK = :pk AND begins_with(SK, :prefix)",
-      ExpressionAttributeValues: { ":pk": userPk(sub), ":prefix": "SESSION#" },
-    }),
+  const { rows } = await getPool().query(
+    `SELECT role, content, tool_calls, interstitial FROM messages WHERE session_id = $1 ORDER BY id ASC`,
+    [sessionId],
   );
-  return (res.Items ?? [])
-    .filter((item) => !String(item.SK).includes(MSG_MARKER)) // metadata items only
-    .map((item) => ({
-      session_id: String(item.SK).slice("SESSION#".length),
-      title: item.title as string,
-      updatedAt: item.updatedAt as string,
-    }))
-    .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
-}
-
-/** Chronological history, or null if the session doesn't exist under this
- *  caller's PK — indistinguishable from "someone else's session" (5.4). */
-export async function getSessionMessages(sub: string, sessionId: string): Promise<ChatMessage[] | null> {
-  const res = await ddb().send(
-    new QueryCommand({
-      TableName: table(),
-      KeyConditionExpression: "PK = :pk AND begins_with(SK, :prefix)",
-      ExpressionAttributeValues: { ":pk": userPk(sub), ":prefix": `${sessionSk(sessionId)}${MSG_MARKER}` },
-    }),
-  );
-  const items = res.Items ?? [];
-  if (items.length === 0) {
-    const meta = await ddb().send(
-      new GetCommand({ TableName: table(), Key: { PK: userPk(sub), SK: sessionSk(sessionId) } }),
-    );
-    if (!meta.Item) return null;
-  }
-  return items.map((item) => {
-    const msg: ChatMessage = { role: item.role as ChatMessage["role"], content: item.content as string };
-    if (item.toolCalls) msg.toolCalls = item.toolCalls as ChatMessage["toolCalls"];
-    if (item.interstitial) msg.interstitial = item.interstitial as ChatMessage["interstitial"];
+  return rows.map((r) => {
+    const msg: ChatMessage = { role: r.role, content: r.content };
+    if (r.tool_calls) msg.toolCalls = r.tool_calls;
+    if (r.interstitial) msg.interstitial = r.interstitial;
     return msg;
   });
 }
 
-/** Persists one user + assistant exchange and atomically increments the session counter. */
+/** Persists one user + assistant exchange. Creates the session if it doesn't exist. */
 export async function appendExchange(
-  sub: string,
+  userId: string,
   sessionId: string,
   userMessage: string,
   assistantMessage: string,
   toolCalls: ToolCall[],
   interstitial?: InterstitialBlock[],
 ): Promise<void> {
-  const pk = userPk(sub);
-  const now = new Date().toISOString();
+  const pool = getPool();
 
-  // Atomically reserve two sequence slots. The returned messageCount is the
-  // value *after* the ADD, so the two new messages occupy (count - 2) and (count - 1).
-  const update = await ddb().send(
-    new UpdateCommand({
-      TableName: table(),
-      Key: { PK: pk, SK: sessionSk(sessionId) },
-      UpdateExpression:
-        "ADD messageCount :inc SET updatedAt = :now, createdAt = if_not_exists(createdAt, :now), title = if_not_exists(title, :title)",
-      ExpressionAttributeValues: {
-        ":inc": 2,
-        ":now": now,
-        ":title": userMessage.slice(0, 80),
-      },
-      ReturnValues: "ALL_NEW",
-    }),
+  // Upsert session (creates on first message, updates timestamp on subsequent)
+  await pool.query(
+    `INSERT INTO sessions (id, user_id, title, updated_at)
+     VALUES ($1, $2, $3, now())
+     ON CONFLICT (id) DO UPDATE SET updated_at = now()`,
+    [sessionId, userId, userMessage.slice(0, 80)],
   );
-  const seq = ((update.Attributes?.messageCount as number) ?? 2) - 2;
 
-  await Promise.all([
-    ddb().send(
-      new PutCommand({
-        TableName: table(),
-        Item: { PK: pk, SK: messageSk(sessionId, seq), role: "user", content: userMessage, createdAt: now },
-      }),
-    ),
-    ddb().send(
-      new PutCommand({
-        TableName: table(),
-        Item: {
-          PK: pk,
-          SK: messageSk(sessionId, seq + 1),
-          role: "assistant",
-          content: assistantMessage,
-          toolCalls,
-          interstitial: interstitial?.length ? interstitial : undefined,
-          createdAt: now,
-        },
-      }),
-    ),
+  // Insert both messages
+  await pool.query(
+    `INSERT INTO messages (session_id, role, content, tool_calls, interstitial) VALUES ($1, $2, $3, $4, $5), ($1, $6, $7, $8, $9)`,
+    [
+      sessionId,
+      "user",
+      userMessage,
+      null,
+      null,
+      "assistant",
+      assistantMessage,
+      toolCalls.length ? JSON.stringify(toolCalls) : null,
+      interstitial?.length ? JSON.stringify(interstitial) : null,
+    ],
+  );
+}
+
+export async function getProfile(userId: string): Promise<Profile> {
+  const { rows } = await getPool().query(`SELECT preferences, email, updated_at FROM profiles WHERE user_id = $1`, [
+    userId,
   ]);
+  if (rows.length === 0) return { preferences: {} };
+  return { preferences: rows[0].preferences ?? {}, email: rows[0].email, updatedAt: rows[0].updated_at?.toISOString() };
 }
 
-export async function getProfile(sub: string): Promise<Profile> {
-  const res = await ddb().send(new GetCommand({ TableName: table(), Key: { PK: userPk(sub), SK: "PROFILE" } }));
-  if (!res.Item) return { preferences: {} };
-  const { preferences, email, updatedAt } = res.Item;
-  return { preferences: preferences ?? {}, email, updatedAt };
-}
-
-export async function putProfile(sub: string, profile: Profile): Promise<void> {
-  await ddb().send(
-    new PutCommand({
-      TableName: table(),
-      Item: {
-        PK: userPk(sub),
-        SK: "PROFILE",
-        preferences: profile.preferences ?? {},
-        email: profile.email,
-        updatedAt: new Date().toISOString(),
-      },
-    }),
+export async function putProfile(userId: string, profile: Profile): Promise<void> {
+  await getPool().query(
+    `INSERT INTO profiles (user_id, preferences, email, updated_at)
+     VALUES ($1, $2, $3, now())
+     ON CONFLICT (user_id) DO UPDATE SET preferences = $2, email = $3, updated_at = now()`,
+    [userId, JSON.stringify(profile.preferences ?? {}), profile.email ?? null],
   );
+}
+
+// --- User management (for auth) ---
+
+export async function createUser(username: string, passwordHash: string): Promise<string> {
+  const { rows } = await getPool().query(`INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id`, [
+    username,
+    passwordHash,
+  ]);
+  return rows[0].id;
+}
+
+export async function getUserByUsername(username: string): Promise<{ id: string; passwordHash: string } | null> {
+  const { rows } = await getPool().query(`SELECT id, password_hash FROM users WHERE username = $1`, [username]);
+  if (rows.length === 0) return null;
+  return { id: rows[0].id, passwordHash: rows[0].password_hash };
 }

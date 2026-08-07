@@ -14,14 +14,11 @@ Bottom-up migration: replace each AWS service adapter one at a time, keeping the
   - Run `npm install` to verify clean dependency tree
   - _Requirements: 7.1, 7.2, 7.4_
 
-- [ ] 2. Data store (filesystem)
-  - [ ] 2.1 Replace `src/server/s3.ts` with filesystem implementation
-    - Implement `S3Reader`/`S3Writer` interface using `fs.readFile`/`fs.writeFile`
-    - Read `DATA_PATH` env var, default to `./data`
-    - _Requirements: 3.1, 3.2, 3.3_
-  - [ ] 2.2 Update `app/api/geo/[name]/route.ts`
-    - Replace S3 `GetObjectCommand` with `fs.createReadStream` from `DATA_PATH`
-    - _Requirements: 3.2, 3.3_
+- [x] 2. Data store (filesystem)
+  - [x] 2.1 Replace `src/server/s3.ts` with filesystem implementation (`src/server/data.ts`)
+  - [x] 2.2 Update `app/api/geo/[name]/route.ts` to use `fs.createReadStream`
+  - Updated imports in `routing.ts`, `modules/buildings.ts`, `scripts/ingest.ts`
+  - Deleted `src/server/s3.ts`
 
 - [ ] 3. Database layer (PostgreSQL)
   - [ ] 3.1 Create `src/server/db.ts`
