@@ -59,7 +59,7 @@ function AssistantMarkdown({ content }: { content: string }) {
 export function UserMessage({ message }: { message: DisplayMessage }) {
   return (
     <div className="animate-message-in flex flex-col items-end">
-      <div className="neu-raised bg-accent-subtle text-on-surface max-w-[90%] rounded-[16px_16px_5px_16px] border px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap sm:max-w-[80%]">
+      <div className="neu-raised bg-accent-subtle text-on-surface border-border-subtle max-w-[90%] rounded-[16px_16px_5px_16px] border px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap sm:max-w-[80%]">
         {message.content}
       </div>
       <span className="text-muted mt-1.5 px-1 text-xs">You</span>
@@ -174,7 +174,7 @@ export function AssistantMessage({ message, isLatest }: { message: DisplayMessag
   return (
     <div className="animate-message-in">
       <div className="mb-2 flex items-center gap-2">
-        <span className="neu-raised bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg border text-[11px] font-semibold">
+        <span className="neu-raised bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg border text-[11px] font-medium">
           U
         </span>
         <span className="text-muted text-xs font-medium">Reogent</span>
@@ -210,7 +210,7 @@ export function TypingIndicator({ slow }: { slow: boolean }) {
   return (
     <div role="status" aria-label="The assistant is thinking">
       <div className="mb-2 flex items-center gap-2">
-        <span className="neu-raised bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg border text-[11px] font-semibold">
+        <span className="neu-raised bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg border text-[11px] font-medium">
           U
         </span>
         <span className="text-muted text-xs font-medium">Reogent</span>
