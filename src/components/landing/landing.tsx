@@ -144,14 +144,12 @@ export function Landing() {
 
         <header className="pointer-events-none fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-6">
           <div
-            className={`glass-neu pointer-events-auto mx-auto flex h-14 max-w-6xl items-center justify-between rounded-2xl border px-3 transition-[border-color,background-color,backdrop-filter] duration-200 sm:px-4 ${
-              scrolled
-                ? "border-border-subtle bg-background/90 backdrop-blur-md"
-                : "bg-background/55 border-transparent backdrop-blur-sm"
+            className={`glass-neu pointer-events-auto mx-auto flex h-14 max-w-6xl items-center justify-between rounded-2xl px-3 transition-[background-color,backdrop-filter] duration-200 sm:px-4 ${
+              scrolled ? "bg-background/90 backdrop-blur-md" : "bg-background/55 backdrop-blur-sm"
             }`}
           >
             <a href="#top" className="group flex items-center gap-2.5 rounded-xl focus-visible:outline-offset-4">
-              <span className="bg-surface text-primary border-border-subtle flex size-8 items-center justify-center rounded-lg border transition-transform duration-150 group-hover:-translate-y-0.5">
+              <span className="bg-surface text-primary flex size-8 items-center justify-center rounded-lg shadow-sm transition-transform duration-150 group-hover:-translate-y-0.5">
                 <Icon name="school" size={17} />
               </span>
               <span className="text-base font-medium tracking-[-0.02em]">Reogent</span>
