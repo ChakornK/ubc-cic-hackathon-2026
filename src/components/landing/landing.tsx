@@ -154,7 +154,7 @@ export function Landing() {
               <span className="bg-surface text-primary border-border-subtle flex size-8 items-center justify-center rounded-lg border transition-transform duration-150 group-hover:-translate-y-0.5">
                 <Icon name="school" size={17} />
               </span>
-              <span className="text-[15px] font-medium tracking-[-0.02em]">Reogent</span>
+              <span className="text-base font-medium tracking-[-0.02em]">Reogent</span>
             </a>
             <a
               href="#top"
@@ -258,7 +258,7 @@ export function Landing() {
                 <TopoTexture className="h-full w-full opacity-10" />
               </div>
               <div className="relative flex flex-col items-center text-center">
-                <h2 className="text-[2.5rem] font-medium tracking-[-0.035em] text-balance sm:text-5xl">
+                <h2 className="text-[1.875rem] font-medium tracking-[-0.035em] text-balance sm:text-5xl">
                   Ready to ask?
                 </h2>
                 <p className="text-on-surface-variant mt-4 text-base">Your courses, your campus, one conversation.</p>

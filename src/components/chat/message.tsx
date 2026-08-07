@@ -174,7 +174,7 @@ export function AssistantMessage({ message, isLatest }: { message: DisplayMessag
   return (
     <div className="animate-message-in">
       <div className="mb-2 flex items-center gap-2">
-        <span className="bg-primary-container text-on-primary-container border-border-subtle flex size-7 items-center justify-center rounded-lg border text-[11px] font-medium">
+        <span className="bg-primary-container text-on-primary-container border-border-subtle flex size-7 items-center justify-center rounded-lg border text-[0.6875rem] font-medium">
           U
         </span>
         <span className="text-muted text-xs font-medium">Reogent</span>
@@ -210,7 +210,7 @@ export function TypingIndicator({ slow }: { slow: boolean }) {
   return (
     <div role="status" aria-label="The assistant is thinking">
       <div className="mb-2 flex items-center gap-2">
-        <span className="bg-primary-container text-on-primary-container border-border-subtle flex size-7 items-center justify-center rounded-lg border text-[11px] font-medium">
+        <span className="bg-primary-container text-on-primary-container border-border-subtle flex size-7 items-center justify-center rounded-lg border text-[0.6875rem] font-medium">
           U
         </span>
         <span className="text-muted text-xs font-medium">Reogent</span>

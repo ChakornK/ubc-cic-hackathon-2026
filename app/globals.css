@@ -551,11 +551,11 @@ html:not([data-auth-pending]) .auth-splash {
 }
 
 .assistant-markdown h1 {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
 }
 
 .assistant-markdown h2 {
-  font-size: 1.075rem;
+  font-size: 1rem;
 }
 
 .assistant-markdown h3 {

@@ -53,7 +53,7 @@ export function SignInButton({ wide = false }: { wide?: boolean }) {
       <button
         type="submit"
         disabled={pending}
-        className="neu-primary-button bg-primary text-on-primary flex h-12 w-full items-center justify-center rounded-xl text-[15px] font-medium disabled:pointer-events-none disabled:opacity-60"
+        className="neu-primary-button bg-primary text-on-primary flex h-12 w-full items-center justify-center rounded-xl text-base font-medium disabled:pointer-events-none disabled:opacity-60"
       >
         {pending ? "Working…" : mode === "login" ? "Sign in" : "Create account"}
       </button>

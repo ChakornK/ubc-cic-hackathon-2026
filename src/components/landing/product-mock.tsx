@@ -10,7 +10,7 @@ export function ProductMock() {
       <div className="border-border-subtle bg-surface overflow-hidden rounded-[1.25rem] border">
         <div className="border-border-subtle bg-surface flex h-12 items-center justify-between border-b px-3 sm:px-4">
           <span className="text-on-surface flex items-center gap-2.5 text-sm font-medium tracking-[-0.02em]">
-            <span className="bg-surface-container-low text-primary border-border-subtle flex size-7 items-center justify-center rounded-lg border text-[11px] font-medium">
+            <span className="bg-surface-container-low text-primary border-border-subtle flex size-7 items-center justify-center rounded-lg border text-[0.6875rem] font-medium">
               U
             </span>
             Reogent
@@ -28,7 +28,7 @@ export function ProductMock() {
 
             <div className="max-w-[94%]">
               <div className="mb-2 flex items-center gap-2">
-                <span className="bg-primary-container text-on-primary-container border-border-subtle flex size-6 items-center justify-center rounded-lg border text-[10px] font-medium">
+                <span className="bg-primary-container text-on-primary-container border-border-subtle flex size-6 items-center justify-center rounded-lg border text-[0.625rem] font-medium">
                   U
                 </span>
                 <span className="text-muted text-xs">Reogent</span>
