@@ -57,13 +57,12 @@ Bottom-up migration: replace each AWS service adapter one at a time, keeping the
   - [x] 8.3 Create `.env.example`
   - [x] 8.4 Create `.dockerignore`
 
-- [ ] 9. Cleanup
-  - Remove `infra/` directory (CDK stack)
-  - Remove `infra` from `workspaces` in root `package.json`
-  - Remove `scripts/sync-data.mjs` (S3 sync no longer needed)
-  - Update `.env` to new variable names
-  - Remove unused OIDC env vars (`NEXT_PUBLIC_COGNITO_*`)
-  - _Requirements: 7.3_
+- [x] 9. Cleanup
+  - [x] Removed `infra/` directory (CDK stack)
+  - [x] Removed `scripts/sync-data.mjs` and `scripts/smoke.ts`
+  - [x] Removed `sync-data` script from package.json
+  - [x] Replaced `.env` with new self-hosted variables (no AWS secrets)
+  - [x] Removed `workspaces` field from package.json
 
 - [ ] 10. Final checkpoint - End-to-end verification
   - `docker compose up` starts all services
