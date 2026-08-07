@@ -43,32 +43,13 @@ Bottom-up migration: replace each AWS service adapter one at a time, keeping the
   - Fixed user-menu AppAuthUser references
   - Removed DynamoDB-based store.test.ts
 
-- [ ] 7. Search migration (Meilisearch)
-  - [ ] 7.1 Rewrite `src/server/search.ts`
-    - Replace OpenSearch client with `MeiliSearch` client
-    - Read `MEILI_URL` and `MEILI_MASTER_KEY` env vars
-    - _Requirements: 4.1_
-  - [ ] 7.2 Rewrite `src/server/ingest.ts`
-    - Replace OpenSearch bulk indexing with Meilisearch `addDocuments()`
-    - Create indexes with correct `primaryKey`, `filterableAttributes`, `sortableAttributes`, `searchableAttributes` per dataset
-    - _Requirements: 4.3_
-  - [ ] 7.3 Rewrite tool queries in each dataset module
-    - `src/server/modules/buildings.ts` — replace `os.get`, `term`, `multi_match` with Meilisearch `search()` + `filter`
-    - `src/server/modules/courses.ts` — replace `terms`, `multi_match`, `bool` queries
-    - `src/server/modules/admissions.ts` — replace `multi_match` + `term` filters
-    - `src/server/modules/grades.ts` — replace `bool.filter` with Meilisearch filter strings
-    - `src/server/modules/tuition.ts` — replace `term` + `match` fallback
-    - `src/server/modules/pages.ts` — replace `multi_match` + `highlight`
-    - `src/server/modules/calendar.ts` — replace `multi_match` + `range` filter
-    - `src/server/modules/events.ts` — replace `multi_match` + `range` date filter
-    - `src/server/modules/spaces.ts` — replace `bool.should` + `range` filters
-    - `src/server/modules/places.ts` — replace `multi_match` via `searchNearable`
-    - `src/server/modules/costs.ts` — replace `term` + `match` queries
-    - _Requirements: 4.2_
-  - [ ] 7.4 Update `OsClient` type in `src/server/core/types.ts`
-    - Replace `OsClient` interface with Meilisearch-based `SearchClient` or remove and use `MeiliSearch` directly in tool signatures
-    - Update `ToolDef.execute` signature accordingly
-    - _Requirements: 4.2_
+- [x] 7. Search migration (Meilisearch)
+  - [x] 7.1 Rewrite `src/server/search.ts` — MeiliSearch client
+  - [x] 7.2 Rewrite `src/server/ingest.ts` — Meilisearch addDocuments
+  - [x] 7.3 Rewrite all tool queries in dataset modules (11 modules)
+  - [x] 7.4 Replace `OsClient` type with `SearchClient` in core/types.ts
+  - Updated agent loop, executor, stream, API routes, and tests
+  - All 97 tests pass
 
 - [ ] 8. Docker packaging
   - [ ] 8.1 Create `Dockerfile`
