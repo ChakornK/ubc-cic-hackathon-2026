@@ -6,10 +6,10 @@ Bottom-up migration: replace each AWS service adapter one at a time, keeping the
 
 ## Tasks
 
-- [ ] 1. Project setup and dependency swap
+- [x] 1. Project setup and dependency swap
   - Remove AWS SDK packages from `package.json`
   - Remove `oidc-client-ts`, `react-oidc-context`, `@smithy/types`, `@types/aws4`
-  - Add `openai`, `pg`, `@types/pg`, `meilisearch`, `jose`, `bcryptjs`, `@types/bcryptjs`
+  - Add `openai`, `pg`, `@types/pg`, `meilisearch`, `jose`, `bcryptjs`
   - Add `output: "standalone"` to `next.config.ts`
   - Run `npm install` to verify clean dependency tree
   - _Requirements: 7.1, 7.2, 7.4_

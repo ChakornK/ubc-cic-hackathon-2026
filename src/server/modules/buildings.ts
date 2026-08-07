@@ -1,7 +1,7 @@
 import type { FeatureCollection } from "geojson";
 import type { DatasetModule, OsClient } from "../core/types";
+import { dataStore } from "../data";
 import { route } from "../routing";
-import { dataBucket } from "../s3";
 
 export interface BuildingDoc {
   code: string;
@@ -73,7 +73,7 @@ const GEO_TTL_MS = 10 * 60 * 1000;
  *  routing graph. */
 export function getBuildingsGeoJson(): Promise<FeatureCollection> {
   if (geoPromise && Date.now() - geoLoadedAt > GEO_TTL_MS) geoPromise = undefined;
-  geoPromise ??= dataBucket()
+  geoPromise ??= dataStore()
     .getJson(BUILDINGS_KEY)
     .then((geo) => {
       geoLoadedAt = Date.now();
