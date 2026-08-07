@@ -10,32 +10,32 @@ export function ProductMock() {
       <div className="border-border-subtle bg-surface overflow-hidden rounded-[1.25rem] border">
         <div className="border-border-subtle bg-surface flex h-12 items-center justify-between border-b px-3 sm:px-4">
           <span className="text-on-surface flex items-center gap-2.5 text-sm font-medium tracking-[-0.02em]">
-            <span className="neu-raised bg-surface-container-low text-primary flex size-7 items-center justify-center rounded-lg border text-[11px] font-semibold">
+            <span className="bg-surface-container-low text-primary border-border-subtle flex size-7 items-center justify-center rounded-lg border text-[11px] font-medium">
               U
             </span>
             Reogent
           </span>
-          <span className="neu-raised bg-surface text-primary flex size-7 items-center justify-center rounded-lg border text-xs font-medium">
+          <span className="bg-surface text-primary border-border-subtle flex size-7 items-center justify-center rounded-lg border text-xs font-medium">
             A
           </span>
         </div>
 
         <div className="flex min-h-[320px] sm:min-h-[390px]">
           <div className="chat-message-well flex min-w-0 flex-1 flex-col gap-4 p-4 sm:p-6">
-            <div className="neu-raised bg-accent-subtle text-on-surface ml-auto max-w-[88%] rounded-[16px_16px_5px_16px] border px-4 py-3 text-left text-sm">
+            <div className="bg-accent-subtle text-on-surface border-border-subtle ml-auto max-w-[88%] rounded-[16px_16px_5px_16px] border px-4 py-3 text-left text-sm">
               How far is it from ICCS to the Nest?
             </div>
 
             <div className="max-w-[94%]">
               <div className="mb-2 flex items-center gap-2">
-                <span className="neu-raised bg-primary-container text-on-primary-container flex size-6 items-center justify-center rounded-lg border text-[10px] font-semibold">
+                <span className="bg-primary-container text-on-primary-container border-border-subtle flex size-6 items-center justify-center rounded-lg border text-[10px] font-medium">
                   U
                 </span>
                 <span className="text-muted text-xs">Reogent</span>
               </div>
-              <div className="neu-raised bg-surface text-on-surface rounded-[16px_16px_16px_5px] border px-4 py-3 text-sm leading-relaxed">
+              <div className="bg-surface text-on-surface border-border-subtle rounded-[16px_16px_16px_5px] border px-4 py-3 text-sm leading-relaxed">
                 ICCS to the AMS Nest is about 650 meters — roughly an 8 minute walk heading north through campus.
-                <div className="neu-inset bg-surface-container-low text-on-surface-variant mt-3 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-mono text-xs">
+                <div className="bg-surface-container-low text-on-surface-variant border-border-subtle mt-3 inline-flex max-w-full items-center gap-1.5 rounded-lg border px-2.5 py-1.5 font-mono text-xs">
                   <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
                     <path d="M12 2a8 8 0 0 1 8 8c0 3.6-2.4 7.2-7.1 10.9a1.5 1.5 0 0 1-1.8 0C6.4 17.2 4 13.6 4 10a8 8 0 0 1 8-8Zm0 5.5A2.5 2.5 0 1 0 12 12.5 2.5 2.5 0 0 0 12 7.5Z" />
                   </svg>
@@ -102,8 +102,8 @@ export function ProductMock() {
               </svg>
             </span>
 
-            <div className="neu-raised bg-surface/92 absolute top-3 right-3 flex items-center gap-2.5 rounded-xl border px-3 py-2 backdrop-blur-sm">
-              <span className="neu-inset bg-secondary-container text-on-secondary-container flex size-8 items-center justify-center rounded-lg border">
+            <div className="bg-surface/92 border-border-subtle absolute top-3 right-3 flex items-center gap-2.5 rounded-xl border px-3 py-2 backdrop-blur-sm">
+              <span className="bg-secondary-container text-on-secondary-container border-border-subtle flex size-8 items-center justify-center rounded-lg border">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
                   <path d="M13.5 5.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM9.9 19.6l-1.8 3-1.7-1 2.4-4.1.9-3.1-2 1.1V19H5.7v-4.6l4.6-2.6a2 2 0 0 1 2.7.8l1 1.8a4.9 4.9 0 0 0 3.4 2.3v2a6.9 6.9 0 0 1-4.7-2.4l-.7 2.7 2 2.1V23h-2v-2.2l-2.1-1.2Z" />
                 </svg>

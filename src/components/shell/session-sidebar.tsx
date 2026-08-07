@@ -45,7 +45,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
   return (
     <div className="glass-neu-inset flex h-full w-full flex-col overflow-hidden rounded-2xl border p-2">
       <div className="flex items-center gap-3 px-2 pt-2 pb-4">
-        <span className="neu-raised bg-surface text-primary flex size-10 shrink-0 items-center justify-center rounded-xl border">
+        <span className="bg-surface text-primary border-border-subtle flex size-10 shrink-0 items-center justify-center rounded-xl border">
           <Icon name="school" size={20} />
         </span>
         <span className="min-w-0 flex-1">
@@ -79,7 +79,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
 
       <nav
         aria-label="Chat sessions"
-        className="neu-inset bg-background/40 min-h-0 flex-1 overflow-y-auto rounded-xl border p-2"
+        className="bg-surface-container-low/60 border-border-subtle min-h-0 flex-1 overflow-y-auto rounded-xl border p-2"
       >
         {sessionsLoading && (
           <div className="flex flex-col gap-2" role="status" aria-label="Loading sessions">

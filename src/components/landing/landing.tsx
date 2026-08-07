@@ -151,7 +151,7 @@ export function Landing() {
             }`}
           >
             <a href="#top" className="group flex items-center gap-2.5 rounded-xl focus-visible:outline-offset-4">
-              <span className="neu-raised bg-surface text-primary flex size-8 items-center justify-center rounded-lg border transition-transform duration-150 group-hover:-translate-y-0.5">
+              <span className="bg-surface text-primary border-border-subtle flex size-8 items-center justify-center rounded-lg border transition-transform duration-150 group-hover:-translate-y-0.5">
                 <Icon name="school" size={17} />
               </span>
               <span className="text-[15px] font-medium tracking-[-0.02em]">Reogent</span>
