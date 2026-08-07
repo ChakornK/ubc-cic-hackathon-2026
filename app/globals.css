@@ -305,25 +305,9 @@ html[data-auth-pending] .landing-root {
 
 /* ---- Theme ripple transition ---- */
 
-@property --ripple-r {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
-
-/* The new snapshot expands as a feathered circle from the click origin */
+/* Hard-edge circle clip animated by the compositor — no mask, no @property */
 ::view-transition-new(root) {
-  animation: ripple-in 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  -webkit-mask: radial-gradient(
-    circle at var(--ripple-x, 50%) var(--ripple-y, 50%),
-    #000 calc(var(--ripple-r) - 24px),
-    transparent var(--ripple-r)
-  );
-  mask: radial-gradient(
-    circle at var(--ripple-x, 50%) var(--ripple-y, 50%),
-    #000 calc(var(--ripple-r) - 24px),
-    transparent var(--ripple-r)
-  );
+  animation: ripple-in 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 ::view-transition-old(root) {
@@ -332,10 +316,10 @@ html[data-auth-pending] .landing-root {
 
 @keyframes ripple-in {
   from {
-    --ripple-r: 0px;
+    clip-path: circle(0px at var(--ripple-x, 50%) var(--ripple-y, 50%));
   }
   to {
-    --ripple-r: 160vmax;
+    clip-path: circle(150vmax at var(--ripple-x, 50%) var(--ripple-y, 50%));
   }
 }
 
@@ -344,8 +328,7 @@ html[data-auth-pending] .landing-root {
   ::view-transition-old(root) {
     /* biome-ignore lint/complexity/noImportantStyles: a11y override */
     animation: none !important;
-    -webkit-mask: none;
-    mask: none;
+    clip-path: none;
   }
 }
 
