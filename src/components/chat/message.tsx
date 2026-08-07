@@ -58,11 +58,10 @@ function AssistantMarkdown({ content }: { content: string }) {
 
 export function UserMessage({ message }: { message: DisplayMessage }) {
   return (
-    <div className="animate-message-in flex flex-col items-end">
-      <div className="bg-accent-subtle text-on-surface border-border-subtle max-w-[90%] min-w-0 rounded-[16px_16px_5px_16px] border px-4 py-3 text-sm leading-relaxed break-words whitespace-pre-wrap sm:max-w-[80%]">
+    <div className="animate-message-in flex justify-end">
+      <div className="bg-accent-subtle text-on-surface border-border-subtle max-w-[85%] min-w-0 rounded-[16px_16px_5px_16px] border px-4 py-3 text-sm leading-relaxed break-words whitespace-pre-wrap">
         {message.content}
       </div>
-      <span className="text-muted mt-1.5 px-1 text-xs">You</span>
     </div>
   );
 }
@@ -179,7 +178,7 @@ export function AssistantMessage({ message, isLatest }: { message: DisplayMessag
         </span>
         <span className="text-muted text-xs font-medium">Reogent</span>
       </div>
-      <div className="bg-surface border-border-subtle max-w-[94%] min-w-0 rounded-[16px_16px_16px_5px] border px-4 py-3.5 sm:max-w-[88%]">
+      <div className="bg-surface border-border-subtle max-w-[88%] min-w-0 rounded-[16px_16px_16px_5px] border px-4 py-3">
         {message.warning && (
           <div className="bg-tertiary-container text-body-sm text-on-tertiary-container border-border-subtle mb-3 flex items-start gap-2 rounded-xl border px-3 py-2">
             <Icon name="alert" size={16} className="mt-0.5 shrink-0" />

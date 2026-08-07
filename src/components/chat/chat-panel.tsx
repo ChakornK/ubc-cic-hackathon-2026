@@ -261,21 +261,14 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
       aria-label="Conversation"
       className="glass-neu-strong flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border"
     >
-      <div className="border-border-subtle flex shrink-0 items-center justify-between border-b bg-transparent px-4 py-3.5">
-        <div className="min-w-0">
-          <h1 className="text-on-surface truncate text-base font-medium tracking-[-0.01em]">{sessionTitle}</h1>
-          <p className="text-body-sm text-muted mt-0.5">Grounded in UBC data</p>
-        </div>
-        <span className="neu-inset bg-surface-container-low text-on-surface-variant ml-3 flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs">
-          <span className="bg-secondary size-1.5 rounded-full" aria-hidden="true" />
-          Active
-        </span>
+      <div className="border-border-subtle flex shrink-0 items-center justify-between border-b bg-transparent px-4 py-3">
+        <h1 className="text-on-surface min-w-0 truncate text-base font-medium tracking-[-0.01em]">{sessionTitle}</h1>
       </div>
 
       <div
         ref={scrollRef}
         aria-busy={historyState === "loading" || sending}
-        className="chat-message-well min-h-0 flex-1 overflow-y-auto p-4 sm:p-5"
+        className="chat-message-well min-h-0 flex-1 overflow-y-auto p-4 sm:p-6"
       >
         {historyState === "loading" && (
           <output aria-label="Loading conversation" className="flex flex-col gap-5">
