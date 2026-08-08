@@ -188,22 +188,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <aside
               aria-label="Chat sessions"
-              className="relative hidden min-h-0 w-fit min-w-0 overflow-hidden lg:block"
+              data-sessions-state={sessionsCollapsed ? "collapsed" : "expanded"}
+              className="sessions-aside relative hidden min-h-0 min-w-0 overflow-hidden lg:block"
             >
-              <div
-                id="desktop-session-panel"
-                inert={sessionsCollapsed}
-                aria-hidden={sessionsCollapsed}
-                className="sessions-panel-layer h-full w-[17rem]"
-              >
+              <div className="sessions-panel-layer h-full w-[17rem]">
                 <SessionSidebar onCollapse={collapseSessions} />
               </div>
               <div
-                inert={!sessionsCollapsed}
-                aria-hidden={!sessionsCollapsed}
-                className={`sessions-menu-trigger neu-panel absolute inset-y-0 left-0 flex w-[3.75rem] flex-col items-center rounded-2xl py-3 ${
-                  sessionsCollapsed ? "" : "pointer-events-none"
-                }`}
+                className={`neu-panel text-on-surface-variant absolute inset-y-0 left-0 flex w-[3.75rem] flex-col items-center rounded-2xl py-3 transition-opacity duration-200 ${sessionsCollapsed ? "opacity-100" : "pointer-events-none opacity-0"}`}
               >
                 <button
                   ref={sessionsMenuRef}
@@ -214,18 +206,18 @@ export function AppShell({ children }: { children: ReactNode }) {
                   aria-controls="desktop-session-panel"
                   aria-expanded={!sessionsCollapsed}
                   title="Expand sessions"
-                  className="neu-panel text-on-surface-variant hover:text-primary flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
+                  className="neu-panel text-primary hover:text-on-surface flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
                 >
                   <Icon name="menu" size={20} />
                 </button>
-                <span className="text-on-surface-variant mt-4 text-xs font-medium tracking-[0.06em] select-none [writing-mode:vertical-rl]">
+                <span className="mt-4 text-xs font-medium tracking-[0.06em] select-none [writing-mode:vertical-rl]">
                   Sessions
                 </span>
               </div>
             </aside>
             <div className="chat-map-area flex min-h-0 min-w-0 flex-1 gap-3">
               <div className="flex min-h-0 min-w-0 flex-1">{children}</div>
-              <div className="hidden min-h-0 min-w-0 flex-1 sm:flex">
+              <div className="map-aside hidden min-h-0 min-w-0 overflow-hidden sm:flex">
                 <MapPanel />
               </div>
             </div>

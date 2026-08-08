@@ -212,7 +212,7 @@ export function MapPanel() {
   if (isMobile) return null;
 
   return (
-    <div className="relative h-full min-h-0 w-full">
+    <div className="map-panel-root relative h-full min-h-0 w-full overflow-hidden">
       <section
         inert={!mapOpen}
         aria-hidden={!mapOpen}

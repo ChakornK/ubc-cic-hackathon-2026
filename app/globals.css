@@ -537,33 +537,27 @@ html.vt-active *::after {
 
 .sessions-panel-layer {
   opacity: 1;
-  transition: opacity 200ms ease-out;
-  transition-delay: 120ms;
+  transition: opacity 200ms ease-out 80ms;
 }
 
-.sessions-menu-trigger {
+.sessions-aside[data-sessions-state="collapsed"] .sessions-panel-layer {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 200ms ease-out;
+  transition: opacity 150ms ease-in 0ms;
 }
 
-.shell-body[data-sessions-state="collapsed"] .sessions-panel-layer {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 150ms ease-in;
-  transition-delay: 0ms;
+.sessions-aside {
+  width: 17rem;
+  transition: width 350ms var(--neu-ease);
 }
 
-.shell-body[data-sessions-state="collapsed"] .sessions-menu-trigger {
-  opacity: 1;
-  pointer-events: auto;
-  transition-delay: 160ms;
+.sessions-aside[data-sessions-state="collapsed"] {
+  width: 3.75rem;
 }
 
 .map-surface-layer {
   opacity: 1;
-  transition: opacity 200ms ease-out;
-  transition-delay: 120ms;
+  transition: opacity 200ms ease-out 80ms;
 }
 
 .map-tab-layer {
@@ -575,14 +569,13 @@ html.vt-active *::after {
 .chat-workspace[data-map-state="collapsed"] .map-surface-layer {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 150ms ease-in;
-  transition-delay: 0ms;
+  transition: opacity 150ms ease-in 0ms;
 }
 
 .chat-workspace[data-map-state="collapsed"] .map-tab-layer {
   opacity: 1;
   pointer-events: auto;
-  transition-delay: 160ms;
+  transition-delay: 120ms;
 }
 
 .profile-menu-surface {
@@ -594,26 +587,18 @@ html.vt-active *::after {
 }
 
 @media (min-width: 640px) {
-  .chat-map-area {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    transition: grid-template-columns 420ms var(--neu-ease);
+  .map-aside {
+    width: 50%;
+    transition: width 350ms var(--neu-ease);
   }
 
-  .chat-workspace[data-map-state="collapsed"] .chat-map-area {
-    grid-template-columns: 1fr minmax(3.75rem, 0fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .chat-workspace {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    transition: grid-template-columns 380ms var(--neu-ease);
+  .chat-workspace[data-map-state="collapsed"] .map-aside {
+    width: 3.75rem;
   }
 
-  .shell-body[data-sessions-state="collapsed"] .chat-workspace {
-    grid-template-columns: 3.75rem minmax(0, 1fr);
+  /* Prevent deck.gl canvas resize during width transition */
+  .map-panel-root > .map-surface-layer canvas {
+    min-width: 40vw;
   }
 }
 
