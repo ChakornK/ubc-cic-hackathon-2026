@@ -28,6 +28,13 @@ const SUGGESTIONS = [
   "What's tuition per credit for international Science students?",
   "Where can I study right now?",
   "What are the prereqs for CPSC 310?",
+  "How do I get from the Nest to Buchanan?",
+  "What are the easiest 3-credit electives?",
+  "Show me MATH courses available in Term 1",
+  "How much does a full-time Arts degree cost per year?",
+  "What's the grade distribution for CHEM 121?",
+  "Find BIOL courses that count toward a Science breadth requirement",
+  "How far is the bus loop from the engineering buildings?",
 ];
 
 const GREETINGS = [
@@ -85,6 +92,12 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
   const [slowResponse, setSlowResponse] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
+
+  // Pick 4 random suggestions once per session
+  const randomSuggestions = useMemo(() => {
+    const shuffled = [...SUGGESTIONS].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 4);
+  }, []);
 
   const inputRef = useRef<ChatInputHandle>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -415,7 +428,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                 you don't have to.
               </p>
               <div className="mt-6 flex max-w-xl flex-wrap justify-center gap-3">
-                {SUGGESTIONS.slice(0, 4).map((suggestion, i) => (
+                {randomSuggestions.map((suggestion, i) => (
                   <button
                     key={suggestion}
                     type="button"
