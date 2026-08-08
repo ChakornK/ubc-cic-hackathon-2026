@@ -170,11 +170,13 @@ You can see what is interactive and what is content without touching anything. D
 
 ### Exclusions
 
-- No playfulness, casualness, or "student-y" character
 - No corporate/enterprise/dashboard aesthetic
 - No decoration, illustration, or branding
 - Light mode is primary (dark mode supported)
-- Motion serves transitions and state changes, not entertainment
+
+### Personality
+
+The interface has warmth and character. Copy is human, varied, and specific to UBC. Loading states, empty states, and transitions carry personality without blocking the task. Precision and warmth coexist.
 
 ## Evidence on Hand
 

@@ -25,6 +25,16 @@ const SUGGESTIONS = [
   "How long is the walk from IKB to ICCS?",
   "Find 3-credit CPSC courses with no prerequisites",
   "What's tuition per credit for international Science students?",
+  "Where can I study right now?",
+  "What are the prereqs for CPSC 310?",
+];
+
+const GREETINGS = [
+  "What can I help you find today?",
+  "Ready when you are.",
+  "Ask me anything about UBC.",
+  "Let's figure it out together.",
+  "Your campus, decoded.",
 ];
 
 let messageSeq = 0;
@@ -335,20 +345,24 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         {historyState === "ready" && messages.length === 0 && !sending && (
           <div className="flex h-full flex-col items-center justify-center px-3 text-center sm:px-6">
             <span className="bg-surface text-primary flex size-16 items-center justify-center rounded-2xl">
-              <Icon name="chat1" size={30} />
+              <Icon name="school" size={30} />
             </span>
-            <h2 className="text-on-surface mt-6 text-xl font-medium tracking-[-0.025em]">Ask me about UBC</h2>
+            <h2 className="text-on-surface mt-6 text-xl font-medium tracking-[-0.025em]">
+              {GREETINGS[Math.floor(Date.now() / 86400000) % GREETINGS.length]}
+            </h2>
             <p className="text-on-surface-variant mt-2 max-w-80 text-sm leading-relaxed">
-              I can help with courses, prerequisites, tuition costs, and walking routes between campus buildings.
+              Courses, prerequisites, tuition, walking routes, study spaces, grades — I look it up in real UBC data so
+              you don't have to.
             </p>
             <div className="mt-6 flex max-w-xl flex-wrap justify-center gap-3">
-              {SUGGESTIONS.map((suggestion) => (
+              {SUGGESTIONS.slice(0, 4).map((suggestion, i) => (
                 <button
                   key={suggestion}
                   type="button"
                   onClick={() => send(suggestion)}
                   disabled={sending}
-                  className="border-primary text-primary hover:bg-accent-subtle focus-visible:ring-primary/40 min-h-[44px] rounded-full border px-4 py-3 text-left text-xs font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                  style={{ animationDelay: `${i * 60}ms` }}
+                  className="animate-message-in border-primary text-primary hover:bg-accent-subtle focus-visible:ring-primary/40 min-h-[44px] rounded-full border px-4 py-3 text-left text-xs font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                 >
                   {suggestion}
                 </button>

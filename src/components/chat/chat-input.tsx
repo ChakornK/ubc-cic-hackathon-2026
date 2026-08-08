@@ -3,7 +3,15 @@
 // The recessed chat composer. Enter sends; Shift+Enter adds a line;
 // Cmd/Ctrl+Enter always sends. Submit locks while a request is in flight.
 import { Icon } from "@/src/components/icons";
-import { forwardRef, useCallback, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState, type KeyboardEvent } from "react";
+
+const PLACEHOLDERS = [
+  "Ask about courses, campus…",
+  "How far is the walk to…",
+  "What are the prereqs for…",
+  "Find me a study space…",
+  "How much is tuition for…",
+];
 
 export interface ChatInputHandle {
   focus: () => void;
@@ -21,9 +29,15 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
   ref,
 ) {
   const [value, setValue] = useState("");
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useImperativeHandle(ref, () => ({ focus: () => textareaRef.current?.focus() }), []);
+
+  useEffect(() => {
+    const interval = setInterval(() => setPlaceholderIdx((i) => (i + 1) % PLACEHOLDERS.length), 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const autosize = useCallback(() => {
     const node = textareaRef.current;
@@ -71,7 +85,7 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
             autosize();
           }}
           onKeyDown={onKeyDown}
-          placeholder="Ask about courses, campus…"
+          placeholder={PLACEHOLDERS[placeholderIdx]}
           aria-label="Message the assistant"
           className="text-on-surface placeholder:text-muted relative z-10 block max-h-24 min-h-9 min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none disabled:opacity-60"
         />

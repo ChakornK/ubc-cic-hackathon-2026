@@ -215,7 +215,18 @@ export function AssistantMessage({
   );
 }
 
+const THINKING_LABELS = ["Thinking", "Looking that up", "Searching", "On it", "Checking"];
+const SLOW_LABELS = [
+  "Still digging — almost there",
+  "Cross-referencing sources",
+  "Pulling data together",
+  "Hang tight, this one takes a moment",
+];
+
 export function TypingIndicator({ slow }: { slow: boolean }) {
+  const label = slow
+    ? SLOW_LABELS[Math.floor(Date.now() / 4000) % SLOW_LABELS.length]
+    : THINKING_LABELS[Math.floor(Date.now() / 3000) % THINKING_LABELS.length];
   return (
     <div role="status" aria-label="The assistant is thinking">
       <div className="mb-2 flex items-center gap-2">
@@ -226,7 +237,7 @@ export function TypingIndicator({ slow }: { slow: boolean }) {
       </div>
       <div className="bg-surface inline-flex items-center gap-3 rounded-[16px_16px_16px_5px] px-4 py-3">
         <span className="thinking-orb" aria-hidden="true" />
-        <span className="text-on-surface text-sm font-medium">{slow ? "Still working" : "Thinking"}</span>
+        <span className="text-on-surface text-sm font-medium">{label}</span>
       </div>
       {slow && <p className="text-muted mt-2 text-xs">Working across data sources — this can take up to 30 seconds.</p>}
     </div>
