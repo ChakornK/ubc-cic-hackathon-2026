@@ -93,6 +93,9 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
   const [sendError, setSendError] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
 
+  // Stable greeting — pick once per mount, don't flicker on re-render.
+  const greeting = useMemo(() => GREETINGS[Math.floor(Math.random() * GREETINGS.length)], []);
+
   // Pick 4 random suggestions once per session
   const randomSuggestions = useMemo(() => {
     const shuffled = [...SUGGESTIONS].sort(() => Math.random() - 0.5);
@@ -420,9 +423,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
               <span className="bg-surface text-primary flex size-16 items-center justify-center rounded-2xl">
                 <Icon name="school" size={30} />
               </span>
-              <h2 className="text-on-surface mt-6 text-xl font-medium tracking-[-0.025em]">
-                {GREETINGS[Math.floor(Math.random() * GREETINGS.length)]}
-              </h2>
+              <h2 className="text-on-surface mt-6 text-xl font-medium tracking-[-0.025em]">{greeting}</h2>
               <p className="text-on-surface-variant mt-2 max-w-80 text-sm leading-relaxed">
                 Courses, prerequisites, tuition, walking routes, study spaces, grades — I look it up in real UBC data so
                 you don't have to.

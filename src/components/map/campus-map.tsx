@@ -18,7 +18,6 @@ import { formatMeters, formatMinutes } from "@/src/lib/format";
 import { featureCentroid, featuresBounds, findBuilding, type BuildingFeature, type LngLat } from "@/src/lib/geo";
 import type { FeatureCollection } from "geojson";
 import { useEffect, useRef, useState } from "react";
-import "maplibre-gl/dist/maplibre-gl.css";
 
 export type MapStatus = "loading" | "ready" | "error";
 
@@ -173,6 +172,7 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
           import("maplibre-gl"),
           import("@deck.gl/mapbox"),
           import("@deck.gl/layers"),
+          import("maplibre-gl/dist/maplibre-gl.css"),
         ]);
         if (disposed) return;
 

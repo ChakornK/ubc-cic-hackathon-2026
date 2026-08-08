@@ -7,9 +7,7 @@ import { ToolCallsView } from "@/src/components/chat/tool-renderers";
 import { Icon } from "@/src/components/icons";
 import type { ToolCall } from "@/src/lib/api-types";
 import type { InterstitialBlock } from "@/src/shared/types";
-import { useState } from "react";
-import Markdown, { type Components } from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { lazy, memo, Suspense, useState } from "react";
 
 export type { InterstitialBlock };
 
@@ -23,8 +21,26 @@ export interface DisplayMessage {
   interstitial?: InterstitialBlock[];
 }
 
-const markdownComponents: Components = {
-  a: ({ href, title, children }) => {
+// Lazy-load the markdown pipeline (~80-120 KB) — only fetched once the first
+// assistant message renders, not on initial page load.
+const LazyMarkdown = lazy(() =>
+  import("react-markdown").then((mod) => {
+    // Co-import remark-gfm so both land in the same async chunk.
+    return import("remark-gfm").then((gfm) => ({
+      default: function MarkdownWithGfm({ content }: { content: string }) {
+        const Markdown = mod.default;
+        return (
+          <Markdown remarkPlugins={[gfm.default]} components={markdownComponents} skipHtml>
+            {content}
+          </Markdown>
+        );
+      },
+    }));
+  }),
+);
+
+const markdownComponents = {
+  a: ({ href, title, children }: { href?: string; title?: string; children?: React.ReactNode }) => {
     const opensNewTab = typeof href === "string" && /^https?:\/\//i.test(href);
     return (
       <a
@@ -38,8 +54,10 @@ const markdownComponents: Components = {
       </a>
     );
   },
-  img: ({ alt }) => <span className="markdown-image-alt">{alt ? `[Image: ${alt}]` : "[Image omitted]"}</span>,
-  table: ({ children }) => (
+  img: ({ alt }: { alt?: string }) => (
+    <span className="markdown-image-alt">{alt ? `[Image: ${alt}]` : "[Image omitted]"}</span>
+  ),
+  table: ({ children }: { children?: React.ReactNode }) => (
     <div className="markdown-table-wrap">
       <table>{children}</table>
     </div>
@@ -49,14 +67,14 @@ const markdownComponents: Components = {
 function AssistantMarkdown({ content }: { content: string }) {
   return (
     <div className="assistant-markdown">
-      <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents} skipHtml>
-        {content}
-      </Markdown>
+      <Suspense fallback={<p className="whitespace-pre-wrap">{content}</p>}>
+        <LazyMarkdown content={content} />
+      </Suspense>
     </div>
   );
 }
 
-export function UserMessage({ message }: { message: DisplayMessage }) {
+export const UserMessage = memo(function UserMessage({ message }: { message: DisplayMessage }) {
   return (
     <div className="animate-message-in flex justify-end">
       <div className="bg-accent-subtle text-on-surface max-w-[85%] min-w-0 rounded-[16px_16px_5px_16px] px-4 py-3 text-sm leading-relaxed break-words whitespace-pre-wrap">
@@ -64,7 +82,7 @@ export function UserMessage({ message }: { message: DisplayMessage }) {
       </div>
     </div>
   );
-}
+});
 
 function ThinkingBlock({ content }: { content: string }) {
   const [open, setOpen] = useState(false);
@@ -167,7 +185,7 @@ function ToolCallBlock({ name, input, result }: { name: string; input?: Record<s
   );
 }
 
-export function AssistantMessage({
+export const AssistantMessage = memo(function AssistantMessage({
   message,
   isLatest,
   showAvatar = true,
@@ -213,7 +231,7 @@ export function AssistantMessage({
       </div>
     </div>
   );
-}
+});
 
 const THINKING_LABELS = ["Thinking", "Looking that up", "Searching", "On it", "Checking"];
 const SLOW_LABELS = [
