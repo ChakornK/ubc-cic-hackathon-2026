@@ -55,28 +55,32 @@ export function Landing() {
       </a>
 
       {/* Header */}
-      <header className="pointer-events-none fixed inset-x-0 top-0 z-40 px-3 pt-3 sm:px-6">
-        <nav
-          className={`pointer-events-auto mx-auto flex h-14 max-w-5xl items-center justify-between rounded-2xl px-4 transition-all duration-200 ${
-            scrolled ? "glass-neu" : ""
-          }`}
-        >
-          <Link href="/" className="flex items-center gap-2" aria-label="Reogent home">
-            <span className="bg-primary-container text-on-primary-container flex size-8 items-center justify-center rounded-xl">
-              <Icon name="school" size={16} />
-            </span>
-            <span className="text-on-surface text-sm font-medium tracking-[-0.02em]">Reogent</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Link
-              href="/login"
-              className="neu-button bg-surface text-on-surface-variant hover:text-on-surface flex h-9 items-center rounded-xl px-4 text-sm font-medium"
-            >
-              Sign in
+      <header className="pointer-events-none fixed inset-x-0 top-0 z-40">
+        <div className="px-3 pt-3 sm:px-6">
+          <nav
+            className={`pointer-events-auto mx-auto flex h-14 max-w-5xl items-center justify-between rounded-2xl px-4 transition-all duration-200 ${
+              scrolled ? "glass-neu" : ""
+            }`}
+          >
+            <Link href="/" className="flex items-center gap-2" aria-label="Reogent home">
+              <span className="bg-primary-container text-on-primary-container flex size-8 items-center justify-center rounded-xl">
+                <Icon name="school" size={16} />
+              </span>
+              <span className="text-on-surface text-sm font-medium tracking-[-0.02em]">Reogent</span>
             </Link>
-          </div>
-        </nav>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Link
+                href="/login"
+                className="neu-button bg-surface text-on-surface-variant hover:text-on-surface flex h-9 items-center rounded-xl px-4 text-sm font-medium"
+              >
+                Sign in
+              </Link>
+            </div>
+          </nav>
+        </div>
+        {/* Gradient mask: content fades out before reaching the header */}
+        <div className="pointer-events-none h-16 bg-gradient-to-b from-[var(--background)] to-transparent" />
       </header>
 
       <main id="main">
