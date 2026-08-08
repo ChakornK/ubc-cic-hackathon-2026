@@ -85,7 +85,7 @@ function SidebarDrawer() {
         tabIndex={-1}
         aria-label="Close sessions"
         onClick={() => setSidebarOpen(false)}
-        className={`bg-scrim fixed inset-0 z-40 transition-opacity duration-250 ${sidebarOpen ? "opacity-100" : "opacity-0"}`}
+        className={`bg-scrim fixed inset-0 z-40 backdrop-blur-[2px] transition-opacity duration-250 ${sidebarOpen ? "opacity-100" : "opacity-0"}`}
       />
       <div
         role="dialog"
@@ -113,7 +113,7 @@ function SidebarDrawer() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { setSidebarOpen, mapOpen, setMobileMapOpen } = useChatShell();
+  const { sidebarOpen, setSidebarOpen, mapOpen, setMobileMapOpen, mobileMapOpen } = useChatShell();
   const [sessionsCollapsed, setSessionsCollapsed] = useState(false);
   const sessionsMenuRef = useRef<HTMLButtonElement>(null);
 
@@ -130,7 +130,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <RequireAuth>
       <div className="app-shell-canvas flex h-svh flex-col overflow-hidden">
-        <header className="glass-neu relative z-30 mx-2 mt-3 flex h-14 shrink-0 items-center justify-between rounded-2xl px-2 sm:mx-3 sm:px-4">
+        <header
+          inert={sidebarOpen || mobileMapOpen || undefined}
+          className="glass-neu relative z-30 mx-2 mt-3 flex h-14 shrink-0 items-center justify-between rounded-2xl px-2 sm:mx-3 sm:px-4"
+        >
           <div className="flex min-w-0 items-center gap-2">
             <button
               type="button"
@@ -167,7 +170,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <div data-sessions-state={sessionsCollapsed ? "collapsed" : "expanded"} className="shell-body min-h-0 flex-1">
+        <div
+          data-sessions-state={sessionsCollapsed ? "collapsed" : "expanded"}
+          inert={sidebarOpen || mobileMapOpen || undefined}
+          className="shell-body min-h-0 flex-1"
+        >
           <aside aria-label="Chat sessions" className="relative hidden min-h-0 min-w-0 overflow-hidden p-3 lg:block">
             <div
               id="desktop-session-panel"

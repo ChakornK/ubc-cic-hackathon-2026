@@ -39,7 +39,7 @@ export function UserMenu() {
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((value) => !value)}
-        aria-haspopup="dialog"
+        aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Account menu"
         className="neu-button bg-surface text-primary flex size-9 items-center justify-center rounded-xl text-sm font-medium"
@@ -49,11 +49,16 @@ export function UserMenu() {
         </span>
       </button>
 
+      {/* Backdrop blur scrim */}
+      <div
+        aria-hidden="true"
+        className={`fixed inset-0 z-40 backdrop-blur-[2px] transition-opacity duration-200 ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      />
+
       <div
         inert={!open}
         aria-hidden={!open}
-        role="dialog"
-        aria-modal="true"
+        role="menu"
         aria-label="Account"
         className={`profile-menu-surface glass-neu absolute top-12 right-0 z-50 w-64 max-w-[calc(100vw-2rem)] origin-top-right rounded-2xl p-3 ${
           open
