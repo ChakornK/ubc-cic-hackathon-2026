@@ -32,17 +32,25 @@ export function ProductMock() {
             </div>
             {/* Bubble — same as message.tsx:191 */}
             <div className="bg-surface max-w-[88%] rounded-[16px_16px_16px_5px] px-4 py-3">
-              {/* Tool badge — same as tool-renderers.tsx:44 */}
-              <div className="bg-secondary-container/15 text-on-surface-variant mb-3 inline-flex items-center gap-2 rounded-lg px-2 py-1 font-mono text-xs">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
-                  <path d="M12 2a8 8 0 0 1 8 8c0 3.6-2.4 7.2-7.1 10.9a1.5 1.5 0 0 1-1.8 0C6.4 17.2 4 13.6 4 10a8 8 0 0 1 8-8Zm0 5.5A2.5 2.5 0 1 0 12 12.5 2.5 2.5 0 0 0 12 7.5Z" />
-                </svg>
-                <span>walking_distance</span>
-              </div>
               <p className="text-on-surface text-sm leading-relaxed">
                 ICCS to the AMS Nest is about <span className="font-mono">650 m</span>, roughly an{" "}
                 <span className="font-medium">8 minute walk</span> heading north through campus.
               </p>
+              {/* Walking distance card — same as tool-renderers.tsx:164 */}
+              <div className="bg-surface-container-low mt-3 flex items-center gap-3 rounded-lg p-3">
+                <span className="bg-secondary-container text-on-secondary-container flex size-9 shrink-0 items-center justify-center rounded-lg">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                    <path d="M13.5 5.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM9.9 19.6l-1.8 3-1.7-1 2.4-4.1.9-3.1-2 1.1V19H5.7v-4.6l4.6-2.6a2 2 0 0 1 2.7.8l1 1.8a4.9 4.9 0 0 0 3.4 2.3v2a6.9 6.9 0 0 1-4.7-2.4l-.7 2.7 2 2.1V23h-2v-2.2l-2.1-1.2Z" />
+                  </svg>
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="text-on-surface block text-base font-medium">8 min walk</span>
+                  <span className="text-on-surface-variant block truncate text-xs">650 m · ICCS → Nest</span>
+                </span>
+                <span className="border-primary text-primary shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium">
+                  Show on map
+                </span>
+              </div>
             </div>
           </div>
 
