@@ -21,7 +21,7 @@ function LoginContent() {
   }
 
   return (
-    <div className="app-shell-canvas flex min-h-svh flex-col px-4 py-8">
+    <div className="auth-canvas flex min-h-svh flex-col px-4 py-8">
       <nav className="flex items-center">
         <Link
           href="/"
