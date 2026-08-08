@@ -1,6 +1,7 @@
 "use client";
 
 import { useAppAuth } from "@/src/components/auth/app-auth";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -13,6 +14,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const auth = useAppAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const prefersReducedMotion = useReducedMotion();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -74,11 +76,22 @@ export function AuthForm({ mode }: AuthFormProps) {
           className="neu-inset bg-surface-container-low text-on-surface placeholder:text-muted focus-visible:ring-primary/40 h-11 w-full rounded-lg px-3 text-sm focus-visible:ring-2"
         />
       </div>
-      {error && (
-        <p id="auth-error" role="alert" aria-live="assertive" className="text-error text-center text-xs">
-          {error}
-        </p>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            id="auth-error"
+            role="alert"
+            aria-live="assertive"
+            className="text-error text-center text-xs"
+            initial={prefersReducedMotion ? false : { opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2 }}
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
       <button
         type="submit"
         disabled={pending}
