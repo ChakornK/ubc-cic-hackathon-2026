@@ -49,10 +49,13 @@ export function UserMenu() {
         </span>
       </button>
 
-      {/* Backdrop blur scrim */}
-      <div
-        aria-hidden="true"
-        className={`fixed inset-0 z-40 backdrop-blur-[2px] transition-opacity duration-200 ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+      {/* Scrim overlay — click to close */}
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label="Close menu"
+        onClick={() => setOpen(false)}
+        className={`fixed inset-0 z-40 transition-opacity duration-200 ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
       />
 
       <div

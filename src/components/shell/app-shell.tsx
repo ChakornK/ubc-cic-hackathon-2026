@@ -85,7 +85,7 @@ function SidebarDrawer() {
         tabIndex={-1}
         aria-label="Close sessions"
         onClick={() => setSidebarOpen(false)}
-        className={`bg-scrim fixed inset-0 z-40 backdrop-blur-[2px] transition-opacity duration-250 ${sidebarOpen ? "opacity-100" : "opacity-0"}`}
+        className={`bg-scrim fixed inset-0 z-40 transition-opacity duration-250 ${sidebarOpen ? "opacity-100" : "opacity-0"}`}
       />
       <div
         role="dialog"

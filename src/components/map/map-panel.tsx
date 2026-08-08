@@ -286,7 +286,7 @@ export function MapBottomSheet() {
         tabIndex={-1}
         aria-label="Close map"
         onClick={() => setMobileMapOpen(false)}
-        className={`bg-scrim fixed inset-0 z-40 backdrop-blur-[2px] transition-opacity duration-300 ${
+        className={`bg-scrim fixed inset-0 z-40 transition-opacity duration-300 ${
           mobileMapOpen ? "opacity-100" : "opacity-0"
         }`}
       />
