@@ -184,7 +184,7 @@ export function BuildingPopup({ building, onClose }: { building: SelectedBuildin
           <Icon name="building1" size={18} />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-on-surface text-base leading-snug font-medium">{building.name}</h2>
+          <h2 className="text-on-surface truncate text-base leading-snug font-medium">{building.name}</h2>
           <p className="text-on-surface-variant mt-0.5 truncate font-mono text-xs">
             {[building.code, building.usage].filter(Boolean).join(" · ")}
           </p>

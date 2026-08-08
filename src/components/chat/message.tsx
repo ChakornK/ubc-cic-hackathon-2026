@@ -75,7 +75,7 @@ function ThinkingBlock({ content }: { content: string }) {
       className="group bg-surface-container-low mb-2 rounded-lg"
     >
       <summary className="text-muted flex cursor-pointer items-center gap-2 px-3 py-2 text-xs font-medium select-none">
-        <Icon name="bling" size={14} className="text-outline shrink-0" />
+        <Icon name="bling" size={14} className="text-muted shrink-0" />
         <span className="truncate">Thinking…</span>
         <Icon name="down" size={12} className="ml-auto shrink-0 transition-transform group-open:rotate-180" />
       </summary>
