@@ -121,7 +121,7 @@ function LandingContent() {
           className="pointer-events-none absolute inset-x-0 top-0 h-48"
           style={{
             background:
-              "linear-gradient(to bottom in oklab, var(--background) 0%, var(--background) 40%, color-mix(in oklab, var(--background) 70%, transparent) 65%, color-mix(in oklab, var(--background) 30%, transparent) 85%, transparent 100%)",
+              "linear-gradient(to bottom in oklch, var(--background) 0%, var(--background) 40%, color-mix(in oklch, var(--background) 70%, transparent) 65%, color-mix(in oklch, var(--background) 30%, transparent) 85%, transparent 100%)",
           }}
         />
         <div className="relative px-3 pt-3 sm:px-6">
