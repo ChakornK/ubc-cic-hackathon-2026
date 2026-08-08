@@ -45,10 +45,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
 
   return (
     <div className="neu-panel flex h-full w-full flex-col overflow-hidden rounded-2xl p-2">
-      <div className="flex items-center gap-3 px-2 pt-3 pb-3">
-        <span className="text-on-surface min-w-0 flex-1 text-base leading-tight font-medium tracking-[-0.02em]">
-          Sessions
-        </span>
+      <div className="flex items-center gap-3 px-2 pt-1 pb-2">
         {onCollapse && (
           <button
             id="desktop-session-collapse"
@@ -61,6 +58,9 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
             <Icon name="left" size={18} />
           </button>
         )}
+        <span className="text-on-surface min-w-0 flex-1 text-base leading-tight font-medium tracking-[-0.02em]">
+          Sessions
+        </span>
       </div>
 
       <div className="pb-3">
