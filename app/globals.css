@@ -578,14 +578,20 @@ html.vt-active *::after {
 }
 
 @media (min-width: 1024px) {
-  .shell-body {
-    display: grid;
-    grid-template-columns: minmax(3.75rem, 18.5rem) minmax(0, 1fr);
-    transition: grid-template-columns 380ms var(--neu-ease);
+  .chat-workspace {
+    grid-template-columns: minmax(3.75rem, 18.5rem) minmax(22rem, 1fr) minmax(3.75rem, 1fr);
   }
 
-  .shell-body[data-sessions-state="collapsed"] {
-    grid-template-columns: minmax(3.75rem, 3.75rem) minmax(0, 1fr);
+  .chat-workspace[data-map-state="collapsed"] {
+    grid-template-columns: minmax(3.75rem, 18.5rem) minmax(0rem, 100fr) minmax(3.75rem, 0fr);
+  }
+
+  .shell-body[data-sessions-state="collapsed"] .chat-workspace {
+    grid-template-columns: minmax(3.75rem, 3.75rem) minmax(22rem, 1fr) minmax(3.75rem, 1fr);
+  }
+
+  .shell-body[data-sessions-state="collapsed"] .chat-workspace[data-map-state="collapsed"] {
+    grid-template-columns: minmax(3.75rem, 3.75rem) minmax(0rem, 100fr) minmax(3.75rem, 0fr);
   }
 }
 

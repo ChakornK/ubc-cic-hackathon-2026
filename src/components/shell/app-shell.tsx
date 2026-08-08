@@ -175,46 +175,46 @@ export function AppShell({ children }: { children: ReactNode }) {
           inert={sidebarOpen || mobileMapOpen || undefined}
           className="shell-body min-h-0 flex-1"
         >
-          <aside aria-label="Chat sessions" className="relative hidden min-h-0 min-w-0 overflow-hidden p-3 lg:block">
-            <div
-              id="desktop-session-panel"
-              inert={sessionsCollapsed}
-              aria-hidden={sessionsCollapsed}
-              className="sessions-panel-layer h-full w-[17rem]"
-            >
-              <SessionSidebar onCollapse={collapseSessions} />
-            </div>
-            <div
-              inert={!sessionsCollapsed}
-              aria-hidden={!sessionsCollapsed}
-              className={`sessions-menu-trigger neu-panel absolute inset-y-0 left-0 flex w-[3.75rem] flex-col items-center rounded-2xl py-3 ${
-                sessionsCollapsed ? "" : "pointer-events-none"
-              }`}
-            >
-              <button
-                ref={sessionsMenuRef}
-                type="button"
-                onClick={expandSessions}
-                tabIndex={sessionsCollapsed ? 0 : -1}
-                aria-label="Expand session history"
-                aria-controls="desktop-session-panel"
-                aria-expanded={!sessionsCollapsed}
-                title="Expand sessions"
-                className="neu-panel text-on-surface-variant hover:text-primary flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
-              >
-                <Icon name="menu" size={20} />
-              </button>
-              <span className="text-on-surface-variant mt-4 text-xs font-medium tracking-[0.06em] select-none [writing-mode:vertical-rl]">
-                Sessions
-              </span>
-            </div>
-          </aside>
           <SidebarDrawer />
 
           <main
             data-map-state={mapOpen ? "open" : "collapsed"}
-            className="chat-workspace min-h-0 min-w-0 flex-1 gap-3 p-3 lg:pl-0"
+            className="chat-workspace min-h-0 min-w-0 flex-1 gap-3 p-3"
           >
+            <aside aria-label="Chat sessions" className="relative hidden min-h-0 min-w-0 overflow-hidden lg:block">
+              <div
+                id="desktop-session-panel"
+                inert={sessionsCollapsed}
+                aria-hidden={sessionsCollapsed}
+                className="sessions-panel-layer h-full w-[17rem]"
+              >
+                <SessionSidebar onCollapse={collapseSessions} />
+              </div>
+              <div
+                inert={!sessionsCollapsed}
+                aria-hidden={!sessionsCollapsed}
+                className={`sessions-menu-trigger neu-panel absolute inset-y-0 left-0 flex w-[3.75rem] flex-col items-center rounded-2xl py-3 ${
+                  sessionsCollapsed ? "" : "pointer-events-none"
+                }`}
+              >
+                <button
+                  ref={sessionsMenuRef}
+                  type="button"
+                  onClick={expandSessions}
+                  tabIndex={sessionsCollapsed ? 0 : -1}
+                  aria-label="Expand session history"
+                  aria-controls="desktop-session-panel"
+                  aria-expanded={!sessionsCollapsed}
+                  title="Expand sessions"
+                  className="neu-panel text-on-surface-variant hover:text-primary flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
+                >
+                  <Icon name="menu" size={20} />
+                </button>
+                <span className="text-on-surface-variant mt-4 text-xs font-medium tracking-[0.06em] select-none [writing-mode:vertical-rl]">
+                  Sessions
+                </span>
+              </div>
+            </aside>
             <div className="flex min-h-0 min-w-0">{children}</div>
             <div className="hidden min-h-0 min-w-0 sm:flex">
               <MapPanel />
