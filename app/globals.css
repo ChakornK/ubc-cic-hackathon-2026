@@ -1,63 +1,91 @@
 @import "tailwindcss";
 
 /*
- * Design tokens per DESIGN.md — soft neumorphism over a muted pastel palette.
- * Raw values live on :root and flip on [data-theme="dark"]; @theme inline maps
- * them to Tailwind utilities so `bg-surface` etc. follow the active theme.
+ * Design tokens per DESIGN.md: neumorphic depth over a cool-neutral palette.
  *
- * Deviation from DESIGN.md, per PRODUCT.md's WCAG 2.1 AA commitment: meta text
- * and placeholders use --muted (≥4.5:1 on all surfaces) instead of Outline /
- * Outline Variant, which fall short of AA on the light surfaces.
+ * Architecture:
+ * - :root / [data-theme="dark"] define raw CSS custom properties (theme-switchable)
+ * - @theme inline maps them to Tailwind v4 utility classes (bg-surface, shadow-sm, etc.)
+ * - .neu-* / .glass-neu-* are composed multi-property surfaces (not convertible to utilities)
+ *
+ * WCAG 2.1 AA: meta text uses --muted (>=4.5:1 on all surfaces), never --outline.
  */
 
 :root {
   color-scheme: light;
-  --background: #f8f8f6;
+
+  /* Surface palette */
+  --background: #f7f7f5;
   --surface-container-lowest: #ffffff;
-  --surface-container-low: #f4f3f5;
-  --surface-container: #eeeeef;
-  --surface-container-high: #e8e8e9;
+  --surface-container-low: #f3f3f5;
+  --surface-container: #ededef;
+  --surface-container-high: #e6e6e8;
   --surface: #fafafa;
   --surface-bright: #ffffff;
 
-  --primary: #416375;
-  --primary-container: #7c9eb2;
+  /* Primary: Muted Indigo */
+  --primary: #4a4e7a;
+  --primary-container: #7a7ea8;
   --on-primary: #ffffff;
-  --on-primary-container: #103546;
-  --secondary: #306946;
-  --secondary-container: #b3f1c4;
+  --on-primary-container: #1a1d3a;
+
+  /* Secondary: Campus Verdant */
+  --secondary: #2d6b47;
+  --secondary-container: #b0efc2;
   --on-secondary: #ffffff;
-  --on-secondary-container: #00210f;
+  --on-secondary-container: #001f0e;
+
+  /* Tertiary: Warm Bark */
   --tertiary: #7a5733;
   --tertiary-container: #f4e3cf;
   --on-tertiary-container: #4a3010;
-  --error: #a04747;
+
+  /* Error: Quiet Ember */
+  --error: #9c4040;
   --error-container: #ffdad6;
-  --on-error-container: #73342c;
+  --on-error-container: #6e2c2c;
 
-  --on-surface: #1a1c1d;
-  --on-surface-variant: #42484c;
-  --muted: #5c6367;
-  --outline: #72787c;
-  --outline-variant: #c2c7cc;
+  /* Text and outline */
+  --on-surface: #18191b;
+  --on-surface-variant: #3e4348;
+  --muted: #5a6066;
+  --outline: #6e747a;
+  --outline-variant: #bfc4c9;
 
-  --border: #e8e8e4;
-  --border-subtle: #f0f0ec;
+  /* Borders */
+  --border: #e6e6e2;
+  --border-subtle: #efefeb;
 
-  --accent-subtle: #eef4f7;
-  --surface-tint: #416375;
+  /* Accents */
+  --accent-subtle: #edeef5;
+  --surface-tint: #4a4e7a;
 
+  /* Utility elevation (Tier 1) */
   --elevation-sm: 4px 4px 8px rgba(174, 174, 174, 0.12), -2px -2px 6px rgba(255, 255, 255, 0.8);
   --elevation-md: 6px 6px 14px rgba(174, 174, 174, 0.15), -3px -3px 10px rgba(255, 255, 255, 0.9);
   --elevation-lg: 8px 8px 20px rgba(174, 174, 174, 0.18), -4px -4px 14px rgba(255, 255, 255, 1);
   --elevation-inset: inset 2px 2px 5px rgba(174, 174, 174, 0.15), inset -2px -2px 5px rgba(255, 255, 255, 0.7);
-  --elevation-glow: 0 4px 14px rgba(65, 99, 117, 0.3);
+  --elevation-glow: 0 4px 14px rgba(74, 78, 122, 0.25);
 
+  /* Neumorphic primitives (Tier 2) */
+  --neu-highlight: rgba(255, 255, 255, 0.68);
+  --neu-edge: rgba(255, 255, 255, 0.58);
+  --neu-shadow: rgba(105, 112, 116, 0.13);
+  --neu-shadow-deep: rgba(91, 99, 104, 0.18);
+  --neu-panel-shadow: 8px 8px 22px var(--neu-shadow), -6px -6px 18px var(--neu-highlight);
+  --neu-raised-shadow: 5px 5px 13px var(--neu-shadow), -4px -4px 10px var(--neu-highlight);
+  --neu-inset-shadow: inset 3px 3px 7px var(--neu-shadow), inset -2px -2px 6px var(--neu-highlight);
+
+  /* Motion */
+  --neu-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Scrim */
   --scrim: rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
+
   --background: #121214;
   --surface-container-lowest: #0e0e10;
   --surface-container-low: #1a1a1e;
@@ -66,14 +94,14 @@
   --surface: #1a1a1e;
   --surface-bright: #2a2a2e;
 
-  --primary: #a9cbe0;
-  --primary-container: #294b5c;
-  --on-primary: #001e2b;
-  --on-primary-container: #c4e7fd;
+  --primary: #b0b4d8;
+  --primary-container: #363a5e;
+  --on-primary: #0f1128;
+  --on-primary-container: #d4d6ef;
   --secondary: #98d4a9;
   --secondary-container: #155130;
-  --on-secondary: #00210f;
-  --on-secondary-container: #b3f1c4;
+  --on-secondary: #001f0e;
+  --on-secondary-container: #b0efc2;
   --tertiary: #ebbe92;
   --tertiary-container: #4a3623;
   --on-tertiary-container: #f7dfc3;
@@ -90,14 +118,22 @@
   --border: #2a2a2e;
   --border-subtle: #232327;
 
-  --accent-subtle: #1e2a30;
-  --surface-tint: #a9cbe0;
+  --accent-subtle: #1e1f2a;
+  --surface-tint: #b0b4d8;
 
   --elevation-sm: 4px 4px 8px rgba(0, 0, 0, 0.3), -2px -2px 6px rgba(50, 50, 55, 0.5);
   --elevation-md: 6px 6px 14px rgba(0, 0, 0, 0.35), -3px -3px 10px rgba(50, 50, 55, 0.4);
   --elevation-lg: 8px 8px 20px rgba(0, 0, 0, 0.4), -4px -4px 14px rgba(50, 50, 55, 0.3);
   --elevation-inset: inset 2px 2px 5px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(50, 50, 55, 0.3);
-  --elevation-glow: 0 4px 14px rgba(169, 203, 224, 0.2);
+  --elevation-glow: 0 4px 14px rgba(176, 180, 216, 0.2);
+
+  --neu-highlight: rgba(65, 66, 72, 0.34);
+  --neu-edge: rgba(255, 255, 255, 0.07);
+  --neu-shadow: rgba(0, 0, 0, 0.32);
+  --neu-shadow-deep: rgba(0, 0, 0, 0.45);
+  --neu-panel-shadow: 8px 8px 22px var(--neu-shadow), -5px -5px 16px var(--neu-highlight);
+  --neu-raised-shadow: 5px 5px 13px var(--neu-shadow), -4px -4px 10px var(--neu-highlight);
+  --neu-inset-shadow: inset 3px 3px 7px var(--neu-shadow), inset -2px -2px 6px var(--neu-highlight);
 
   --scrim: rgba(0, 0, 0, 0.5);
 }
@@ -105,9 +141,11 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
+  /* Fonts */
   --font-sans: var(--font-aspekta), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-commit-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
+  /* Colors: all theme-switchable via CSS vars */
   --color-background: var(--background);
   --color-surface-container-lowest: var(--surface-container-lowest);
   --color-surface-container-low: var(--surface-container-low);
@@ -144,15 +182,26 @@
   --color-surface-tint: var(--surface-tint);
   --color-scrim: var(--scrim);
 
+  /* Shadows (Tier 1 mapped to Tailwind utilities) */
   --shadow-sm: var(--elevation-sm);
   --shadow-md: var(--elevation-md);
   --shadow-lg: var(--elevation-lg);
   --shadow-inset: var(--elevation-inset);
   --shadow-glow: var(--elevation-glow);
 
+  /* Text size: body-sm */
   --text-body-sm: 0.8125rem;
   --text-body-sm--line-height: 1.5;
+
+  /* Transition timing */
+  --ease-neu: var(--neu-ease);
+
+  /* Animation: message entrance */
+  --animate-message-in: message-in 200ms ease-out both;
+  --animate-spin-slow: spin 1s linear infinite;
 }
+
+/* ---- Base ---- */
 
 html,
 body {
@@ -179,12 +228,11 @@ body {
   outline-offset: 2px;
 }
 
-/* MapLibre injects its own chrome; keep its canvas within our rounded card. */
 .maplibregl-map {
   font: inherit;
 }
 
-/* ---- Motion vocabulary (DESIGN.md "Motion") ---- */
+/* ---- Keyframes ---- */
 
 @keyframes message-in {
   from {
@@ -246,6 +294,16 @@ body {
   }
 }
 
+@keyframes ripple-in {
+  from {
+    clip-path: circle(0px at var(--ripple-x, 50%) var(--ripple-y, 50%));
+  }
+  to {
+    clip-path: circle(150vmax at var(--ripple-x, 50%) var(--ripple-y, 50%));
+  }
+}
+
+/* Animation utilities (not in @theme because they use custom keyframes) */
 .animate-message-in {
   animation: message-in 200ms ease-out both;
 }
@@ -258,7 +316,8 @@ body {
   animation: scroll-hint 2s ease-in-out infinite;
 }
 
-/* Landing scroll reveals: hidden until [data-inview] lands. */
+/* ---- Landing scroll reveals ---- */
+
 .reveal {
   opacity: 0;
 }
@@ -272,20 +331,22 @@ body {
 }
 
 .reveal-mock[data-inview] {
-  animation: mock-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: mock-in 600ms var(--neu-ease) both;
 }
+
+/* ---- Reduced motion ---- */
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    /* biome-ignore lint/complexity/noImportantStyles: the a11y kill-switch must beat inline animation styles */
+    /* biome-ignore lint/complexity/noImportantStyles: a11y kill-switch */
     animation-duration: 0.01ms !important;
     /* biome-ignore lint/complexity/noImportantStyles: see above */
     animation-iteration-count: 1 !important;
     /* biome-ignore lint/complexity/noImportantStyles: see above */
     transition-duration: 0.01ms !important;
-    /* biome-ignore lint/complexity/noImportantStyles: delayed transitions should also resolve immediately */
+    /* biome-ignore lint/complexity/noImportantStyles: see above */
     transition-delay: 0ms !important;
     /* biome-ignore lint/complexity/noImportantStyles: see above */
     scroll-behavior: auto !important;
@@ -297,24 +358,23 @@ body {
   }
 }
 
-/* Landing page pre-paint guard: a returning signed-in user sees the splash, not
-   a flash of the landing page, while the client redirects to /chat. */
+/* ---- Auth guards ---- */
+
 html[data-auth-pending] .landing-root {
+  display: none;
+}
+
+html:not([data-auth-pending]) .auth-splash {
   display: none;
 }
 
 /* ---- Theme ripple transition ---- */
 
-/*
- * During the view transition the old/new snapshots are rasterized bitmaps.
- * Suppress per-element CSS transitions so nothing animates independently
- * underneath the ripple (the class is toggled by theme-toggle.tsx).
- */
 html.vt-active,
 html.vt-active *,
 html.vt-active *::before,
 html.vt-active *::after {
-  /* biome-ignore lint/complexity/noImportantStyles: must override inline and component transitions during view-transition */
+  /* biome-ignore lint/complexity/noImportantStyles: suppress transitions during view-transition */
   transition-duration: 0s !important;
 }
 
@@ -328,15 +388,6 @@ html.vt-active *::after {
   will-change: auto;
 }
 
-@keyframes ripple-in {
-  from {
-    clip-path: circle(0px at var(--ripple-x, 50%) var(--ripple-y, 50%));
-  }
-  to {
-    clip-path: circle(150vmax at var(--ripple-x, 50%) var(--ripple-y, 50%));
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-new(root),
   ::view-transition-old(root) {
@@ -346,32 +397,7 @@ html.vt-active *::after {
   }
 }
 
-html:not([data-auth-pending]) .auth-splash {
-  display: none;
-}
-
-/* ---- Refined neumorphic surface vocabulary ---- */
-
-:root {
-  --neu-highlight: rgba(255, 255, 255, 0.68);
-  --neu-edge: rgba(255, 255, 255, 0.58);
-  --neu-shadow: rgba(105, 112, 116, 0.13);
-  --neu-shadow-deep: rgba(91, 99, 104, 0.18);
-  --neu-panel-shadow: 8px 8px 22px var(--neu-shadow), -6px -6px 18px var(--neu-highlight);
-  --neu-raised-shadow: 5px 5px 13px var(--neu-shadow), -4px -4px 10px var(--neu-highlight);
-  --neu-inset-shadow: inset 3px 3px 7px var(--neu-shadow), inset -2px -2px 6px var(--neu-highlight);
-  --neu-ease: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-[data-theme="dark"] {
-  --neu-highlight: rgba(65, 66, 72, 0.34);
-  --neu-edge: rgba(255, 255, 255, 0.07);
-  --neu-shadow: rgba(0, 0, 0, 0.32);
-  --neu-shadow-deep: rgba(0, 0, 0, 0.45);
-  --neu-panel-shadow: 8px 8px 22px var(--neu-shadow), -5px -5px 16px var(--neu-highlight);
-  --neu-raised-shadow: 5px 5px 13px var(--neu-shadow), -4px -4px 10px var(--neu-highlight);
-  --neu-inset-shadow: inset 3px 3px 7px var(--neu-shadow), inset -2px -2px 6px var(--neu-highlight);
-}
+/* ---- Neumorphic surface classes (Tier 2: composed, multi-property) ---- */
 
 .neu-panel {
   box-shadow:
@@ -418,7 +444,7 @@ html:not([data-auth-pending]) .auth-splash {
 .neu-primary-button {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 6px 16px rgba(65, 99, 117, 0.22),
+    0 6px 16px rgba(74, 78, 122, 0.22),
     -3px -3px 10px var(--neu-highlight);
   transition:
     filter 150ms ease-out,
@@ -429,7 +455,7 @@ html:not([data-auth-pending]) .auth-splash {
 .neu-primary-button:hover {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    0 8px 20px rgba(65, 99, 117, 0.28),
+    0 8px 20px rgba(74, 78, 122, 0.28),
     -4px -4px 12px var(--neu-highlight);
   filter: brightness(1.04);
   transform: translateY(-1px);
@@ -441,6 +467,8 @@ html:not([data-auth-pending]) .auth-splash {
     inset -2px -2px 6px rgba(255, 255, 255, 0.12);
   transform: translateY(1px) scale(0.985);
 }
+
+/* ---- App shell layout ---- */
 
 .app-shell-canvas {
   background-color: var(--background);
@@ -752,7 +780,8 @@ html:not([data-auth-pending]) .auth-splash {
   padding: 0.35rem 0.55rem;
 }
 
-/* Focus feedback on the composer uses a soft ring instead of border. */
+/* ---- Chat composer ---- */
+
 .chat-composer:focus-within {
   box-shadow:
     var(--neu-inset-shadow),
@@ -866,7 +895,7 @@ html:not([data-auth-pending]) .auth-splash {
   }
 }
 
-/* ---- Glass-neumorphic material system ---- */
+/* ---- Glass-neumorphic materials ---- */
 
 .glass-neu {
   -webkit-backdrop-filter: blur(18px) saturate(1.16);
