@@ -112,9 +112,21 @@ export function Landing() {
                 </Link>
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* Product mock — integrated into hero as proof */}
-            <div ref={revealMock} className="reveal-mock mt-16 sm:mt-20">
+        {/* Product proof */}
+        <section className="px-4 py-16 sm:px-6 sm:py-24">
+          <div className="mx-auto max-w-5xl">
+            <div className="mx-auto mb-10 max-w-lg text-center sm:mb-12">
+              <h2 className="text-on-surface text-2xl font-medium tracking-[-0.02em] sm:text-3xl">
+                You ask. It finds. The map shows.
+              </h2>
+              <p className="text-on-surface-variant mt-3 text-sm leading-relaxed sm:text-base">
+                The agent calls real UBC data tools. If the answer involves a place, you see the route.
+              </p>
+            </div>
+            <div ref={revealMock} className="reveal-mock">
               <ProductMock />
             </div>
           </div>
