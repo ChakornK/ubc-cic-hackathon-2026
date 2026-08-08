@@ -102,7 +102,7 @@ function SidebarDrawer() {
             type="button"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close sessions"
-            className="neu-button bg-surface text-on-surface-variant hover:text-primary absolute top-3 right-3 flex size-8 items-center justify-center rounded-lg"
+            className="neu-button bg-surface text-on-surface-variant hover:text-primary absolute top-3 right-3 flex size-11 items-center justify-center rounded-lg sm:size-8"
           >
             <Icon name="close" size={18} />
           </button>
@@ -139,7 +139,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               type="button"
               onClick={() => setSidebarOpen(true)}
               aria-label="Open sessions"
-              className="neu-button bg-surface text-on-surface-variant hover:text-primary flex size-9 shrink-0 items-center justify-center rounded-xl lg:hidden"
+              className="neu-button bg-surface text-on-surface-variant hover:text-primary flex size-11 shrink-0 items-center justify-center rounded-xl sm:size-9 lg:hidden"
             >
               <Icon name="menu" size={21} />
             </button>
@@ -161,7 +161,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               type="button"
               onClick={() => setMobileMapOpen(true)}
               aria-label="Open campus map"
-              className="neu-button bg-surface text-on-surface-variant hover:text-primary flex size-9 items-center justify-center rounded-xl sm:hidden"
+              className="neu-button bg-surface text-on-surface-variant hover:text-primary flex size-11 items-center justify-center rounded-xl sm:hidden sm:size-9"
             >
               <Icon name="map" size={19} />
             </button>

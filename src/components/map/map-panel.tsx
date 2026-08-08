@@ -330,7 +330,7 @@ export function MapBottomSheet() {
               type="button"
               onClick={() => setMobileMapOpen(false)}
               aria-label="Close map"
-              className="text-on-surface-variant hover:bg-surface-container-high flex size-8 shrink-0 items-center justify-center rounded-lg transition-colors duration-150"
+              className="text-on-surface-variant hover:bg-surface-container-high flex size-11 shrink-0 items-center justify-center rounded-lg transition-colors duration-150"
             >
               <Icon name="close" size={18} />
             </button>
