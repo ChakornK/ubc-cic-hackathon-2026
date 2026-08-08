@@ -301,6 +301,19 @@ body {
   }
 }
 
+@keyframes topo-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(-8px, 4px) rotate(0.3deg);
+  }
+  66% {
+    transform: translate(4px, -6px) rotate(-0.2deg);
+  }
+}
+
 /* Animation utilities (not in @theme because they use custom keyframes) */
 .animate-message-in {
   animation: message-in 200ms ease-out both;
@@ -312,6 +325,10 @@ body {
 
 .animate-scroll-hint {
   animation: scroll-hint 2s ease-in-out infinite;
+}
+
+.animate-topo-drift {
+  animation: topo-drift 30s ease-in-out infinite;
 }
 
 /* ---- Landing scroll reveals ---- */

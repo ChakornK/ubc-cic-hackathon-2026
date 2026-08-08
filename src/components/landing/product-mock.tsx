@@ -1,14 +1,39 @@
 // Product mock for the landing page. Mirrors the actual app-shell structure:
-// neu-panel chat panel + neu-panel map panel, no borders,
-// same bubble radii, same composer, same tool badge styling.
+// neu-panel chat panel + neu-panel map panel, same bubble radii, same composer.
+// Accepts motion values from parent for scroll-driven animations:
+// - routeProgress: drives SVG path draw
+// - inView: triggers staggered message entrance
+// - chatZ/mapZ: drives Z-depth separation
+
+"use client";
 
 import { Icon } from "@/src/components/icons";
+import { motion, type MotionValue } from "motion/react";
 
-export function ProductMock() {
+interface ProductMockProps {
+  routeProgress?: MotionValue<number>;
+  inView: boolean;
+  chatZ?: MotionValue<number>;
+  mapZ?: MotionValue<number>;
+}
+
+const msgVariant = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
+
+export function ProductMock({ routeProgress, inView, chatZ, mapZ }: ProductMockProps) {
   return (
-    <div aria-hidden="true" className="app-shell-canvas mx-auto flex w-full max-w-[960px] gap-3 rounded-[1.75rem] p-3">
+    <div
+      aria-hidden="true"
+      className="app-shell-canvas mx-auto flex w-full max-w-[960px] gap-3 rounded-[1.75rem] p-3"
+      style={{ perspective: "1200px" }}
+    >
       {/* Chat panel */}
-      <div className="neu-panel flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl">
+      <motion.div
+        className="neu-panel flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl"
+        style={chatZ ? { z: chatZ } : undefined}
+      >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between bg-transparent px-4 py-3">
           <span className="text-on-surface text-sm font-medium tracking-[-0.01em]">Walking to the Nest</span>
@@ -17,14 +42,23 @@ export function ProductMock() {
         {/* Message well */}
         <div className="chat-message-well flex min-h-[280px] flex-1 flex-col gap-6 overflow-hidden p-4 sm:min-h-[340px] sm:p-6">
           {/* User message */}
-          <div className="flex justify-end">
+          <motion.div
+            className="flex justify-end"
+            initial={msgVariant.hidden}
+            animate={inView ? msgVariant.visible : msgVariant.hidden}
+            transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          >
             <div className="bg-accent-subtle text-on-surface max-w-[85%] rounded-[16px_16px_5px_16px] px-4 py-3 text-sm leading-relaxed">
               How far is ICCS to the Nest?
             </div>
-          </div>
+          </motion.div>
 
           {/* Assistant message */}
-          <div>
+          <motion.div
+            initial={msgVariant.hidden}
+            animate={inView ? msgVariant.visible : msgVariant.hidden}
+            transition={{ duration: 0.5, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          >
             <div className="mb-2 flex items-center gap-2">
               <span className="bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg text-[0.6875rem] font-medium">
                 R
@@ -50,21 +84,29 @@ export function ProductMock() {
                 </span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Composer */}
-          <div className="chat-composer neu-inset bg-surface-container-low mt-auto flex items-center rounded-2xl p-1.5">
+          <motion.div
+            className="chat-composer neu-inset bg-surface-container-low mt-auto flex items-center rounded-2xl p-1.5"
+            initial={msgVariant.hidden}
+            animate={inView ? msgVariant.visible : msgVariant.hidden}
+            transition={{ duration: 0.5, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
             <span className="text-muted min-w-0 flex-1 truncate px-3 py-2 text-sm">Ask about courses, campus…</span>
             <span className="neu-primary-button bg-primary text-on-primary flex size-9 shrink-0 items-center justify-center rounded-xl">
               <Icon name="arrowUp" size={16} />
             </span>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Map panel */}
-      <div className="neu-panel relative hidden flex-1 overflow-hidden rounded-2xl sm:flex">
-        {/* Map illustration (decorative SVG — not an icon) */}
+      <motion.div
+        className="neu-panel relative hidden flex-1 overflow-hidden rounded-2xl sm:flex"
+        style={mapZ ? { z: mapZ } : undefined}
+      >
+        {/* Map illustration with animated route */}
         <svg viewBox="0 0 400 400" className="h-full w-full" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           <g fill="var(--surface-container-high)" stroke="var(--border)" strokeWidth="0.8">
             <rect x="40" y="50" width="70" height="45" rx="4" transform="rotate(5 75 72)" />
@@ -74,14 +116,16 @@ export function ProductMock() {
             <rect x="150" y="140" width="50" height="38" rx="4" transform="rotate(5 175 159)" />
             <rect x="320" y="150" width="40" height="55" rx="4" transform="rotate(5 340 177)" />
           </g>
-          <path
+          {/* Animated route path */}
+          <motion.path
             d="M 90 310 C 120 270 160 220 200 170 C 230 130 270 110 300 90"
             fill="none"
             stroke="var(--primary)"
             strokeWidth="4"
             strokeLinecap="round"
-            strokeDasharray="10 6"
             opacity="0.85"
+            style={routeProgress ? { pathLength: routeProgress } : undefined}
+            strokeDasharray={routeProgress ? undefined : "10 6"}
           />
           <circle cx="90" cy="310" r="8" fill="var(--primary)" stroke="var(--surface-bright)" strokeWidth="3" />
           <circle cx="300" cy="90" r="8" fill="var(--primary)" stroke="var(--surface-bright)" strokeWidth="3" />
@@ -123,7 +167,7 @@ export function ProductMock() {
             <span className="text-on-surface-variant block text-xs">650 m</span>
           </span>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
