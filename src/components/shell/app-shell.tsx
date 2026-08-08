@@ -10,6 +10,7 @@ import { MapBottomSheet, MapPanel } from "@/src/components/map/map-panel";
 import { SessionSidebar } from "@/src/components/shell/session-sidebar";
 import { UserMenu } from "@/src/components/shell/user-menu";
 import { ThemeToggle } from "@/src/components/theme-toggle";
+import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -116,6 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { sidebarOpen, setSidebarOpen, mapOpen, setMobileMapOpen, mobileMapOpen } = useChatShell();
   const [sessionsCollapsed, setSessionsCollapsed] = useState(false);
   const sessionsMenuRef = useRef<HTMLButtonElement>(null);
+  const reduce = useReducedMotion();
 
   function collapseSessions() {
     setSessionsCollapsed(true);
@@ -130,7 +132,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <RequireAuth>
       <div className="app-shell-canvas flex h-svh flex-col overflow-hidden">
-        <header
+        <motion.header
+          initial={reduce ? false : { opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           inert={sidebarOpen || mobileMapOpen || undefined}
           className="neu-panel relative z-30 mx-2 mt-3 flex h-14 shrink-0 items-center justify-between rounded-2xl px-2 sm:mx-3 sm:px-4"
         >
@@ -168,7 +173,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <ThemeToggle className="hidden sm:grid" />
             <UserMenu />
           </div>
-        </header>
+        </motion.header>
 
         <div
           data-sessions-state={sessionsCollapsed ? "collapsed" : "expanded"}
