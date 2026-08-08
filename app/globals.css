@@ -489,27 +489,11 @@ html.vt-active *::after {
 /* ---- App shell layout ---- */
 
 .app-shell-canvas {
-  background: linear-gradient(
-    in oklch 135deg,
-    color-mix(in oklch, var(--surface-bright) 10%, var(--background)) 0%,
-    var(--background) 50%,
-    color-mix(in oklch, var(--surface-container-low) 10%, var(--background)) 100%
-  );
+  background-color: var(--background);
 }
 
 .auth-canvas {
   background-color: var(--background);
-  background-image:
-    radial-gradient(
-      in oklch ellipse 120% 80% at 85% -10%,
-      color-mix(in oklch, var(--surface-container-low) 40%, transparent) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      in oklch ellipse 100% 60% at 10% 110%,
-      color-mix(in oklch, var(--accent-subtle) 25%, transparent) 0%,
-      transparent 60%
-    );
 }
 
 .chat-message-well {
