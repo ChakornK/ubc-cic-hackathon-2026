@@ -41,7 +41,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <form onSubmit={handleSubmit} aria-busy={pending} className="flex w-full max-w-80 flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <label htmlFor="auth-username" className="text-on-surface-variant text-xs font-medium">
           Username
         </label>
@@ -57,7 +57,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           className="neu-inset bg-surface-container-low text-on-surface placeholder:text-muted focus-visible:ring-primary/40 h-11 w-full rounded-lg px-3 text-sm focus-visible:ring-2"
         />
       </div>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         <label htmlFor="auth-password" className="text-on-surface-variant text-xs font-medium">
           Password{mode === "signup" && <span className="text-muted ml-1">(6+ characters)</span>}
         </label>

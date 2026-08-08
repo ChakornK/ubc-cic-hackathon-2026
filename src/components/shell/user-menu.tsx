@@ -55,13 +55,13 @@ export function UserMenu() {
         role="dialog"
         aria-modal="true"
         aria-label="Account"
-        className={`profile-menu-surface glass-neu absolute top-12 right-0 z-50 w-64 max-w-[calc(100vw-2rem)] origin-top-right rounded-2xl p-2.5 ${
+        className={`profile-menu-surface glass-neu absolute top-12 right-0 z-50 w-64 max-w-[calc(100vw-2rem)] origin-top-right rounded-2xl p-3 ${
           open
             ? "blur-0 visible translate-y-0 scale-100 opacity-100"
             : "pointer-events-none invisible -translate-y-1.5 scale-[0.97] opacity-0 blur-[2px]"
         }`}
       >
-        <div className="px-2.5 py-2">
+        <div className="px-3 py-2">
           <p className="text-muted text-xs font-medium">Signed in as</p>
           <p className="text-body-sm text-on-surface mt-0.5 truncate" title={auth.user?.username}>
             {auth.user?.username ?? "Signed in"}
@@ -73,7 +73,7 @@ export function UserMenu() {
         <button
           type="button"
           onClick={() => auth.signOut()}
-          className="text-on-surface hover:bg-error/10 hover:text-error flex h-10 w-full items-center gap-2 rounded-xl px-2.5 text-sm transition-colors duration-150"
+          className="text-on-surface hover:bg-error/10 hover:text-error flex h-9 w-full items-center gap-2 rounded-lg px-3 text-sm transition-colors duration-150"
         >
           <Icon name="exit" size={16} className="text-on-surface-variant" />
           Sign out
