@@ -130,14 +130,43 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
     };
   }, [api, sessionId, setHighlight, historyNonce]);
 
-  // Keep the newest message in view as the conversation and typing state change.
+  // Stick-to-bottom: auto-scroll when new content arrives IF user is near the bottom.
+  const isNearBottom = useRef(true);
+
+  // Track scroll position to know if user scrolled away from bottom.
+  useEffect(() => {
+    const node = scrollRef.current;
+    if (!node) return;
+    const onScroll = () => {
+      const threshold = 80; // px from bottom
+      isNearBottom.current = node.scrollHeight - node.scrollTop - node.clientHeight < threshold;
+    };
+    node.addEventListener("scroll", onScroll, { passive: true });
+    return () => node.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // When user sends a message, pin to bottom for the duration of the response.
+  const wasSendingRef = useRef(false);
+  useEffect(() => {
+    if (sending && !wasSendingRef.current) {
+      isNearBottom.current = true;
+    }
+    wasSendingRef.current = sending;
+  }, [sending]);
+
+  // Scroll to bottom when messages change (new message, streaming content, sending state).
+  // Use instant scroll during streaming (smooth can't keep up with rapid updates).
   const messageCount = messages.length;
+  const lastMessageContent = messages.length > 0 ? messages[messages.length - 1].content : "";
   useEffect(() => {
     void messageCount;
     void sending;
+    void lastMessageContent;
     const node = scrollRef.current;
-    if (node) node.scrollTo({ top: node.scrollHeight, behavior: prefersReducedMotion ? "instant" : "smooth" });
-  }, [messageCount, sending, prefersReducedMotion]);
+    if (!node || !isNearBottom.current) return;
+    const behavior = sending || prefersReducedMotion ? "instant" : "smooth";
+    node.scrollTo({ top: node.scrollHeight, behavior });
+  }, [messageCount, sending, lastMessageContent, prefersReducedMotion]);
 
   // Focus the input when the conversation is ready and after each response.
   useEffect(() => {
