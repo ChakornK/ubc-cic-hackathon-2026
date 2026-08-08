@@ -75,7 +75,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
             aria-label={option.label}
             tabIndex={selected ? 0 : -1}
             onClick={(e) => applyWithRipple(e, () => setMode(option.mode))}
-            className={`flex size-9 items-center justify-center rounded-lg text-xs font-medium transition-all duration-150 ${
+            className={`flex size-8 items-center justify-center rounded-lg text-xs font-medium transition-all duration-150 ${
               selected ? "neu-raised bg-surface text-primary" : "text-on-surface-variant hover:text-on-surface"
             }`}
           >
