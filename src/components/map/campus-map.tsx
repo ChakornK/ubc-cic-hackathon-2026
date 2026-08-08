@@ -84,7 +84,7 @@ const MAP_COLORS: Record<
   },
   dark: {
     // Buildings
-    fill: [4, 4, 6, 255],
+    fill: [8, 8, 11, 255],
     line: [64, 65, 72, 255],
     // Highlighted: dark-mode primary #b0b4d8
     fillHighlight: [176, 180, 216, 220],
@@ -285,7 +285,7 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
           }
         });
 
-        // Shader extension: darken building sides from bottom to top
+        // Shader extension: bottom-to-top gradient on building sides
         class GradientExtension extends core.LayerExtension {
           getShaders() {
             return {
@@ -293,7 +293,9 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
                 "vs:#decl": "out float vHeightFrac;",
                 "vs:#main-end": "vHeightFrac = clamp(geometry.position.z / 35.0, 0.0, 1.0);",
                 "fs:#decl": "in float vHeightFrac;",
-                "fs:DECKGL_FILTER_COLOR": "color.rgb *= mix(0.7, 1.0, vHeightFrac);",
+                "fs:DECKGL_FILTER_COLOR": `
+                  color.rgb *= mix(0.7, 1.0, vHeightFrac);
+                `,
               },
             };
           }
@@ -473,7 +475,7 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
         getElevation: (feature) => buildingHeight(feature as BuildingFeature),
         getFillColor: (feature) => (isHighlighted(feature as BuildingFeature) ? colors.fillHighlight : colors.fill),
         getLineColor: (feature) => (isHighlighted(feature as BuildingFeature) ? colors.lineHighlight : colors.line),
-        material: { ambient: 1, diffuse: 0, shininess: 0 },
+        material: { ambient: 1, diffuse: 0.6, shininess: 1 },
         stroked: true,
         getLineWidth: 1,
         lineWidthUnits: "pixels" as const,
