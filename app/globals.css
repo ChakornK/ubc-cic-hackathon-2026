@@ -580,7 +580,7 @@ html.vt-active *::after {
 @media (min-width: 1024px) {
   .chat-workspace {
     display: grid;
-    grid-template-columns: minmax(3.75rem, 18.5rem) minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     transition: grid-template-columns 380ms var(--neu-ease);
   }
 

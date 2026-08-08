@@ -181,7 +181,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             data-map-state={mapOpen ? "open" : "collapsed"}
             className="chat-workspace min-h-0 min-w-0 flex-1 gap-3 p-3"
           >
-            <aside aria-label="Chat sessions" className="relative hidden min-h-0 min-w-0 overflow-hidden lg:block">
+            <aside
+              aria-label="Chat sessions"
+              className="relative hidden min-h-0 w-fit min-w-0 overflow-hidden lg:block"
+            >
               <div
                 id="desktop-session-panel"
                 inert={sessionsCollapsed}
