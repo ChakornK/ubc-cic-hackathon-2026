@@ -103,7 +103,7 @@ function SidebarDrawer() {
             type="button"
             onClick={() => setSidebarOpen(false)}
             aria-label="Close sessions"
-            className="neu-button bg-surface text-on-surface-variant hover:text-primary absolute top-3 right-3 flex size-11 items-center justify-center rounded-lg sm:size-8"
+            className="neu-button bg-surface text-on-surface-variant hover:text-primary absolute top-3 right-3 flex size-11 items-center justify-center rounded-xl sm:size-8"
           >
             <Icon name="close" size={18} />
           </button>

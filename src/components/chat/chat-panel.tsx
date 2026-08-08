@@ -443,7 +443,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                 role="alert"
                 className="animate-message-in border-error/30 bg-error-container/40 flex flex-col items-start justify-between gap-3 rounded-xl border px-4 py-3 sm:flex-row sm:items-center"
               >
-                <p id="send-error-msg" className="text-on-surface flex items-center gap-2 text-sm">
+                <p id="send-error-msg" className="text-on-surface flex min-w-0 items-center gap-2 text-sm break-words">
                   <Icon name="alert" size={16} className="text-error shrink-0" />
                   {sendError}
                 </p>
@@ -452,7 +452,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                   onClick={retry}
                   disabled={sending}
                   aria-describedby="send-error-msg"
-                  className="neu-button bg-surface text-on-surface flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium disabled:pointer-events-none disabled:opacity-60"
+                  className="neu-button bg-surface text-on-surface flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-medium disabled:pointer-events-none disabled:opacity-60"
                 >
                   <Icon name="refresh2" size={14} />
                   Retry

@@ -42,7 +42,7 @@ function GlassButton({
       aria-label={label}
       title={label}
       aria-pressed={pressed}
-      className={`neu-panel flex size-10 items-center justify-center rounded-lg transition-colors duration-150 ${
+      className={`neu-panel flex size-10 items-center justify-center rounded-2xl transition-colors duration-150 ${
         pressed ? "text-primary" : "text-on-surface-variant hover:text-primary"
       }`}
     >
@@ -72,13 +72,13 @@ function RouteInfoCard() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="neu-panel flex items-center gap-2.5 rounded-lg px-3 py-2"
+          className="neu-panel flex items-center gap-2.5 rounded-2xl px-3 py-2"
         >
           <span className="bg-secondary-container text-on-secondary-container flex size-8 items-center justify-center rounded-md">
             <Icon name={highlight.kind === "route" ? "walk" : "location"} size={18} />
           </span>
           <span className="min-w-0">
-            <span className="text-on-surface block text-base leading-tight font-medium">
+            <span className="text-on-surface block truncate text-base leading-tight font-medium">
               {highlight.kind === "route"
                 ? formatMinutes(highlight.minutes)
                 : highlight.kind === "buildings"
@@ -110,7 +110,7 @@ function MapFallback() {
       role="status"
       className="bg-surface-container-low flex h-full flex-col items-center justify-center gap-2 px-6 text-center"
     >
-      <Icon name="wifiOff" size={32} className="text-outline" />
+      <Icon name="wifiOff" size={32} className="text-muted" />
       <p className="text-body-sm text-on-surface-variant">Map couldn&apos;t load. Route details are shown below.</p>
       {highlight?.kind === "route" && (
         <p className="text-on-surface max-w-60 text-sm">
@@ -173,7 +173,7 @@ function MapSurface() {
           </div>
 
           {/* Zoom — floating bottom-right */}
-          <div className="neu-panel absolute right-3 bottom-6 z-10 flex flex-col overflow-hidden rounded-lg">
+          <div className="neu-panel absolute right-3 bottom-6 z-10 flex flex-col overflow-hidden rounded-xl">
             <button
               type="button"
               aria-label="Zoom in"
@@ -316,7 +316,7 @@ export function MapBottomSheet() {
         role="dialog"
         aria-modal="true"
         aria-label="Campus map"
-        className={`neu-panel border-border-subtle bg-surface fixed inset-x-0 bottom-0 z-50 flex h-[80vh] flex-col overflow-hidden rounded-t-2xl border-t pb-[env(safe-area-inset-bottom)] transition-transform duration-300 [transition-timing-function:var(--neu-ease)] ${
+        className={`neu-panel bg-surface fixed inset-x-0 bottom-0 z-50 flex h-[80vh] flex-col overflow-hidden rounded-t-2xl pb-[env(safe-area-inset-bottom)] transition-transform duration-300 [transition-timing-function:var(--neu-ease)] ${
           mobileMapOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >

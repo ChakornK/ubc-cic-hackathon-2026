@@ -93,7 +93,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
             <button
               type="button"
               onClick={refreshSessions}
-              className="neu-button bg-surface text-on-surface mt-3 flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm font-medium"
+              className="neu-button bg-surface text-on-surface mt-3 flex h-9 items-center gap-1.5 rounded-xl px-3 text-sm font-medium"
             >
               <Icon name="refresh2" size={14} />
               Try again

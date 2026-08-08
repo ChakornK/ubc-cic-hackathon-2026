@@ -158,7 +158,7 @@ export function ProductMock({ routeProgress, inView, chatZ, mapZ }: ProductMockP
         </span>
 
         {/* Route info card */}
-        <div className="neu-panel absolute top-3 right-3 flex items-center gap-2 rounded-lg px-3 py-2">
+        <div className="neu-panel absolute top-3 right-3 flex items-center gap-2 rounded-2xl px-3 py-2">
           <span className="bg-secondary-container text-on-secondary-container flex size-8 items-center justify-center rounded-lg">
             <Icon name="walk" size={16} />
           </span>
