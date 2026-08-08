@@ -1,5 +1,5 @@
 // Product mock for the landing page. Mirrors the actual app-shell structure:
-// glass-neu-strong chat panel + glass-neu-strong map panel, no borders,
+// neu-panel chat panel + neu-panel map panel, no borders,
 // same bubble radii, same composer, same tool badge styling.
 
 import { Icon } from "@/src/components/icons";
@@ -8,7 +8,7 @@ export function ProductMock() {
   return (
     <div aria-hidden="true" className="app-shell-canvas mx-auto flex w-full max-w-[960px] gap-3 rounded-[1.75rem] p-3">
       {/* Chat panel */}
-      <div className="glass-neu-strong flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl">
+      <div className="neu-panel flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl">
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between bg-transparent px-4 py-3">
           <span className="text-on-surface text-sm font-medium tracking-[-0.01em]">Walking to the Nest</span>
@@ -63,7 +63,7 @@ export function ProductMock() {
       </div>
 
       {/* Map panel */}
-      <div className="glass-neu-strong relative hidden flex-1 overflow-hidden rounded-2xl sm:flex">
+      <div className="neu-panel relative hidden flex-1 overflow-hidden rounded-2xl sm:flex">
         {/* Map illustration (decorative SVG — not an icon) */}
         <svg viewBox="0 0 400 400" className="h-full w-full" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           <g fill="var(--surface-container-high)" stroke="var(--border)" strokeWidth="0.8">
@@ -109,12 +109,12 @@ export function ProductMock() {
         </svg>
 
         {/* Collapse button */}
-        <span className="glass-neu-compact text-on-surface-variant absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl">
+        <span className="neu-panel text-on-surface-variant absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl">
           <Icon name="right" size={15} />
         </span>
 
         {/* Route info card */}
-        <div className="glass-neu-compact absolute top-3 right-3 flex items-center gap-2 rounded-lg px-3 py-2">
+        <div className="neu-panel absolute top-3 right-3 flex items-center gap-2 rounded-lg px-3 py-2">
           <span className="bg-secondary-container text-on-secondary-container flex size-8 items-center justify-center rounded-lg">
             <Icon name="walk" size={16} />
           </span>

@@ -6,7 +6,7 @@
  * Architecture:
  * - :root / [data-theme="dark"] define raw CSS custom properties (theme-switchable)
  * - @theme inline maps them to Tailwind v4 utility classes (bg-surface, shadow-sm, etc.)
- * - .neu-* / .glass-neu-* are composed multi-property surfaces (not convertible to utilities)
+ * - .neu-* classes are composed multi-property surfaces
  *
  * WCAG 2.1 AA: meta text uses --muted (>=4.5:1 on all surfaces), never --outline.
  */
@@ -69,7 +69,6 @@
 
   /* Neumorphic primitives (Tier 2) — single recipe for all surfaces */
   --neu-highlight: rgba(255, 255, 255, 0.2);
-  --neu-edge: rgba(255, 255, 255, 0.16);
   --neu-shadow: rgba(105, 112, 116, 0.045);
   --neu-shadow-deep: rgba(91, 99, 104, 0.06);
   --neu-surface-shadow: 3px 3px 8px var(--neu-shadow), -2px -2px 6px var(--neu-highlight);
@@ -127,7 +126,6 @@
   --elevation-glow: 0 2px 8px rgba(176, 180, 216, 0.08);
 
   --neu-highlight: rgba(65, 66, 72, 0.1);
-  --neu-edge: rgba(255, 255, 255, 0.02);
   --neu-shadow: rgba(0, 0, 0, 0.11);
   --neu-shadow-deep: rgba(0, 0, 0, 0.16);
   --neu-surface-shadow: 3px 3px 8px var(--neu-shadow), -2px -2px 6px var(--neu-highlight);
@@ -398,15 +396,11 @@ html.vt-active *::after {
 /* ---- Neumorphic surface classes (Tier 2: composed, multi-property) ---- */
 
 .neu-panel {
-  box-shadow:
-    inset 0 1px 0 var(--neu-edge),
-    var(--neu-surface-shadow);
+  box-shadow: var(--neu-surface-shadow);
 }
 
 .neu-raised {
-  box-shadow:
-    inset 0 1px 0 var(--neu-edge),
-    var(--neu-surface-shadow);
+  box-shadow: var(--neu-surface-shadow);
 }
 
 .neu-inset {
@@ -415,9 +409,7 @@ html.vt-active *::after {
 
 .neu-button {
   border: 1px solid var(--border-subtle);
-  box-shadow:
-    inset 0 1px 0 var(--neu-edge),
-    var(--neu-surface-shadow);
+  box-shadow: var(--neu-surface-shadow);
   transition:
     color 150ms ease-out,
     background-color 150ms ease-out,
@@ -427,7 +419,6 @@ html.vt-active *::after {
 
 .neu-button:hover {
   box-shadow:
-    inset 0 1px 0 var(--neu-edge),
     4px 4px 10px var(--neu-shadow),
     -2px -2px 7px var(--neu-highlight);
   transform: translateY(-1px);
@@ -441,7 +432,6 @@ html.vt-active *::after {
 
 .neu-primary-button {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 3px 8px rgba(74, 78, 122, 0.1),
     -2px -2px 6px var(--neu-highlight);
   transition:
@@ -452,7 +442,6 @@ html.vt-active *::after {
 
 .neu-primary-button:hover {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
     0 4px 10px rgba(74, 78, 122, 0.12),
     -2px -2px 7px var(--neu-highlight);
   filter: brightness(1.03);
@@ -781,9 +770,9 @@ html.vt-active *::after {
 /* ---- Chat composer ---- */
 
 .chat-composer:focus-within {
-  box-shadow:
-    var(--neu-inset-shadow),
-    0 0 0 2px color-mix(in srgb, var(--primary) 28%, transparent);
+  box-shadow: var(--neu-inset-shadow);
+  outline: 2px solid color-mix(in srgb, var(--primary) 28%, transparent);
+  outline-offset: -2px;
 }
 
 .chat-composer textarea:focus-visible {
@@ -805,10 +794,7 @@ html.vt-active *::after {
 }
 
 .chat-composer[data-thinking="true"] {
-  box-shadow:
-    var(--neu-inset-shadow),
-    5px 5px 14px color-mix(in srgb, var(--primary) 14%, transparent),
-    -4px -4px 10px var(--neu-highlight);
+  box-shadow: var(--neu-inset-shadow);
 }
 
 .chat-composer[data-thinking="true"]::before {
@@ -850,10 +836,7 @@ html.vt-active *::after {
   );
   border: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border-subtle));
   border-radius: 999px;
-  box-shadow:
-    inset 0 1px 1px var(--neu-edge),
-    4px 4px 9px var(--neu-shadow),
-    -3px -3px 8px var(--neu-highlight);
+  box-shadow: var(--neu-surface-shadow);
   display: inline-block;
   height: 1.75rem;
   position: relative;
@@ -891,20 +874,4 @@ html.vt-active *::after {
   .chat-composer[data-thinking="true"]::before {
     --thinking-angle: 112deg;
   }
-}
-
-/* ---- Neumorphic surface classes ---- */
-
-.glass-neu,
-.glass-neu-strong,
-.glass-neu-compact {
-  background-color: var(--surface);
-  box-shadow:
-    inset 0 1px 0 var(--neu-edge),
-    var(--neu-surface-shadow);
-}
-
-.glass-neu-inset {
-  background-color: var(--surface-container-low);
-  box-shadow: var(--neu-inset-shadow);
 }

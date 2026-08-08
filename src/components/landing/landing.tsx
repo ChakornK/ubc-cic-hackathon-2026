@@ -67,7 +67,7 @@ export function Landing() {
         <div className="relative px-3 pt-3 sm:px-6">
           <nav
             className={`pointer-events-auto mx-auto flex h-14 max-w-5xl items-center justify-between rounded-2xl px-4 transition-all duration-200 ${
-              scrolled ? "glass-neu" : ""
+              scrolled ? "neu-panel" : ""
             }`}
           >
             <Link href="/" className="flex items-center gap-2" aria-label="Reogent home">

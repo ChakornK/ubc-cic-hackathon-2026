@@ -132,7 +132,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="app-shell-canvas flex h-svh flex-col overflow-hidden">
         <header
           inert={sidebarOpen || mobileMapOpen || undefined}
-          className="glass-neu relative z-30 mx-2 mt-3 flex h-14 shrink-0 items-center justify-between rounded-2xl px-2 sm:mx-3 sm:px-4"
+          className="neu-panel relative z-30 mx-2 mt-3 flex h-14 shrink-0 items-center justify-between rounded-2xl px-2 sm:mx-3 sm:px-4"
         >
           <div className="flex min-w-0 items-center gap-2">
             <button
@@ -193,7 +193,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               aria-controls="desktop-session-panel"
               aria-expanded={!sessionsCollapsed}
               title="Expand sessions"
-              className="sessions-menu-trigger glass-neu-compact text-on-surface-variant hover:text-primary absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
+              className="sessions-menu-trigger neu-panel text-on-surface-variant hover:text-primary absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
             >
               <Icon name="menu" size={20} />
             </button>

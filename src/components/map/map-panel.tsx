@@ -41,7 +41,7 @@ function GlassButton({
       aria-label={label}
       title={label}
       aria-pressed={pressed}
-      className={`glass-neu-compact flex size-10 items-center justify-center rounded-lg transition-colors duration-150 ${
+      className={`neu-panel flex size-10 items-center justify-center rounded-lg transition-colors duration-150 ${
         pressed ? "text-primary" : "text-on-surface-variant hover:text-primary"
       }`}
     >
@@ -54,7 +54,7 @@ function RouteInfoCard() {
   const { highlight } = useChatShell();
   if (!highlight) return null;
   return (
-    <div className="glass-neu-compact flex items-center gap-2.5 rounded-lg px-3 py-2">
+    <div className="neu-panel flex items-center gap-2.5 rounded-lg px-3 py-2">
       <span className="bg-secondary-container text-on-secondary-container flex size-8 items-center justify-center rounded-md">
         <Icon name={highlight.kind === "route" ? "walk" : "location"} size={18} />
       </span>
@@ -152,7 +152,7 @@ function MapSurface() {
           </div>
 
           {/* Zoom — floating bottom-right */}
-          <div className="glass-neu-compact absolute right-3 bottom-6 z-10 flex flex-col overflow-hidden rounded-lg">
+          <div className="neu-panel absolute right-3 bottom-6 z-10 flex flex-col overflow-hidden rounded-lg">
             <button
               type="button"
               aria-label="Zoom in"
@@ -195,7 +195,7 @@ export function MapPanel() {
         inert={!mapOpen}
         aria-hidden={!mapOpen}
         aria-label="Campus map"
-        className={`map-surface-layer glass-neu-strong absolute inset-0 flex min-w-0 overflow-hidden rounded-2xl ${
+        className={`map-surface-layer neu-panel absolute inset-0 flex min-w-0 overflow-hidden rounded-2xl ${
           mapOpen ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-3 opacity-0"
         }`}
       >
@@ -206,7 +206,7 @@ export function MapPanel() {
           aria-label="Collapse campus map to tab"
           aria-expanded={true}
           title="Collapse map"
-          className="glass-neu-compact text-on-surface-variant hover:text-primary absolute top-3 left-3 z-20 flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
+          className="neu-panel text-on-surface-variant hover:text-primary absolute top-3 left-3 z-20 flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
         >
           <Icon name="right" size={17} />
         </button>
@@ -216,7 +216,7 @@ export function MapPanel() {
         inert={mapOpen}
         aria-hidden={mapOpen}
         aria-label="Collapsed campus map"
-        className={`map-tab-layer glass-neu text-on-surface-variant absolute inset-y-0 right-0 flex w-[3.75rem] cursor-default flex-col items-center rounded-2xl py-3 ${
+        className={`map-tab-layer neu-panel text-on-surface-variant absolute inset-y-0 right-0 flex w-[3.75rem] cursor-default flex-col items-center rounded-2xl py-3 ${
           mapOpen ? "pointer-events-none translate-x-2 opacity-0" : "translate-x-0 opacity-100"
         }`}
       >
@@ -227,7 +227,7 @@ export function MapPanel() {
           aria-label="Expand campus map"
           aria-expanded={false}
           title="Expand campus map"
-          className="glass-neu-compact text-primary hover:text-on-surface flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
+          className="neu-panel text-primary hover:text-on-surface flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
         >
           <Icon name="fullscreen" size={17} />
         </button>
