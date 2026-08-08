@@ -319,20 +319,21 @@ html.vt-active *::after {
 }
 
 ::view-transition-new(root) {
-  mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="20" fill="white"/></svg>')
-    var(--ripple-x, 50%) var(--ripple-y, 50%) / 0 no-repeat;
-  animation: vt-scale 400ms cubic-bezier(0, 0, 0.2, 1) both;
+  animation: ripple-in 400ms cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  will-change: clip-path;
 }
 
 ::view-transition-old(root) {
   animation: none;
-  animation-fill-mode: both;
-  z-index: -1;
+  will-change: auto;
 }
 
-@keyframes vt-scale {
+@keyframes ripple-in {
+  from {
+    clip-path: circle(0px at var(--ripple-x, 50%) var(--ripple-y, 50%));
+  }
   to {
-    mask-size: 200vmax;
+    clip-path: circle(150vmax at var(--ripple-x, 50%) var(--ripple-y, 50%));
   }
 }
 
@@ -341,7 +342,7 @@ html.vt-active *::after {
   ::view-transition-old(root) {
     /* biome-ignore lint/complexity/noImportantStyles: a11y override */
     animation: none !important;
-    mask: none;
+    clip-path: none;
   }
 }
 
