@@ -167,17 +167,27 @@ function ToolCallBlock({ name, input, result }: { name: string; input?: Record<s
   );
 }
 
-export function AssistantMessage({ message, isLatest }: { message: DisplayMessage; isLatest: boolean }) {
+export function AssistantMessage({
+  message,
+  isLatest,
+  showAvatar = true,
+}: {
+  message: DisplayMessage;
+  isLatest: boolean;
+  showAvatar?: boolean;
+}) {
   const tools = message.toolCalls ?? [];
   const interstitial = message.interstitial ?? [];
   return (
     <div className="animate-message-in">
-      <div className="mb-2 flex items-center gap-2">
-        <span className="bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg text-[0.6875rem] font-medium">
-          R
-        </span>
-        <span className="text-muted text-xs font-medium">Reogent</span>
-      </div>
+      {showAvatar && (
+        <div className="mb-2 flex items-center gap-2">
+          <span className="bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg text-[0.6875rem] font-medium">
+            R
+          </span>
+          <span className="text-muted text-xs font-medium">Reogent</span>
+        </div>
+      )}
       <div className="bg-surface max-w-[88%] min-w-0 rounded-[16px_16px_16px_5px] px-4 py-3">
         {message.warning && (
           <div className="bg-tertiary-container text-body-sm text-on-tertiary-container mb-3 flex items-start gap-2 rounded-xl px-3 py-2">

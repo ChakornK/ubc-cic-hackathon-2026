@@ -359,11 +359,16 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
 
         {historyState === "ready" && messages.length > 0 && (
           <div role="log" aria-label="Conversation" aria-live="polite" className="flex flex-col gap-6">
-            {messages.map((message) =>
+            {messages.map((message, idx) =>
               message.role === "user" ? (
                 <UserMessage key={message.id} message={message} />
               ) : message.content || message.toolCalls || (message.interstitial && message.interstitial.length > 0) ? (
-                <AssistantMessage key={message.id} message={message} isLatest={message.id === latestAssistantId} />
+                <AssistantMessage
+                  key={message.id}
+                  message={message}
+                  isLatest={message.id === latestAssistantId}
+                  showAvatar={idx === 0 || messages[idx - 1].role !== "assistant"}
+                />
               ) : null,
             )}
             {sending &&
