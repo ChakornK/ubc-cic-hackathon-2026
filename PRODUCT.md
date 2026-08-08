@@ -53,11 +53,11 @@ The server appends messages in pairs (user + assistant) after the agent loop com
 
 The app has three zones, left to right:
 
-1. **Sidebar** (left): Session history list. Collapsible on desktop (3.75rem collapsed rail to 18.5rem expanded). Drawer with backdrop scrim on mobile (<1024px). Contains: new conversation button, session list grouped by recency, user menu at bottom.
+1. **Sidebar** (left): Session history list. Collapsible on desktop (3.75rem collapsed rail to 17rem expanded). Drawer with backdrop scrim on mobile (<1024px). Contains: new conversation button, session list grouped by recency, user menu in header.
 
 2. **Chat panel** (center): Always visible, full-height. Contains: message history (scrollable), chat input composer (bottom-pinned). The primary and permanent surface. When no visual pane is open, chat stretches to fill the remaining width.
 
-3. **Visual pane** (right): Conditionally visible. Appears when the agent's response includes visual content (map route, building highlight, POI pins). Disappears when dismissed. On desktop: side-by-side split with chat via CSS Grid. On mobile (<640px): a draggable bottom sheet (80vh height, 20% drag threshold to dismiss).
+3. **Visual pane** (right): Conditionally visible. Appears when the agent's response includes visual content (map route, building highlight, POI pins). Disappears when dismissed. On desktop: side-by-side flex layout with chat (50% width when open, 3.75rem collapsed rail when closed). On mobile (<640px): a draggable bottom sheet (80vh height, 20% drag threshold to dismiss).
 
 **Critical behavior**: The visual pane is agent-triggered. Users do not toggle it. The pane auto-opens when a tool call returns map-renderable data (walking_distance returns a route, find_building returns a footprint highlight, find_places returns POI pins). Users can dismiss or collapse it. It stays hidden until the next relevant tool call.
 
@@ -73,9 +73,9 @@ The app has three zones, left to right:
 
 ### Device Contexts
 
-- **Desktop (>=1024px)**: Sidebar + Chat + Visual Pane (when active). Sidebar is collapsible. Visual pane animates in/out.
+- **Desktop (>=1024px)**: Sidebar + Chat + Visual Pane (when active). Sidebar is collapsible (flex layout with animated width). Visual pane transitions width.
 - **Tablet (640-1024px)**: Sidebar is a drawer (hidden by default, triggered by menu button). Chat + Visual Pane side-by-side.
-- **Mobile (<640px)**: Chat full-width. Sidebar is a drawer. Visual pane becomes a bottom sheet overlay.
+- **Mobile (<640px)**: Chat full-width. Sidebar is a drawer with backdrop scrim. Visual pane becomes a bottom sheet overlay (80vh, drag-to-dismiss).
 
 ## Capabilities and Constraints
 
@@ -130,15 +130,15 @@ All providers implement the same adapter interface with both `converse` (single-
 
 A design director at a top-tier product company would have nothing to criticize about the craft. Every pixel is intentional. This is production-grade work, not a prototype.
 
-### Neumorphic Depth System
+### Whisper-Neumorphic Depth System
 
-Neumorphism is the primary visual language:
+Neumorphism at whisper intensity is the primary visual language:
 
-- **Raised surfaces** (buttons, cards, message bubbles) sit above the background via dual-direction box-shadows: dark shadow bottom-right, light highlight top-left. Light source is upper-left.
+- **Raised surfaces** (buttons, cards, panels) sit above the background via dual-direction box-shadows: dark shadow bottom-right, light highlight top-left. Light source is upper-left.
 - **Recessed surfaces** (input fields, sidebar wells, content areas) sit below the background via inset shadows with the same dual-direction logic.
-- **Flat surfaces** (text content, inline elements) have no shadow. They sit on the surface plane.
+- **Flat surfaces** (text content, message bubbles, inline elements) have no shadow. They sit on the surface plane.
 
-Shadows are warm-gray tinted (`rgba(174, 174, 174, x)` in light mode), never pure black. Shadow spread is tight and precise. Depth communicates function: raised = interactive, recessed = input, flat = content. The interface reads as one continuous material shaped into different forms.
+Shadows use tiny offsets (2-3px), minimal blur (4-8px), and near-transparent opacity (4-6%). Depth communicates function — raised = interactive, recessed = input, flat = content — but registers subconsciously rather than announcing itself. The interface reads as one continuous material shaped into different forms.
 
 ### Minimalism
 
@@ -148,10 +148,10 @@ Nothing exists without a reason. No decorative elements, no illustrations, no ba
 
 - Spacing aligns to an 8px grid
 - Radius is consistent within element categories (all buttons share one radius, all panels share one radius)
-- Shadow recipes reuse from a finite set, no one-off values
-- Transitions use one easing curve
+- Two shadow tiers: utility elevation (Tailwind-mapped) and composed neumorphic (.neu-\* classes), never mixed on the same element
+- In-app transitions use one easing curve (`cubic-bezier(0.16, 1, 0.3, 1)`)
 - Text sizes form a strict hierarchy with no sizes between steps
-- Colors come from a defined palette with no ad-hoc hex values
+- Colors come from a defined palette; opacity modifiers create tinted variants
 
 ### Material Honesty
 
@@ -172,11 +172,11 @@ You can see what is interactive and what is content without touching anything. D
 
 - No corporate/enterprise/dashboard aesthetic
 - No decoration, illustration, or branding
-- Light mode is primary (dark mode supported)
+- Light mode is primary (dark mode supported via `[data-theme="dark"]` attribute, user-controlled)
 
 ### Personality
 
-The interface has warmth and character. Copy is human, varied, and specific to UBC. Loading states, empty states, and transitions carry personality without blocking the task. Precision and warmth coexist.
+The interface has warmth and character. Copy is human, varied, and specific to UBC. Loading states, empty states, and transitions carry personality without blocking the task. The landing page is permitted to be expressive (spring animations, blur reveals, scroll-driven parallax); the app shell stays calm and disciplined. Precision and warmth coexist.
 
 ## Evidence on Hand
 
@@ -217,10 +217,11 @@ The interface has warmth and character. Copy is human, varied, and specific to U
 
 ## Accessibility & Inclusion
 
-- WCAG 2.1 AA compliance as baseline (all text meets 4.5:1 contrast on its background)
+- WCAG 2.1 AA compliance as baseline (all text meets 4.5:1 contrast on its background; subdued text uses `--muted` #5a6066 which passes AA on all surfaces)
 - Map content has text alternatives: when a route is displayed, distance and time are also stated in chat message text
 - Chat is keyboard-navigable: Tab through messages, Enter to send, Escape to dismiss overlays
-- Reduced-motion preference respected: all animations collapse to instant transitions
-- Screen reader support: messages are announced, tool execution states are communicated, map highlights have aria descriptions
-- Focus indicators are visible on keyboard navigation, not hidden behind mouse-only styles
-- Touch targets are minimum 44x44px on mobile
+- Reduced-motion preference respected: all animations collapse to 0.01ms duration, reveals show at once, spinning elements freeze
+- Screen reader support: messages are announced via sr-only live region, tool execution states communicated, icon buttons have aria-labels
+- Focus indicators are visible on keyboard navigation (`ring-primary/40 ring-2`), not hidden behind mouse-only styles
+- Touch targets are minimum 44x44px on mobile (achieved via `size-11` or `min-h-[44px] min-w-[44px]`)
+- Safe-area insets respected for bottom-pinned elements on iOS (`env(safe-area-inset-bottom)`)
