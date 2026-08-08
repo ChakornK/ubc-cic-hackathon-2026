@@ -57,30 +57,50 @@ export function AppAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = useCallback(async (username: string, password: string) => {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-    const body = await res.json();
-    if (!res.ok) return { error: body.error ?? "Login failed. Check your username and password." };
-    localStorage.setItem(TOKEN_KEY, body.token);
-    const authUser: AppAuthUser = { username: body.username, userId: body.userId };
+    let res: Response;
+    try {
+      res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+    } catch {
+      return { error: "Can't reach the server. Check your connection and try again." };
+    }
+    let body: Record<string, unknown>;
+    try {
+      body = await res.json();
+    } catch {
+      return { error: "Unexpected response from server. Try again in a moment." };
+    }
+    if (!res.ok) return { error: (body.error as string) ?? "Login failed. Check your username and password." };
+    localStorage.setItem(TOKEN_KEY, body.token as string);
+    const authUser: AppAuthUser = { username: body.username as string, userId: body.userId as string };
     localStorage.setItem(USER_KEY, JSON.stringify(authUser));
     setUser(authUser);
     return {};
   }, []);
 
   const register = useCallback(async (username: string, password: string) => {
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-    const body = await res.json();
-    if (!res.ok) return { error: body.error ?? "Registration failed. The username may already be taken." };
-    localStorage.setItem(TOKEN_KEY, body.token);
-    const authUser: AppAuthUser = { username: body.username, userId: body.userId };
+    let res: Response;
+    try {
+      res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+    } catch {
+      return { error: "Can't reach the server. Check your connection and try again." };
+    }
+    let body: Record<string, unknown>;
+    try {
+      body = await res.json();
+    } catch {
+      return { error: "Unexpected response from server. Try again in a moment." };
+    }
+    if (!res.ok) return { error: (body.error as string) ?? "Registration failed. The username may already be taken." };
+    localStorage.setItem(TOKEN_KEY, body.token as string);
+    const authUser: AppAuthUser = { username: body.username as string, userId: body.userId as string };
     localStorage.setItem(USER_KEY, JSON.stringify(authUser));
     setUser(authUser);
     return {};

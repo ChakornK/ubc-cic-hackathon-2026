@@ -85,7 +85,7 @@ function CourseCard({ course, detailed = false }: { course: CourseDoc; detailed?
           </span>
         )}
       </div>
-      <h4 className="text-on-surface mt-0.5 text-sm font-medium">{course.title}</h4>
+      <h4 className="text-on-surface mt-0.5 line-clamp-2 text-sm font-medium">{course.title}</h4>
       {detailed && course.description && (
         <p className="text-body-sm text-on-surface-variant mt-1.5 line-clamp-3 leading-relaxed">{course.description}</p>
       )}
@@ -201,7 +201,7 @@ function FindBuildingRenderer({ call }: ToolCallRendererProps) {
         <Icon name="map" size={18} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="text-on-surface block text-base font-medium">{building.name}</span>
+        <span className="text-on-surface block truncate text-base font-medium">{building.name}</span>
         <span className="text-muted block truncate font-mono text-xs">{building.code}</span>
       </span>
       <button

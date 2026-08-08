@@ -18,7 +18,7 @@ import { ApiError, type ChatMessage } from "@/src/lib/api-types";
 import { mergeMapHighlights } from "@/src/lib/walking";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Component, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 type HistoryState = "loading" | "ready" | "failed";
 
@@ -42,6 +42,30 @@ let messageSeq = 0;
 function nextId(): string {
   messageSeq += 1;
   return `m${messageSeq}`;
+}
+
+// Minimal error boundary: if the composer crashes, show a recovery prompt
+// instead of killing the entire chat panel.
+class ComposerBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    if (this.state.failed) {
+      return (
+        <div className="shrink-0 px-3 pt-2 pb-3 text-center sm:px-4">
+          <p className="text-muted text-xs">
+            Input crashed.{" "}
+            <button type="button" onClick={() => this.setState({ failed: false })} className="text-primary underline">
+              Reload composer
+            </button>
+          </p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 function toConversation(messages: DisplayMessage[]): ChatMessage[] {
@@ -467,13 +491,15 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         {announcement}
       </output>
 
-      <ChatInput
-        ref={inputRef}
-        disabled={sending || historyState !== "ready"}
-        thinking={sending}
-        onSend={send}
-        onStop={sending ? stopGenerating : undefined}
-      />
+      <ComposerBoundary>
+        <ChatInput
+          ref={inputRef}
+          disabled={sending || historyState !== "ready"}
+          thinking={sending}
+          onSend={send}
+          onStop={sending ? stopGenerating : undefined}
+        />
+      </ComposerBoundary>
     </section>
   );
 }

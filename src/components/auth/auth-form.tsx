@@ -28,6 +28,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (pending) return; // guard against double-submit
     setError("");
     setPending(true);
 
