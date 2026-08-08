@@ -16,6 +16,7 @@ import { Icon } from "@/src/components/icons";
 import { useApi } from "@/src/components/providers";
 import { ApiError, type ChatMessage } from "@/src/lib/api-types";
 import { mergeMapHighlights } from "@/src/lib/walking";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -50,6 +51,7 @@ function toConversation(messages: DisplayMessage[]): ChatMessage[] {
 export function ChatPanel({ sessionId }: { sessionId: string }) {
   const api = useApi();
   const router = useRouter();
+  const prefersReducedMotion = useReducedMotion();
   const { setHighlight, sessions, refreshSessions } = useChatShell();
 
   const [historyState, setHistoryState] = useState<HistoryState>("loading");
@@ -134,8 +136,8 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
     void messageCount;
     void sending;
     const node = scrollRef.current;
-    if (node) node.scrollTop = node.scrollHeight;
-  }, [messageCount, sending]);
+    if (node) node.scrollTo({ top: node.scrollHeight, behavior: prefersReducedMotion ? "instant" : "smooth" });
+  }, [messageCount, sending, prefersReducedMotion]);
 
   // Focus the input when the conversation is ready and after each response.
   useEffect(() => {
@@ -293,10 +295,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
   }, [messages]);
 
   return (
-    <section
-      aria-label="Conversation"
-      className="neu-panel flex min-h-0 w-full flex-col overflow-hidden rounded-2xl"
-    >
+    <section aria-label="Conversation" className="neu-panel flex min-h-0 w-full flex-col overflow-hidden rounded-2xl">
       <div className="flex shrink-0 items-center justify-between bg-transparent px-4 py-3">
         <h1 className="text-on-surface min-w-0 truncate text-base font-medium tracking-[-0.01em]">{sessionTitle}</h1>
       </div>
@@ -342,34 +341,43 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
           </div>
         )}
 
-        {historyState === "ready" && messages.length === 0 && !sending && (
-          <div className="flex h-full flex-col items-center justify-center px-3 text-center sm:px-6">
-            <span className="bg-surface text-primary flex size-16 items-center justify-center rounded-2xl">
-              <Icon name="school" size={30} />
-            </span>
-            <h2 className="text-on-surface mt-6 text-xl font-medium tracking-[-0.025em]">
-              {GREETINGS[Math.floor(Math.random() * GREETINGS.length)]}
-            </h2>
-            <p className="text-on-surface-variant mt-2 max-w-80 text-sm leading-relaxed">
-              Courses, prerequisites, tuition, walking routes, study spaces, grades — I look it up in real UBC data so
-              you don't have to.
-            </p>
-            <div className="mt-6 flex max-w-xl flex-wrap justify-center gap-3">
-              {SUGGESTIONS.slice(0, 4).map((suggestion, i) => (
-                <button
-                  key={suggestion}
-                  type="button"
-                  onClick={() => send(suggestion)}
-                  disabled={sending}
-                  style={{ animationDelay: `${i * 60}ms` }}
-                  className="animate-message-in border-primary text-primary hover:bg-accent-subtle focus-visible:ring-primary/40 min-h-[44px] rounded-full border px-4 py-3 text-left text-xs font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {historyState === "ready" && messages.length === 0 && !sending && (
+            <motion.div
+              key="empty-state"
+              initial={prefersReducedMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="flex h-full flex-col items-center justify-center px-3 text-center sm:px-6"
+            >
+              <span className="bg-surface text-primary flex size-16 items-center justify-center rounded-2xl">
+                <Icon name="school" size={30} />
+              </span>
+              <h2 className="text-on-surface mt-6 text-xl font-medium tracking-[-0.025em]">
+                {GREETINGS[Math.floor(Math.random() * GREETINGS.length)]}
+              </h2>
+              <p className="text-on-surface-variant mt-2 max-w-80 text-sm leading-relaxed">
+                Courses, prerequisites, tuition, walking routes, study spaces, grades — I look it up in real UBC data so
+                you don't have to.
+              </p>
+              <div className="mt-6 flex max-w-xl flex-wrap justify-center gap-3">
+                {SUGGESTIONS.slice(0, 4).map((suggestion, i) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => send(suggestion)}
+                    disabled={sending}
+                    style={{ animationDelay: `${i * 60}ms` }}
+                    className="animate-message-in border-primary text-primary hover:bg-accent-subtle focus-visible:ring-primary/40 min-h-[44px] rounded-full border px-4 py-3 text-left text-xs font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {historyState === "ready" && messages.length > 0 && (
           <div role="log" aria-label="Conversation" aria-live="polite" className="flex flex-col gap-6">
@@ -385,12 +393,22 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                 />
               ) : null,
             )}
-            {sending &&
-              (!messages.length ||
-                messages[messages.length - 1]?.role !== "assistant" ||
-                (!messages[messages.length - 1]?.content && !messages[messages.length - 1]?.interstitial?.length)) && (
-                <TypingIndicator slow={slowResponse} />
-              )}
+            <AnimatePresence>
+              {sending &&
+                (!messages.length ||
+                  messages[messages.length - 1]?.role !== "assistant" ||
+                  (!messages[messages.length - 1]?.content &&
+                    !messages[messages.length - 1]?.interstitial?.length)) && (
+                  <motion.div
+                    key="typing-indicator"
+                    initial={prefersReducedMotion ? false : { opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0, transition: { duration: 0.15 } }}
+                    exit={{ opacity: 0, y: -4, transition: { duration: 0.12 } }}
+                  >
+                    <TypingIndicator slow={slowResponse} />
+                  </motion.div>
+                )}
+            </AnimatePresence>
             {sendError && (
               <div
                 role="alert"
