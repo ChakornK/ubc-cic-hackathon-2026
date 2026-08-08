@@ -215,9 +215,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </span>
               </div>
             </aside>
-            <div className="flex min-h-0 min-w-0">{children}</div>
-            <div className="hidden min-h-0 min-w-0 sm:flex">
-              <MapPanel />
+            <div className="chat-map-area flex min-h-0 min-w-0 flex-1 gap-3">
+              <div className="flex min-h-0 min-w-0 flex-1">{children}</div>
+              <div className="hidden min-h-0 min-w-0 flex-1 sm:flex">
+                <MapPanel />
+              </div>
             </div>
           </main>
         </div>
