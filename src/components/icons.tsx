@@ -4,6 +4,7 @@
 const BODIES = {
   arrowUp:
     '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20V5m-5.657 5L12 4.343L17.657 10"/>',
+  stop: '<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>',
   add: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M5 12h14m-7 7V5"/>',
   chat1:
     '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11h6m-6 4h3m-8 6h8a9 9 0 1 0-9-9v8a1 1 0 0 0 1 1"/>',

@@ -13,10 +13,11 @@ interface ChatInputProps {
   disabled: boolean;
   thinking: boolean;
   onSend: (text: string) => void;
+  onStop?: () => void;
 }
 
 export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function ChatInput(
-  { disabled, thinking, onSend },
+  { disabled, thinking, onSend, onStop },
   ref,
 ) {
   const [value, setValue] = useState("");
@@ -74,14 +75,25 @@ export const ChatInput = forwardRef<ChatInputHandle, ChatInputProps>(function Ch
           aria-label="Message the assistant"
           className="text-on-surface placeholder:text-muted relative z-10 block max-h-24 min-h-9 min-w-0 flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none disabled:opacity-60"
         />
-        <button
-          type="submit"
-          disabled={!canSend}
-          aria-label="Send message"
-          className="neu-primary-button bg-primary text-on-primary relative z-10 flex size-11 shrink-0 items-center justify-center rounded-xl disabled:pointer-events-none disabled:opacity-45 sm:size-9"
-        >
-          <Icon name="arrowUp" size={18} />
-        </button>
+        {onStop ? (
+          <button
+            type="button"
+            onClick={onStop}
+            aria-label="Stop generating"
+            className="neu-button bg-surface text-on-surface-variant relative z-10 flex size-11 shrink-0 items-center justify-center rounded-xl sm:size-9"
+          >
+            <Icon name="stop" size={16} />
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={!canSend}
+            aria-label="Send message"
+            className="neu-primary-button bg-primary text-on-primary relative z-10 flex size-11 shrink-0 items-center justify-center rounded-xl disabled:pointer-events-none disabled:opacity-45 sm:size-9"
+          >
+            <Icon name="arrowUp" size={18} />
+          </button>
+        )}
       </form>
       <p className="text-muted mt-2 text-center text-xs">AI can make mistakes. Verify important information.</p>
     </div>

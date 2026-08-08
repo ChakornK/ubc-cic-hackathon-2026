@@ -59,6 +59,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
   // the user switched to.
   const alive = useRef(true);
   const deltaFlushRef = useRef<number | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   useEffect(() => {
     alive.current = true;
     return () => {
@@ -146,6 +147,9 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
       setSending(true);
       setSendError(null);
 
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       // Add a placeholder assistant message for streaming text
       const streamId = nextId();
       setMessages((current) => [...current, { id: streamId, role: "assistant", content: "", interstitial: [] }]);
@@ -158,55 +162,60 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
       };
 
       api
-        .chat(sessionId, conversation, {
-          onThinking(delta) {
-            if (!alive.current) return;
-            // Append to the last thinking block only if it's immediately preceding (no tool calls in between)
-            const last = interstitialBlocks[interstitialBlocks.length - 1];
-            if (last?.type === "thinking") {
-              last.content += delta;
-            } else {
-              interstitialBlocks.push({ type: "thinking", content: delta });
-            }
-            updateMessage({ interstitial: [...interstitialBlocks] });
-          },
-          onToolStart(name, input) {
-            if (!alive.current) return;
-            interstitialBlocks.push({ type: "tool_call", content: name, input, result: undefined });
-            updateMessage({ interstitial: [...interstitialBlocks] });
-          },
-          onToolEnd(name, result) {
-            if (!alive.current) return;
-            // Find the last tool_call block with this name that has no result
-            for (let i = interstitialBlocks.length - 1; i >= 0; i--) {
-              if (
-                interstitialBlocks[i].type === "tool_call" &&
-                interstitialBlocks[i].content === name &&
-                interstitialBlocks[i].result === undefined
-              ) {
-                interstitialBlocks[i] = { ...interstitialBlocks[i], result };
-                break;
+        .chat(
+          sessionId,
+          conversation,
+          {
+            onThinking(delta) {
+              if (!alive.current) return;
+              // Append to the last thinking block only if it's immediately preceding (no tool calls in between)
+              const last = interstitialBlocks[interstitialBlocks.length - 1];
+              if (last?.type === "thinking") {
+                last.content += delta;
+              } else {
+                interstitialBlocks.push({ type: "thinking", content: delta });
               }
-            }
-            updateMessage({ interstitial: [...interstitialBlocks] });
+              updateMessage({ interstitial: [...interstitialBlocks] });
+            },
+            onToolStart(name, input) {
+              if (!alive.current) return;
+              interstitialBlocks.push({ type: "tool_call", content: name, input, result: undefined });
+              updateMessage({ interstitial: [...interstitialBlocks] });
+            },
+            onToolEnd(name, result) {
+              if (!alive.current) return;
+              // Find the last tool_call block with this name that has no result
+              for (let i = interstitialBlocks.length - 1; i >= 0; i--) {
+                if (
+                  interstitialBlocks[i].type === "tool_call" &&
+                  interstitialBlocks[i].content === name &&
+                  interstitialBlocks[i].result === undefined
+                ) {
+                  interstitialBlocks[i] = { ...interstitialBlocks[i], result };
+                  break;
+                }
+              }
+              updateMessage({ interstitial: [...interstitialBlocks] });
+            },
+            onTextClear() {
+              if (!alive.current) return;
+              streamedText = "";
+              updateMessage({ content: "" });
+            },
+            onDelta(delta) {
+              if (!alive.current) return;
+              streamedText += delta;
+              // Batch text deltas: flush to state once per animation frame
+              if (!deltaFlushRef.current) {
+                deltaFlushRef.current = requestAnimationFrame(() => {
+                  deltaFlushRef.current = null;
+                  if (alive.current) updateMessage({ content: streamedText });
+                });
+              }
+            },
           },
-          onTextClear() {
-            if (!alive.current) return;
-            streamedText = "";
-            updateMessage({ content: "" });
-          },
-          onDelta(delta) {
-            if (!alive.current) return;
-            streamedText += delta;
-            // Batch text deltas: flush to state once per animation frame
-            if (!deltaFlushRef.current) {
-              deltaFlushRef.current = requestAnimationFrame(() => {
-                deltaFlushRef.current = null;
-                if (alive.current) updateMessage({ content: streamedText });
-              });
-            }
-          },
-        })
+          controller.signal,
+        )
         .then((response) => {
           if (!alive.current) return;
           pendingRetry.current = null;
@@ -225,6 +234,8 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         })
         .catch((error: unknown) => {
           if (!alive.current) return;
+          // Abort is not an error — keep whatever text has streamed
+          if (error instanceof DOMException && error.name === "AbortError") return;
           pendingRetry.current = { conversation };
           const message =
             error instanceof ApiError && error.status !== 500
@@ -234,7 +245,10 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
           setAnnouncement(`Error: ${message}`);
         })
         .finally(() => {
-          if (alive.current) setSending(false);
+          if (alive.current) {
+            setSending(false);
+            abortRef.current = null;
+          }
         });
     },
     [api, sessionId, setHighlight, refreshSessions],
@@ -256,6 +270,10 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
     const pending = pendingRetry.current;
     if (pending) runExchange(pending.conversation);
   }, [runExchange]);
+
+  const stopGenerating = useCallback(() => {
+    abortRef.current?.abort();
+  }, []);
 
   const latestAssistantId = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -383,7 +401,13 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         {announcement}
       </output>
 
-      <ChatInput ref={inputRef} disabled={sending || historyState !== "ready"} thinking={sending} onSend={send} />
+      <ChatInput
+        ref={inputRef}
+        disabled={sending || historyState !== "ready"}
+        thinking={sending}
+        onSend={send}
+        onStop={sending ? stopGenerating : undefined}
+      />
     </section>
   );
 }

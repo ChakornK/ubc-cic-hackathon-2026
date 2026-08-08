@@ -29,6 +29,7 @@ export interface ChatApi {
       onToolEnd?: (name: string, result: unknown) => void;
       onTurnStart?: () => void;
     },
+    signal?: AbortSignal,
   ): Promise<ChatResponse>;
   /** GET /api/sessions — caller's sessions, most recently updated first. */
   listSessions(): Promise<SessionSummary[]>;
@@ -104,6 +105,7 @@ function createHttpApi({ getToken, onUnauthorized, baseUrl = "/api" }: ChatApiOp
       onToolEnd?: (name: string, result: unknown) => void;
       onTurnStart?: () => void;
     },
+    signal?: AbortSignal,
   ): Promise<ChatResponse> {
     const token = await getToken();
     if (!token) {
@@ -117,6 +119,7 @@ function createHttpApi({ getToken, onUnauthorized, baseUrl = "/api" }: ChatApiOp
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ session_id: sessionId, messages }),
+      signal,
     });
     if (!response.ok) {
       const error = await parseError(response);
