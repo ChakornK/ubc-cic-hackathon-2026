@@ -537,29 +537,32 @@ html.vt-active *::after {
 
 .sessions-panel-layer {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateX(0) scale(1);
   transition:
-    opacity 140ms ease-in,
-    transform 260ms var(--neu-ease);
+    opacity 250ms var(--neu-ease),
+    transform 300ms var(--neu-ease);
 }
 
 .sessions-menu-trigger {
   opacity: 0;
   pointer-events: none;
-  transform: translateX(-0.375rem) scale(0.94);
+  transform: translateX(-0.25rem) scale(0.96);
   transition:
-    opacity 140ms ease-out,
-    transform 220ms var(--neu-ease);
+    opacity 200ms ease-out,
+    transform 250ms var(--neu-ease);
 }
 
 .shell-body[data-sessions-state="expanded"] .sessions-panel-layer {
-  transition-delay: 110ms;
+  transition-delay: 80ms;
 }
 
 .shell-body[data-sessions-state="collapsed"] .sessions-panel-layer {
   opacity: 0;
   pointer-events: none;
-  transform: translateX(-0.75rem);
+  transform: translateX(-1rem) scale(0.97);
+  transition:
+    opacity 180ms ease-in,
+    transform 220ms var(--neu-ease);
   transition-delay: 0ms;
 }
 
@@ -567,33 +570,52 @@ html.vt-active *::after {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0) scale(1);
-  transition-delay: 150ms;
+  transition-delay: 120ms;
 }
 
 .map-surface-layer,
 .map-tab-layer {
   backface-visibility: hidden;
-  transform-origin: center;
+  transform-origin: center right;
 }
 
 .map-surface-layer {
+  opacity: 1;
+  transform: translateX(0) scale(1);
   transition:
-    opacity 140ms ease-in,
-    transform 260ms var(--neu-ease);
+    opacity 250ms var(--neu-ease),
+    transform 300ms var(--neu-ease);
+  transition-delay: 80ms;
 }
 
 .map-tab-layer {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(0.25rem) scale(0.96);
   transition:
-    opacity 180ms ease-out,
-    transform 280ms var(--neu-ease);
+    opacity 200ms ease-out,
+    transform 250ms var(--neu-ease);
 }
 
-.chat-workspace[data-map-state="open"] .map-surface-layer {
-  transition-delay: 120ms;
+.chat-workspace[data-map-state="collapsed"] .map-surface-layer {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(1rem) scale(0.97);
+  transition:
+    opacity 180ms ease-in,
+    transform 220ms var(--neu-ease);
+  transition-delay: 0ms;
 }
 
 .chat-workspace[data-map-state="collapsed"] .map-tab-layer {
-  transition-delay: 150ms;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0) scale(1);
+  transition-delay: 120ms;
+}
+
+.chat-workspace[data-map-state="open"] .map-surface-layer {
+  transition-delay: 80ms;
 }
 
 .profile-menu-surface {
