@@ -623,7 +623,7 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
   }, [buildings, highlight, focusNonce, status, routePath]);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full overflow-hidden rounded-2xl">
       <div
         ref={containerRef}
         className="h-full w-full"
