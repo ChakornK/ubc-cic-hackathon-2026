@@ -15,7 +15,6 @@ export function Landing() {
   const router = useRouter();
   const revealMock = useReveal(0.15);
   const revealFeatures = useReveal();
-  const revealCta = useReveal();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -72,7 +71,7 @@ export function Landing() {
             <ThemeToggle />
             <Link
               href="/login"
-              className="neu-button bg-surface text-on-surface rounded-xl px-4 py-2 text-sm font-medium"
+              className="neu-button bg-surface text-on-surface-variant hover:text-on-surface flex h-9 items-center rounded-xl px-4 text-sm font-medium"
             >
               Sign in
             </Link>
@@ -82,11 +81,10 @@ export function Landing() {
 
       <main id="main">
         {/* Hero + Product in one flow */}
-        <section className="relative min-h-[100dvh] px-4 pt-28 pb-16 sm:px-6 sm:pt-32">
+        <section className="relative flex min-h-[100dvh] flex-col items-center justify-center px-4 sm:px-6">
           <TopoTexture className="text-on-surface pointer-events-none absolute inset-0 h-full w-full opacity-[0.03]" />
 
           <div className="relative z-10 mx-auto max-w-5xl">
-            {/* Headline */}
             <div className="mx-auto max-w-2xl text-center">
               <h1 className="text-4xl leading-[1.05] font-medium tracking-[-0.035em] sm:text-5xl lg:text-6xl">
                 Ask UBC anything.
@@ -166,39 +164,35 @@ export function Landing() {
         </section>
 
         {/* Final CTA */}
-        <section className="px-4 pb-16 sm:px-6 sm:pb-24">
-          <div
-            ref={revealCta}
-            className="reveal neu-inset bg-surface-container-low relative mx-auto max-w-4xl overflow-hidden rounded-[2rem] px-6 py-20 sm:px-12 sm:py-24"
-          >
-            <TopoTexture className="text-on-surface pointer-events-none absolute inset-[-20%] h-[140%] w-[140%] opacity-[0.025]" />
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <h2 className="max-w-sm text-2xl font-medium tracking-[-0.025em] text-balance sm:text-3xl lg:text-4xl">
-                Skip the tab juggling.
-              </h2>
-              <p className="text-on-surface-variant mt-4 max-w-sm text-base leading-relaxed">
-                One conversation replaces the course catalog, tuition calculator, and campus map.
-              </p>
-              <div className="mt-8 flex items-center gap-3">
-                <Link
-                  href="/signup"
-                  className="neu-primary-button bg-primary text-on-primary flex h-12 items-center rounded-xl px-8 text-base font-medium"
-                >
-                  Create account
-                </Link>
-                <Link
-                  href="/login"
-                  className="neu-button bg-surface text-on-surface flex h-12 items-center rounded-xl px-8 text-base font-medium"
-                >
-                  Sign in
-                </Link>
-              </div>
-              <p className="text-muted mt-4 text-xs">Free to use</p>
-            </div>
+        <section className="px-4 pt-24 pb-12 text-center sm:px-6 sm:pt-32 sm:pb-16">
+          <h2 className="text-on-surface text-2xl font-medium tracking-[-0.02em] sm:text-3xl">
+            Stop guessing. Start asking.
+          </h2>
+          <p className="text-on-surface-variant mx-auto mt-4 max-w-xs text-base leading-relaxed">
+            Courses, buildings, deadlines. One conversation away.
+          </p>
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <Link
+              href="/signup"
+              className="neu-primary-button bg-primary text-on-primary flex h-12 items-center rounded-xl px-8 text-base font-medium"
+            >
+              Get started free
+            </Link>
+            <Link
+              href="/login"
+              className="neu-button bg-surface text-on-surface flex h-12 items-center rounded-xl px-8 text-base font-medium"
+            >
+              Sign in
+            </Link>
           </div>
-          <p className="text-muted mt-8 text-center text-xs">Built for UBC CIC Hackathon 2026</p>
         </section>
       </main>
+
+      <footer className="mt-32 px-4 pb-4 text-center">
+        <p className="text-muted text-sm">
+          Built for UBC students. Not affiliated with the University of British Columbia.
+        </p>
+      </footer>
     </div>
   );
 }
