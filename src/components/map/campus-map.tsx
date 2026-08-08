@@ -152,7 +152,8 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
   const [selected, setSelected] = useState<SelectedBuilding | null>(null);
   /** Pedestrian-network polyline for the current route highlight. */
   const [routePath, setRoutePath] = useState<{ key: string; path: LngLat[] } | null>(null);
-  const [drawProgress, setDrawProgress] = useState(1);
+  const drawProgressRef = useRef(1);
+  const [drawComplete, setDrawComplete] = useState(true);
 
   const onStatusRef = useRef(onStatus);
   onStatusRef.current = onStatus;
@@ -311,18 +312,41 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
   useEffect(() => {
     if (!routePath) return;
     if (prefersReducedMotion()) {
-      setDrawProgress(1);
+      drawProgressRef.current = 1;
+      setDrawComplete(true);
       return;
     }
-    setDrawProgress(0);
+    drawProgressRef.current = 0;
+    setDrawComplete(false);
     let frame = 0;
     let start: number | undefined;
+    const handles = handlesRef.current;
     const tick = (now: number) => {
       start ??= now;
       const raw = Math.min(1, (now - start) / ROUTE_DRAW_MS);
       const t = 1 - Math.pow(1 - raw, 3); // ease-out cubic
-      setDrawProgress(t);
+      drawProgressRef.current = t;
+      // Update only the route PathLayer directly, avoiding full layer rebuild
+      if (handles) {
+        const layers = handles.overlay.props.layers as unknown[];
+        const routeLayer = (layers as { id?: string }[]).find((l) => l && (l as { id?: string }).id === "route-trace");
+        if (routeLayer) {
+          // Trigger a minimal setProps with the updated path data
+          handles.overlay.setProps({
+            layers: layers.map((l) =>
+              l && (l as { id?: string }).id === "route-trace"
+                ? new (l as { constructor: new (props: unknown) => unknown }).constructor({
+                    ...(l as { props: Record<string, unknown> }).props,
+                    data: [{ path: partialPath(routePath.path, t) }],
+                    updateTriggers: { getPath: [routePath.key, t] },
+                  })
+                : l,
+            ),
+          });
+        }
+      }
       if (raw < 1) frame = requestAnimationFrame(tick);
+      else setDrawComplete(true);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
@@ -424,14 +448,14 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
       routePath
         ? new PathLayer({
             id: "route-trace",
-            data: [{ path: partialPath(routePath.path, drawProgress) }],
+            data: [{ path: partialPath(routePath.path, drawProgressRef.current) }],
             getPath: (d: { path: LngLat[] }) => d.path,
             getColor: colors.route,
             getWidth: 5,
             widthUnits: "pixels" as const,
             capRounded: true,
             jointRounded: true,
-            updateTriggers: { getPath: [routePath.key, drawProgress] },
+            updateTriggers: { getPath: [routePath.key, drawComplete] },
           })
         : null,
       endpoints.length > 0
@@ -526,7 +550,7 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
     ].filter(Boolean);
 
     handles.overlay.setProps({ layers });
-  }, [buildings, walkingRoutes, showRoutes, highlight, theme, status, routePath, drawProgress, selected]);
+  }, [buildings, walkingRoutes, showRoutes, highlight, theme, status, routePath, drawComplete, selected]);
 
   // ---- Theme: swap basemap style (appliedStyleRef is seeded at init, so a
   // toggle that lands while the first style is still loading applies at ready) ----

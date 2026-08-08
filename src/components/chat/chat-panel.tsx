@@ -58,10 +58,12 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
   // not touch shared shell state (map highlight, session list) for the session
   // the user switched to.
   const alive = useRef(true);
+  const deltaFlushRef = useRef<number | null>(null);
   useEffect(() => {
     alive.current = true;
     return () => {
       alive.current = false;
+      if (deltaFlushRef.current) cancelAnimationFrame(deltaFlushRef.current);
     };
   }, []);
 
@@ -196,7 +198,13 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
           onDelta(delta) {
             if (!alive.current) return;
             streamedText += delta;
-            updateMessage({ content: streamedText });
+            // Batch text deltas: flush to state once per animation frame
+            if (!deltaFlushRef.current) {
+              deltaFlushRef.current = requestAnimationFrame(() => {
+                deltaFlushRef.current = null;
+                if (alive.current) updateMessage({ content: streamedText });
+              });
+            }
           },
         })
         .then((response) => {
