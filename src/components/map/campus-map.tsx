@@ -54,6 +54,11 @@ const STYLE_URLS: Record<ResolvedTheme, string> = {
 
 type Rgba = [number, number, number, number];
 
+// ---- Map color system ----
+// Derived from DESIGN.md tokens. Buildings are the same neumorphic "raised surface"
+// material; highlights use primary indigo; routes use secondary verdant; the basemap
+// blends seamlessly with --background.
+
 const MAP_COLORS: Record<
   ResolvedTheme,
   Record<
@@ -62,30 +67,93 @@ const MAP_COLORS: Record<
   >
 > = {
   light: {
-    fill: [216, 220, 222, 170],
-    line: [154, 162, 166, 200],
-    fillHighlight: [65, 99, 117, 235],
-    lineHighlight: [16, 53, 70, 255],
-    route: [65, 99, 117, 230],
-    routeCasing: [255, 255, 255, 200],
-    label: [16, 53, 70, 255],
-    labelBg: [255, 255, 255, 215],
-    walkway: [124, 158, 178, 90],
+    // Buildings
+    fill: [232, 232, 237, 255],
+    line: [195, 196, 202, 255],
+    // Highlighted: primary muted indigo #4a4e7a
+    fillHighlight: [74, 78, 122, 220],
+    lineHighlight: [26, 29, 58, 255],
+    // Route: secondary #2d6b47
+    route: [45, 107, 71, 235],
+    routeCasing: [250, 250, 250, 190],
+    // Labels: on-surface-variant for legibility without heaviness
+    label: [62, 67, 72, 255],
+    labelBg: [250, 250, 250, 215],
+    // Walkways: primary accent at 25%
+    walkway: [74, 78, 122, 64],
   },
   dark: {
-    fill: [58, 58, 64, 190],
-    line: [90, 92, 98, 220],
-    fillHighlight: [169, 203, 224, 235],
-    lineHighlight: [196, 231, 253, 255],
-    route: [169, 203, 224, 235],
-    routeCasing: [18, 18, 20, 200],
-    label: [196, 231, 253, 255],
-    labelBg: [26, 26, 30, 215],
-    walkway: [124, 158, 178, 70],
+    // Buildings
+    fill: [4, 4, 6, 255],
+    line: [64, 65, 72, 255],
+    // Highlighted: dark-mode primary #b0b4d8
+    fillHighlight: [176, 180, 216, 220],
+    lineHighlight: [208, 210, 235, 255],
+    // Route: dark-mode secondary #98d4a9
+    route: [152, 212, 169, 220],
+    routeCasing: [18, 18, 20, 190],
+    // Labels: on-surface-variant (dark) for clarity
+    label: [194, 199, 204, 255],
+    labelBg: [14, 14, 16, 215],
+    // Walkways: primary accent at 25%
+    walkway: [176, 180, 216, 64],
   },
 };
 
 const ROUTE_DRAW_MS = 2500;
+
+// Basemap layer overrides: makes CARTO tiles seamless with the app shell.
+// Positron (light) gets matched to --background; Dark Matter loses its black.
+const BASEMAP_OVERRIDES: Record<
+  ResolvedTheme,
+  { background: string; landcover: string; water: string; road: string; roadMinor: string }
+> = {
+  light: {
+    background: "#f7f7f5", // --background
+    landcover: "#eff2ee", // hint of life, barely-there warm green
+    water: "#e2e6ee", // cool blue-gray from the indigo family
+    road: "#eae9e6", // --border adjacent — hairline dividers
+    roadMinor: "#f0efed", // even subtler for small paths
+  },
+  dark: {
+    background: "#141416", // between --background #121214 and --surface-container-lowest
+    landcover: "#171819", // barely differentiated, no tint
+    water: "#111113", // dark, not black — subtle depth
+    road: "#1e1f22", // --border-subtle adjacent
+    roadMinor: "#191a1d", // ghostly
+  },
+};
+
+function patchBasemapColors(map: import("maplibre-gl").Map, resolvedTheme: ResolvedTheme) {
+  const ov = BASEMAP_OVERRIDES[resolvedTheme];
+  try {
+    const style = map.getStyle();
+    if (!style?.layers) return;
+    for (const layer of style.layers) {
+      const id = layer.id;
+      if (id === "background" && layer.type === "background") {
+        map.setPaintProperty(id, "background-color", ov.background);
+      } else if (layer.type === "fill") {
+        if (id.includes("water")) {
+          map.setPaintProperty(id, "fill-color", ov.water);
+        } else if (id.includes("landcover") || id.includes("landuse") || id.includes("park")) {
+          map.setPaintProperty(id, "fill-color", ov.landcover);
+        } else if (id.includes("building")) {
+          // Hide basemap flat buildings — deck.gl renders them in 3D
+          map.setPaintProperty(id, "fill-opacity", 0);
+        }
+      } else if (layer.type === "line") {
+        if (id.includes("road") || id.includes("highway") || id.includes("street")) {
+          if (id.includes("path") || id.includes("pedestrian")) continue;
+          const isMinor = id.includes("minor") || id.includes("service");
+          map.setPaintProperty(id, "line-color", isMinor ? ov.roadMinor : ov.road);
+        }
+      }
+    }
+  } catch {
+    // Non-critical — deck.gl layers render regardless of basemap tinting
+  }
+}
 
 /** Real height where the dataset has one; ~3.5 m per floor otherwise; low default. */
 function buildingHeight(feature: BuildingFeature): number {
@@ -102,6 +170,7 @@ interface MapHandles {
     ScatterplotLayer: typeof import("@deck.gl/layers").ScatterplotLayer;
     TextLayer: typeof import("@deck.gl/layers").TextLayer;
   };
+  gradientExtension: import("@deck.gl/core").LayerExtension;
 }
 
 function prefersReducedMotion(): boolean {
@@ -168,10 +237,11 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
 
     (async () => {
       try {
-        const [maplibre, { MapboxOverlay }, layers] = await Promise.all([
+        const [maplibre, { MapboxOverlay }, layers, core] = await Promise.all([
           import("maplibre-gl"),
           import("@deck.gl/mapbox"),
           import("@deck.gl/layers"),
+          import("@deck.gl/core"),
           import("maplibre-gl/dist/maplibre-gl.css"),
         ]);
         if (disposed) return;
@@ -208,8 +278,26 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
           console.warn("Map error", event.error?.message);
         });
         map.on("load", () => {
-          if (!disposed) setStatus("ready");
+          if (!disposed) {
+            setStatus("ready");
+            // Defer basemap tinting to next frame so deck.gl overlay initializes first
+            requestAnimationFrame(() => patchBasemapColors(map, initialTheme));
+          }
         });
+
+        // Shader extension: darken building sides from bottom to top
+        class GradientExtension extends core.LayerExtension {
+          getShaders() {
+            return {
+              inject: {
+                "vs:#decl": "out float vHeightFrac;",
+                "vs:#main-end": "vHeightFrac = clamp(geometry.position.z / 35.0, 0.0, 1.0);",
+                "fs:#decl": "in float vHeightFrac;",
+                "fs:DECKGL_FILTER_COLOR": "color.rgb *= mix(0.7, 1.0, vHeightFrac);",
+              },
+            };
+          }
+        }
 
         handlesRef.current = {
           map,
@@ -220,6 +308,7 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
             ScatterplotLayer: layers.ScatterplotLayer,
             TextLayer: layers.TextLayer,
           },
+          gradientExtension: new GradientExtension(),
         };
 
         if (controls) {
@@ -380,9 +469,11 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
         data: buildings,
         extruded: true,
         wireframe: false,
+        extensions: [handles.gradientExtension],
         getElevation: (feature) => buildingHeight(feature as BuildingFeature),
         getFillColor: (feature) => (isHighlighted(feature as BuildingFeature) ? colors.fillHighlight : colors.fill),
         getLineColor: (feature) => (isHighlighted(feature as BuildingFeature) ? colors.lineHighlight : colors.line),
+        material: { ambient: 1, diffuse: 0, shininess: 0 },
         stroked: true,
         getLineWidth: 1,
         lineWidthUnits: "pixels" as const,
@@ -553,6 +644,7 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
       const apply = () => {
         handles.map.setStyle(STYLE_URLS[theme]);
         handles.map.once("style.load", () => {
+          requestAnimationFrame(() => patchBasemapColors(handles.map, theme));
           if (fade) {
             el.style.opacity = "1";
           }
