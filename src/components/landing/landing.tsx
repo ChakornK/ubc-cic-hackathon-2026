@@ -57,12 +57,7 @@ export function Landing() {
       {/* Header */}
       <header className="pointer-events-none fixed inset-x-0 top-0 z-40">
         {/* Top mask: opaque through header, fades to transparent below */}
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-[calc((0.75rem+3.5rem)*2)]"
-          style={{
-            background: "linear-gradient(to bottom, var(--background) 0%, var(--background) 50%, transparent 100%)",
-          }}
-        />
+        <div className="from-background via-background pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b to-transparent" />
         <div className="relative px-3 pt-3 sm:px-6">
           <nav
             className={`pointer-events-auto mx-auto flex h-14 max-w-5xl items-center justify-between rounded-2xl px-4 transition-all duration-200 ${
