@@ -187,7 +187,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div
               inert={!sessionsCollapsed}
               aria-hidden={!sessionsCollapsed}
-              className={`sessions-menu-trigger neu-panel absolute inset-y-3 left-3 flex w-[3.75rem] flex-col items-center rounded-2xl py-3 ${
+              className={`sessions-menu-trigger neu-panel absolute inset-y-0 left-0 flex w-[3.75rem] flex-col items-center rounded-2xl py-3 ${
                 sessionsCollapsed ? "" : "pointer-events-none"
               }`}
             >
