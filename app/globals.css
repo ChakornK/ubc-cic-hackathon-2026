@@ -470,14 +470,12 @@ html.vt-active *::after {
 /* ---- App shell layout ---- */
 
 .app-shell-canvas {
-  background-color: var(--background);
-  background-image:
-    radial-gradient(circle at 86% -8%, color-mix(in srgb, var(--accent-subtle) 72%, transparent) 0, transparent 34%),
-    radial-gradient(
-      circle at -8% 104%,
-      color-mix(in srgb, var(--primary-container) 10%, transparent) 0,
-      transparent 30%
-    );
+  background: linear-gradient(
+    135deg,
+    var(--surface-bright) 0%,
+    var(--background) 50%,
+    var(--surface-container-low) 100%
+  );
 }
 
 .chat-message-well {
