@@ -7,6 +7,7 @@ import { useChatShell } from "@/src/components/chat/chat-shell-context";
 import { Icon } from "@/src/components/icons";
 import { CampusMap, type MapControls, type MapStatus } from "@/src/components/map/campus-map";
 import { formatMeters, formatMinutes } from "@/src/lib/format";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 function useMediaQuery(query: string): boolean {
@@ -52,33 +53,53 @@ function GlassButton({
 
 function RouteInfoCard() {
   const { highlight } = useChatShell();
-  if (!highlight) return null;
+  const reduce = useReducedMotion();
+  // Stable key that changes when highlight data changes
+  const key = highlight
+    ? highlight.kind === "route"
+      ? `${highlight.from}-${highlight.to}`
+      : highlight.kind === "buildings"
+        ? highlight.buildings.map((b) => b.code).join(",")
+        : highlight.places.map((p) => p.name).join(",")
+    : "";
+
   return (
-    <div className="neu-panel flex items-center gap-2.5 rounded-lg px-3 py-2">
-      <span className="bg-secondary-container text-on-secondary-container flex size-8 items-center justify-center rounded-md">
-        <Icon name={highlight.kind === "route" ? "walk" : "location"} size={18} />
-      </span>
-      <span className="min-w-0">
-        <span className="text-on-surface block text-base leading-tight font-medium">
-          {highlight.kind === "route"
-            ? formatMinutes(highlight.minutes)
-            : highlight.kind === "buildings"
-              ? highlight.buildings.length === 1
-                ? highlight.buildings[0].name
-                : `${highlight.buildings.length} buildings`
-              : `${highlight.places.length} place${highlight.places.length === 1 ? "" : "s"}`}
-        </span>
-        <span className="text-on-surface-variant block truncate text-xs">
-          {highlight.kind === "route"
-            ? `${formatMeters(highlight.meters)} · ${highlight.from} → ${highlight.to}`
-            : highlight.kind === "buildings"
-              ? highlight.buildings.map((b) => b.code).join(" · ")
-              : highlight.near
-                ? `near ${highlight.near}`
-                : highlight.places[0]?.name}
-        </span>
-      </span>
-    </div>
+    <AnimatePresence mode="wait">
+      {highlight && (
+        <motion.div
+          key={key}
+          initial={reduce ? false : { opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="neu-panel flex items-center gap-2.5 rounded-lg px-3 py-2"
+        >
+          <span className="bg-secondary-container text-on-secondary-container flex size-8 items-center justify-center rounded-md">
+            <Icon name={highlight.kind === "route" ? "walk" : "location"} size={18} />
+          </span>
+          <span className="min-w-0">
+            <span className="text-on-surface block text-base leading-tight font-medium">
+              {highlight.kind === "route"
+                ? formatMinutes(highlight.minutes)
+                : highlight.kind === "buildings"
+                  ? highlight.buildings.length === 1
+                    ? highlight.buildings[0].name
+                    : `${highlight.buildings.length} buildings`
+                  : `${highlight.places.length} place${highlight.places.length === 1 ? "" : "s"}`}
+            </span>
+            <span className="text-on-surface-variant block truncate text-xs">
+              {highlight.kind === "route"
+                ? `${formatMeters(highlight.meters)} · ${highlight.from} → ${highlight.to}`
+                : highlight.kind === "buildings"
+                  ? highlight.buildings.map((b) => b.code).join(" · ")
+                  : highlight.near
+                    ? `near ${highlight.near}`
+                    : highlight.places[0]?.name}
+            </span>
+          </span>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
