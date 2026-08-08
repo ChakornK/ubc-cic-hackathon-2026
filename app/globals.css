@@ -874,9 +874,8 @@ html.vt-active *::after {
     from 18deg,
     var(--primary-container) 0deg,
     var(--primary) 92deg,
-    color-mix(in srgb, var(--primary) 28%, white) 142deg,
-    var(--primary) 190deg,
-    color-mix(in srgb, var(--primary-container) 82%, var(--surface)) 292deg,
+    color-mix(in srgb, var(--primary) 60%, var(--primary-container)) 142deg,
+    var(--primary) 210deg,
     var(--primary-container) 360deg
   );
   border: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border-subtle));
@@ -893,21 +892,8 @@ html.vt-active *::after {
   border-radius: inherit;
   box-shadow: var(--neu-inset-shadow);
   content: "";
-  inset: 0.28rem;
+  inset: 0.3rem;
   position: absolute;
-}
-
-.thinking-orb::after {
-  background: color-mix(in srgb, var(--primary) 20%, white);
-  border-radius: 999px;
-  box-shadow: 0 1px 5px color-mix(in srgb, var(--primary) 62%, transparent);
-  content: "";
-  height: 0.26rem;
-  left: 50%;
-  position: absolute;
-  top: 0.08rem;
-  transform: translateX(-50%);
-  width: 0.26rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
