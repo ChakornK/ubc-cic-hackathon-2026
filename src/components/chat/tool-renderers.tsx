@@ -15,6 +15,7 @@ import {
 } from "@/src/lib/api-types";
 import { formatCad, formatMeters, formatMinutes, summarizeToolInput } from "@/src/lib/format";
 import { extractBuildingHighlight, extractPlacesHighlight, extractWalkingHighlight } from "@/src/lib/walking";
+import { motion, useReducedMotion } from "motion/react";
 import { useMemo } from "react";
 
 export interface ToolCallRendererProps {
@@ -281,13 +282,21 @@ function callKeys(calls: ToolCall[]): string[] {
 }
 
 export function ToolCallsView({ calls, isLatest }: { calls: ToolCall[]; isLatest: boolean }) {
+  const reduced = useReducedMotion();
   if (calls.length === 0) return null;
   const keys = callKeys(calls);
   return (
     <div>
       <div className="mt-3 flex flex-wrap gap-2">
         {calls.map((call, i) => (
-          <ToolBadge key={keys[i]} call={call} />
+          <motion.span
+            key={keys[i]}
+            initial={reduced ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.15, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <ToolBadge call={call} />
+          </motion.span>
         ))}
       </div>
       {calls.map((call, i) => {
