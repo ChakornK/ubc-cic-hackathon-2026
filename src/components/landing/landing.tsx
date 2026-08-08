@@ -56,8 +56,14 @@ export function Landing() {
 
       {/* Header */}
       <header className="pointer-events-none fixed inset-x-0 top-0 z-40">
-        {/* Top mask: opaque through header, fades to transparent below */}
-        <div className="from-background via-background pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b to-transparent" />
+        {/* Top mask: opaque through header, perceptually smooth fade below */}
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-48"
+          style={{
+            background:
+              "linear-gradient(to bottom in oklab, var(--background) 0%, var(--background) 40%, color-mix(in oklab, var(--background) 70%, transparent) 65%, color-mix(in oklab, var(--background) 30%, transparent) 85%, transparent 100%)",
+          }}
+        />
         <div className="relative px-3 pt-3 sm:px-6">
           <nav
             className={`pointer-events-auto mx-auto flex h-14 max-w-5xl items-center justify-between rounded-2xl px-4 transition-all duration-200 ${
