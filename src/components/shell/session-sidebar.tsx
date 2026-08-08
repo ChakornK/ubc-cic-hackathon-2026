@@ -66,7 +66,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
         <button
           type="button"
           onClick={newConversation}
-          className="neu-primary-button bg-primary text-on-primary flex h-10 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium active:scale-[0.98] active:brightness-110"
+          className="neu-primary-button bg-primary text-on-primary flex h-9 w-full items-center justify-center gap-2 rounded-xl text-sm font-medium"
         >
           <Icon name="add" size={18} />
           New conversation

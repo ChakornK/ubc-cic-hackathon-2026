@@ -569,12 +569,12 @@ html.vt-active *::after {
 @media (min-width: 640px) {
   .chat-workspace {
     display: grid;
-    grid-template-columns: minmax(22rem, 42fr) minmax(3.25rem, 58fr);
+    grid-template-columns: minmax(22rem, 42fr) minmax(3.75rem, 58fr);
     transition: grid-template-columns 420ms var(--neu-ease);
   }
 
   .chat-workspace[data-map-state="collapsed"] {
-    grid-template-columns: minmax(0rem, 100fr) minmax(3.25rem, 0fr);
+    grid-template-columns: minmax(0rem, 100fr) minmax(3.75rem, 0fr);
   }
 }
 
