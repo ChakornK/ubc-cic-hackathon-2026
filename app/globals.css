@@ -396,15 +396,26 @@ html.vt-active *::after {
 /* ---- Neumorphic surface classes (Tier 2: composed, multi-property) ---- */
 
 .neu-panel {
+  background-color: var(--surface);
   box-shadow: var(--neu-surface-shadow);
 }
 
 .neu-raised {
+  background-color: var(--surface);
   box-shadow: var(--neu-surface-shadow);
 }
 
 .neu-inset {
+  background-color: var(--surface-container-low);
   box-shadow: var(--neu-inset-shadow);
+}
+
+/* Overlay surfaces only: backdrop blur + subtle drop shadow */
+.glass-neu {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background-color: color-mix(in srgb, var(--surface) 85%, transparent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .neu-button {
