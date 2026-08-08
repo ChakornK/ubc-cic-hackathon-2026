@@ -429,6 +429,27 @@ html.vt-active *::after {
   }
 }
 
+/* Map participates as its own view-transition element: the old basemap
+   screenshot crossfades into the new theme basemap, covering the tile load. */
+::view-transition-old(campus-map) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(campus-map) {
+  animation: map-crossfade 500ms ease-out forwards;
+  mix-blend-mode: normal;
+}
+
+@keyframes map-crossfade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* ---- Neumorphic surface classes (Tier 2: composed, multi-property) ---- */
 
 .neu-panel {

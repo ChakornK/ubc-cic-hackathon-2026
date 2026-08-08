@@ -541,12 +541,15 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
     if (appliedStyleRef.current !== theme) {
       appliedStyleRef.current = theme;
       const el = containerRef.current;
-      const fade = !prefersReducedMotion() && el;
+      // When a view-transition is active (circular ripple), the browser handles
+      // the visual crossfade via ::view-transition-old/new(campus-map). Skip
+      // the manual opacity fade to avoid a double-animation.
+      const vtActive = document.documentElement.classList.contains("vt-active");
+      const fade = !vtActive && !prefersReducedMotion() && el;
       if (fade) {
         el.style.transition = "opacity 200ms ease-out";
         el.style.opacity = "0";
       }
-      // ponytail: swap after fade-out completes (or immediately if reduced motion)
       const apply = () => {
         handles.map.setStyle(STYLE_URLS[theme]);
         handles.map.once("style.load", () => {
@@ -623,7 +626,7 @@ export function CampusMap({ highlight, focusNonce, showRoutes, onStatus, control
   }, [buildings, highlight, focusNonce, status, routePath]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl">
+    <div className="relative h-full w-full overflow-hidden rounded-2xl" style={{ viewTransitionName: "campus-map" }}>
       <div
         ref={containerRef}
         className="h-full w-full"
