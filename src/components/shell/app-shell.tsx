@@ -184,19 +184,30 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <SessionSidebar onCollapse={collapseSessions} />
             </div>
-            <button
-              ref={sessionsMenuRef}
-              type="button"
-              onClick={expandSessions}
-              tabIndex={sessionsCollapsed ? 0 : -1}
-              aria-label="Expand session history"
-              aria-controls="desktop-session-panel"
-              aria-expanded={!sessionsCollapsed}
-              title="Expand sessions"
-              className="sessions-menu-trigger neu-panel text-on-surface-variant hover:text-primary absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
+            <div
+              inert={!sessionsCollapsed}
+              aria-hidden={!sessionsCollapsed}
+              className={`sessions-menu-trigger neu-panel absolute inset-y-3 left-3 flex w-[3.75rem] flex-col items-center rounded-2xl py-3 ${
+                sessionsCollapsed ? "" : "pointer-events-none"
+              }`}
             >
-              <Icon name="menu" size={20} />
-            </button>
+              <button
+                ref={sessionsMenuRef}
+                type="button"
+                onClick={expandSessions}
+                tabIndex={sessionsCollapsed ? 0 : -1}
+                aria-label="Expand session history"
+                aria-controls="desktop-session-panel"
+                aria-expanded={!sessionsCollapsed}
+                title="Expand sessions"
+                className="neu-panel text-on-surface-variant hover:text-primary flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
+              >
+                <Icon name="menu" size={20} />
+              </button>
+              <span className="text-on-surface-variant mt-4 text-xs font-medium tracking-[0.06em] select-none [writing-mode:vertical-rl]">
+                Sessions
+              </span>
+            </div>
           </aside>
           <SidebarDrawer />
 
