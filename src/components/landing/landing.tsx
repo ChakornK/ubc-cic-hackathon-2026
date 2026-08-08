@@ -172,7 +172,7 @@ function LandingContent() {
                   className="inline-block"
                   initial={skipAnim ? false : heroLineVariant.hidden}
                   animate={heroLineVariant.visible}
-                  transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.6, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
                 >
                   Ask UBC anything.
                 </motion.span>
@@ -181,7 +181,7 @@ function LandingContent() {
                   className="text-primary inline-block"
                   initial={skipAnim ? false : heroLineVariant.hidden}
                   animate={heroLineVariant.visible}
-                  transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.6, delay: 0.13, ease: [0.16, 1, 0.3, 1] }}
                 >
                   Get a real answer.
                 </motion.span>
@@ -190,7 +190,7 @@ function LandingContent() {
                 className="text-on-surface-variant mx-auto mt-6 max-w-md text-base leading-relaxed sm:text-lg"
                 initial={skipAnim ? false : heroSublineVariant.hidden}
                 animate={heroSublineVariant.visible}
-                transition={{ duration: 0.5, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.5, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
               >
                 Courses, tuition, walking routes, deadlines. Reogent searches indexed campus data and responds with
                 facts you can trust.
@@ -199,12 +199,12 @@ function LandingContent() {
                 className="mt-8 flex items-center justify-center gap-3 sm:mt-10"
                 initial={skipAnim ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.65 }}
+                transition={{ delay: 0.32 }}
               >
                 <motion.div
                   initial={skipAnim ? false : heroCTAVariant.hidden}
                   animate={heroCTAVariant.visible}
-                  transition={{ type: "spring", stiffness: 80, damping: 18, delay: 0.65 }}
+                  transition={{ type: "spring", stiffness: 80, damping: 18, delay: 0.32 }}
                 >
                   <Link
                     href="/signup"
@@ -216,7 +216,7 @@ function LandingContent() {
                 <motion.div
                   initial={skipAnim ? false : heroCTAVariant.hidden}
                   animate={heroCTAVariant.visible}
-                  transition={{ type: "spring", stiffness: 80, damping: 18, delay: 0.73 }}
+                  transition={{ type: "spring", stiffness: 80, damping: 18, delay: 0.36 }}
                 >
                   <Link
                     href="/login"
