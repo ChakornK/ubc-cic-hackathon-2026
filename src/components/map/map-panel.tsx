@@ -133,7 +133,7 @@ function MapFallback() {
   );
 }
 
-function MapSurface() {
+function MapSurface({ onCollapse }: { onCollapse: () => void }) {
   const { highlight, focusNonce } = useChatShell();
   const [showRoutes, setShowRoutes] = useState(false);
   const [status, setStatus] = useState<MapStatus>("loading");
@@ -163,6 +163,7 @@ function MapSurface() {
 
           {/* Layer + view controls — floating top-right */}
           <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
+            <GlassButton label="Collapse map" icon="right" onClick={onCollapse} />
             <GlassButton
               label={showRoutes ? "Hide walking paths" : "Show walking paths"}
               icon="layer"
@@ -220,17 +221,7 @@ export function MapPanel() {
           mapOpen ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-3 opacity-0"
         }`}
       >
-        <MapSurface />
-        <button
-          type="button"
-          onClick={() => setMapOpen(false)}
-          aria-label="Collapse campus map to tab"
-          aria-expanded={true}
-          title="Collapse map"
-          className="neu-panel text-on-surface-variant hover:text-primary absolute top-3 left-3 z-20 flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
-        >
-          <Icon name="right" size={17} />
-        </button>
+        <MapSurface onCollapse={() => setMapOpen(false)} />
       </section>
 
       <aside
@@ -357,7 +348,9 @@ export function MapBottomSheet() {
             </button>
           </div>
         </div>
-        <div className="min-h-0 flex-1">{mobileMapOpen && <MapSurface />}</div>
+        <div className="min-h-0 flex-1">
+          {mobileMapOpen && <MapSurface onCollapse={() => setMobileMapOpen(false)} />}
+        </div>
       </div>
     </div>
   );
