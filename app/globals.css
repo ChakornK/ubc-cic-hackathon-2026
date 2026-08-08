@@ -61,20 +61,20 @@
   --surface-tint: #4a4e7a;
 
   /* Utility elevation (Tier 1) */
-  --elevation-sm: 4px 4px 8px rgba(174, 174, 174, 0.12), -2px -2px 6px rgba(255, 255, 255, 0.8);
-  --elevation-md: 6px 6px 14px rgba(174, 174, 174, 0.15), -3px -3px 10px rgba(255, 255, 255, 0.9);
-  --elevation-lg: 8px 8px 20px rgba(174, 174, 174, 0.18), -4px -4px 14px rgba(255, 255, 255, 1);
-  --elevation-inset: inset 2px 2px 5px rgba(174, 174, 174, 0.15), inset -2px -2px 5px rgba(255, 255, 255, 0.7);
-  --elevation-glow: 0 4px 14px rgba(74, 78, 122, 0.25);
+  --elevation-sm: 3px 3px 6px rgba(174, 174, 174, 0.08), -2px -2px 4px rgba(255, 255, 255, 0.5);
+  --elevation-md: 4px 4px 10px rgba(174, 174, 174, 0.1), -3px -3px 8px rgba(255, 255, 255, 0.6);
+  --elevation-lg: 6px 6px 16px rgba(174, 174, 174, 0.12), -4px -4px 12px rgba(255, 255, 255, 0.7);
+  --elevation-inset: inset 2px 2px 4px rgba(174, 174, 174, 0.1), inset -2px -2px 4px rgba(255, 255, 255, 0.45);
+  --elevation-glow: 0 3px 10px rgba(74, 78, 122, 0.18);
 
   /* Neumorphic primitives (Tier 2) */
-  --neu-highlight: rgba(255, 255, 255, 0.68);
-  --neu-edge: rgba(255, 255, 255, 0.58);
-  --neu-shadow: rgba(105, 112, 116, 0.13);
-  --neu-shadow-deep: rgba(91, 99, 104, 0.18);
-  --neu-panel-shadow: 8px 8px 22px var(--neu-shadow), -6px -6px 18px var(--neu-highlight);
-  --neu-raised-shadow: 5px 5px 13px var(--neu-shadow), -4px -4px 10px var(--neu-highlight);
-  --neu-inset-shadow: inset 3px 3px 7px var(--neu-shadow), inset -2px -2px 6px var(--neu-highlight);
+  --neu-highlight: rgba(255, 255, 255, 0.4);
+  --neu-edge: rgba(255, 255, 255, 0.32);
+  --neu-shadow: rgba(105, 112, 116, 0.09);
+  --neu-shadow-deep: rgba(91, 99, 104, 0.12);
+  --neu-panel-shadow: 6px 6px 16px var(--neu-shadow), -4px -4px 12px var(--neu-highlight);
+  --neu-raised-shadow: 4px 4px 10px var(--neu-shadow), -3px -3px 8px var(--neu-highlight);
+  --neu-inset-shadow: inset 2px 2px 5px var(--neu-shadow), inset -2px -2px 4px var(--neu-highlight);
 
   /* Motion */
   --neu-ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -121,19 +121,19 @@
   --accent-subtle: #1e1f2a;
   --surface-tint: #b0b4d8;
 
-  --elevation-sm: 4px 4px 8px rgba(0, 0, 0, 0.3), -2px -2px 6px rgba(50, 50, 55, 0.5);
-  --elevation-md: 6px 6px 14px rgba(0, 0, 0, 0.35), -3px -3px 10px rgba(50, 50, 55, 0.4);
-  --elevation-lg: 8px 8px 20px rgba(0, 0, 0, 0.4), -4px -4px 14px rgba(50, 50, 55, 0.3);
-  --elevation-inset: inset 2px 2px 5px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(50, 50, 55, 0.3);
-  --elevation-glow: 0 4px 14px rgba(176, 180, 216, 0.2);
+  --elevation-sm: 3px 3px 6px rgba(0, 0, 0, 0.2), -2px -2px 4px rgba(50, 50, 55, 0.3);
+  --elevation-md: 4px 4px 10px rgba(0, 0, 0, 0.25), -3px -3px 8px rgba(50, 50, 55, 0.25);
+  --elevation-lg: 6px 6px 16px rgba(0, 0, 0, 0.3), -4px -4px 12px rgba(50, 50, 55, 0.2);
+  --elevation-inset: inset 2px 2px 4px rgba(0, 0, 0, 0.2), inset -2px -2px 4px rgba(50, 50, 55, 0.2);
+  --elevation-glow: 0 3px 10px rgba(176, 180, 216, 0.15);
 
-  --neu-highlight: rgba(65, 66, 72, 0.34);
-  --neu-edge: rgba(255, 255, 255, 0.07);
-  --neu-shadow: rgba(0, 0, 0, 0.32);
-  --neu-shadow-deep: rgba(0, 0, 0, 0.45);
-  --neu-panel-shadow: 8px 8px 22px var(--neu-shadow), -5px -5px 16px var(--neu-highlight);
-  --neu-raised-shadow: 5px 5px 13px var(--neu-shadow), -4px -4px 10px var(--neu-highlight);
-  --neu-inset-shadow: inset 3px 3px 7px var(--neu-shadow), inset -2px -2px 6px var(--neu-highlight);
+  --neu-highlight: rgba(65, 66, 72, 0.2);
+  --neu-edge: rgba(255, 255, 255, 0.04);
+  --neu-shadow: rgba(0, 0, 0, 0.22);
+  --neu-shadow-deep: rgba(0, 0, 0, 0.32);
+  --neu-panel-shadow: 6px 6px 16px var(--neu-shadow), -4px -4px 12px var(--neu-highlight);
+  --neu-raised-shadow: 4px 4px 10px var(--neu-shadow), -3px -3px 8px var(--neu-highlight);
+  --neu-inset-shadow: inset 2px 2px 5px var(--neu-shadow), inset -2px -2px 4px var(--neu-highlight);
 
   --scrim: rgba(0, 0, 0, 0.5);
 }
@@ -430,8 +430,8 @@ html.vt-active *::after {
 .neu-button:hover {
   box-shadow:
     inset 0 1px 0 var(--neu-edge),
-    6px 6px 15px var(--neu-shadow),
-    -4px -4px 12px var(--neu-highlight);
+    5px 5px 12px var(--neu-shadow),
+    -3px -3px 9px var(--neu-highlight);
   transform: translateY(-1px);
 }
 
@@ -443,9 +443,9 @@ html.vt-active *::after {
 
 .neu-primary-button {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 6px 16px rgba(74, 78, 122, 0.22),
-    -3px -3px 10px var(--neu-highlight);
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 4px 12px rgba(74, 78, 122, 0.16),
+    -2px -2px 8px var(--neu-highlight);
   transition:
     filter 150ms ease-out,
     box-shadow 150ms ease-out,
@@ -454,9 +454,9 @@ html.vt-active *::after {
 
 .neu-primary-button:hover {
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    0 8px 20px rgba(74, 78, 122, 0.28),
-    -4px -4px 12px var(--neu-highlight);
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 6px 16px rgba(74, 78, 122, 0.2),
+    -3px -3px 10px var(--neu-highlight);
   filter: brightness(1.04);
   transform: translateY(-1px);
 }
@@ -898,62 +898,60 @@ html.vt-active *::after {
 /* ---- Glass-neumorphic materials ---- */
 
 .glass-neu {
-  -webkit-backdrop-filter: blur(18px) saturate(1.16);
-  backdrop-filter: blur(18px) saturate(1.16);
-  background-color: color-mix(in srgb, var(--surface) 68%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  backdrop-filter: blur(18px) saturate(1.1);
+  background-color: color-mix(in srgb, var(--surface) 72%, transparent);
   background-image: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--surface-bright) 72%, transparent) 0%,
-    color-mix(in srgb, var(--surface) 62%, transparent) 56%,
-    color-mix(in srgb, var(--accent-subtle) 52%, transparent) 100%
+    color-mix(in srgb, var(--surface-bright) 50%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 45%, transparent) 56%,
+    color-mix(in srgb, var(--accent-subtle) 35%, transparent) 100%
   );
   box-shadow:
-    inset 1px 1px 0 color-mix(in srgb, var(--surface-bright) 76%, transparent),
-    inset -1px -1px 0 color-mix(in srgb, var(--primary-container) 10%, transparent),
-    6px 7px 20px var(--neu-shadow),
-    -5px -5px 14px var(--neu-highlight);
+    inset 0 1px 0 var(--neu-edge),
+    var(--neu-panel-shadow);
 }
 
 .glass-neu-strong {
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  backdrop-filter: blur(14px) saturate(1.1);
-  background-color: color-mix(in srgb, var(--surface) 82%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  backdrop-filter: blur(14px) saturate(1.08);
+  background-color: color-mix(in srgb, var(--surface) 85%, transparent);
   background-image: linear-gradient(
     140deg,
-    color-mix(in srgb, var(--surface-bright) 84%, transparent) 0%,
-    color-mix(in srgb, var(--surface) 78%, transparent) 62%,
-    color-mix(in srgb, var(--accent-subtle) 60%, transparent) 100%
+    color-mix(in srgb, var(--surface-bright) 60%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 55%, transparent) 62%,
+    color-mix(in srgb, var(--accent-subtle) 40%, transparent) 100%
   );
   box-shadow:
-    inset 1px 1px 0 color-mix(in srgb, var(--surface-bright) 78%, transparent),
+    inset 0 1px 0 var(--neu-edge),
     var(--neu-panel-shadow);
 }
 
 .glass-neu-inset {
-  -webkit-backdrop-filter: blur(16px) saturate(1.08);
-  backdrop-filter: blur(16px) saturate(1.08);
-  background-color: color-mix(in srgb, var(--surface-container-low) 76%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.06);
+  backdrop-filter: blur(16px) saturate(1.06);
+  background-color: color-mix(in srgb, var(--surface-container-low) 80%, transparent);
   background-image: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--surface) 66%, transparent),
-    color-mix(in srgb, var(--surface-container-low) 72%, transparent)
+    color-mix(in srgb, var(--surface) 50%, transparent),
+    color-mix(in srgb, var(--surface-container-low) 55%, transparent)
   );
   box-shadow:
     var(--neu-inset-shadow),
-    inset 0 1px 0 color-mix(in srgb, var(--surface-bright) 54%, transparent);
+    inset 0 1px 0 var(--neu-edge);
 }
 
 .glass-neu-compact {
-  -webkit-backdrop-filter: blur(12px) saturate(1.14);
-  backdrop-filter: blur(12px) saturate(1.14);
-  background-color: color-mix(in srgb, var(--surface) 74%, transparent);
+  -webkit-backdrop-filter: blur(12px) saturate(1.08);
+  backdrop-filter: blur(12px) saturate(1.08);
+  background-color: color-mix(in srgb, var(--surface) 78%, transparent);
   background-image: linear-gradient(
     135deg,
-    color-mix(in srgb, var(--surface-bright) 78%, transparent),
-    color-mix(in srgb, var(--surface) 66%, transparent)
+    color-mix(in srgb, var(--surface-bright) 55%, transparent),
+    color-mix(in srgb, var(--surface) 50%, transparent)
   );
   box-shadow:
-    inset 1px 1px 0 color-mix(in srgb, var(--surface-bright) 70%, transparent),
+    inset 0 1px 0 var(--neu-edge),
     var(--neu-raised-shadow);
 }
 
