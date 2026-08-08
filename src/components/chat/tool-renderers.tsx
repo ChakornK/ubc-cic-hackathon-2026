@@ -42,7 +42,7 @@ function ToolBadge({ call }: { call: ToolCall }) {
   return (
     <span
       className={`inline-flex max-w-full items-center gap-2 rounded-lg px-2 py-1 font-mono text-xs ${
-        failed ? "bg-error-container/40 text-on-surface-variant" : "bg-surface-container-low text-on-surface-variant"
+        failed ? "bg-error-container/40 text-on-surface-variant" : "bg-secondary-container/15 text-on-surface-variant"
       }`}
       title={failed && isToolError(call.result) ? call.result.message : undefined}
     >
@@ -167,7 +167,7 @@ function WalkingDistanceRenderer({ call }: ToolCallRendererProps) {
       </span>
       <span className="min-w-0 flex-1">
         <span className="text-on-surface block text-base font-medium">{formatMinutes(highlight.minutes)}</span>
-        <span className="text-muted block truncate text-xs">
+        <span className="text-on-surface-variant block truncate text-xs">
           {formatMeters(highlight.meters)} · {highlight.from} → {highlight.to}
         </span>
       </span>

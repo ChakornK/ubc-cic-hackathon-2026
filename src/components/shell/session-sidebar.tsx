@@ -123,7 +123,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
                         title={session.title}
                         className={`focus-visible:ring-primary/40 flex h-9 w-full items-center gap-2 rounded-lg px-3 py-2 text-left transition-all duration-150 focus-visible:ring-2 focus-visible:ring-offset-1 ${
                           active
-                            ? "bg-accent-subtle text-primary"
+                            ? "bg-accent-subtle text-primary border-primary border-l-2"
                             : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                         }`}
                       >
