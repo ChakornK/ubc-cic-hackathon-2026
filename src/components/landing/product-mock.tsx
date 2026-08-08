@@ -2,46 +2,44 @@
 // glass-neu-strong chat panel + glass-neu-strong map panel, no borders,
 // same bubble radii, same composer, same tool badge styling.
 
+import { Icon } from "@/src/components/icons";
+
 export function ProductMock() {
   return (
     <div aria-hidden="true" className="app-shell-canvas mx-auto flex w-full max-w-[960px] gap-3 rounded-[1.75rem] p-3">
-      {/* Chat panel — glass-neu-strong, same as real chat-panel.tsx */}
+      {/* Chat panel */}
       <div className="glass-neu-strong flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl">
-        {/* Header — no border, transparent bg, same as chat-panel.tsx:300 */}
+        {/* Header */}
         <div className="flex shrink-0 items-center justify-between bg-transparent px-4 py-3">
           <span className="text-on-surface text-sm font-medium tracking-[-0.01em]">Walking to the Nest</span>
         </div>
 
-        {/* Message well — same class as the real one */}
+        {/* Message well */}
         <div className="chat-message-well flex min-h-[280px] flex-1 flex-col gap-6 overflow-hidden p-4 sm:min-h-[340px] sm:p-6">
-          {/* User message — same classes as message.tsx:62 */}
+          {/* User message */}
           <div className="flex justify-end">
             <div className="bg-accent-subtle text-on-surface max-w-[85%] rounded-[16px_16px_5px_16px] px-4 py-3 text-sm leading-relaxed">
               How far is ICCS to the Nest?
             </div>
           </div>
 
-          {/* Assistant message — same classes as message.tsx:182-191 */}
+          {/* Assistant message */}
           <div>
-            {/* Avatar — same as message.tsx:184-189 */}
             <div className="mb-2 flex items-center gap-2">
               <span className="bg-primary-container text-on-primary-container flex size-7 items-center justify-center rounded-lg text-[0.6875rem] font-medium">
                 R
               </span>
               <span className="text-muted text-xs font-medium">Reogent</span>
             </div>
-            {/* Bubble — same as message.tsx:191 */}
             <div className="bg-surface max-w-[88%] rounded-[16px_16px_16px_5px] px-4 py-3">
               <p className="text-on-surface text-sm leading-relaxed">
                 ICCS to the AMS Nest is about <span className="font-mono">650 m</span>, roughly an{" "}
                 <span className="font-medium">8 minute walk</span> heading north through campus.
               </p>
-              {/* Walking distance card — same as tool-renderers.tsx:164 */}
+              {/* Walking distance card */}
               <div className="bg-surface-container-low mt-3 flex items-center gap-3 rounded-lg p-3">
                 <span className="bg-secondary-container text-on-secondary-container flex size-9 shrink-0 items-center justify-center rounded-lg">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-                    <path d="M13.5 5.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM9.9 19.6l-1.8 3-1.7-1 2.4-4.1.9-3.1-2 1.1V19H5.7v-4.6l4.6-2.6a2 2 0 0 1 2.7.8l1 1.8a4.9 4.9 0 0 0 3.4 2.3v2a6.9 6.9 0 0 1-4.7-2.4l-.7 2.7 2 2.1V23h-2v-2.2l-2.1-1.2Z" />
-                  </svg>
+                  <Icon name="walk" size={18} />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="text-on-surface block text-base font-medium">8 min walk</span>
@@ -54,32 +52,20 @@ export function ProductMock() {
             </div>
           </div>
 
-          {/* Composer — same as chat-input.tsx:72 */}
+          {/* Composer */}
           <div className="chat-composer neu-inset bg-surface-container-low mt-auto flex items-center rounded-2xl p-1.5">
             <span className="text-muted min-w-0 flex-1 truncate px-3 py-2 text-sm">Ask about courses, campus…</span>
             <span className="neu-primary-button bg-primary text-on-primary flex size-9 shrink-0 items-center justify-center rounded-xl">
-              <svg
-                viewBox="0 0 24 24"
-                width="16"
-                height="16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M12 19V5M5 12l7-7 7 7" />
-              </svg>
+              <Icon name="arrowUp" size={16} />
             </span>
           </div>
         </div>
       </div>
 
-      {/* Map panel — glass-neu-strong, same as map-panel.tsx:198 */}
+      {/* Map panel */}
       <div className="glass-neu-strong relative hidden flex-1 overflow-hidden rounded-2xl sm:flex">
+        {/* Map illustration (decorative SVG — not an icon) */}
         <svg viewBox="0 0 400 400" className="h-full w-full" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          {/* Buildings */}
           <g fill="var(--surface-container-high)" stroke="var(--border)" strokeWidth="0.8">
             <rect x="40" y="50" width="70" height="45" rx="4" transform="rotate(5 75 72)" />
             <rect x="240" y="70" width="85" height="50" rx="4" transform="rotate(5 282 95)" />
@@ -88,7 +74,6 @@ export function ProductMock() {
             <rect x="150" y="140" width="50" height="38" rx="4" transform="rotate(5 175 159)" />
             <rect x="320" y="150" width="40" height="55" rx="4" transform="rotate(5 340 177)" />
           </g>
-          {/* Route */}
           <path
             d="M 90 310 C 120 270 160 220 200 170 C 230 130 270 110 300 90"
             fill="none"
@@ -98,11 +83,9 @@ export function ProductMock() {
             strokeDasharray="10 6"
             opacity="0.85"
           />
-          {/* Endpoints */}
           <circle cx="90" cy="310" r="8" fill="var(--primary)" stroke="var(--surface-bright)" strokeWidth="3" />
           <circle cx="300" cy="90" r="8" fill="var(--primary)" stroke="var(--surface-bright)" strokeWidth="3" />
           <circle cx="300" cy="90" r="3" fill="var(--surface-bright)" />
-          {/* Labels */}
           <text
             x="108"
             y="326"
@@ -125,29 +108,15 @@ export function ProductMock() {
           </text>
         </svg>
 
-        {/* Collapse button — same as map-panel.tsx:209 */}
+        {/* Collapse button */}
         <span className="glass-neu-compact text-on-surface-variant absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl">
-          <svg
-            viewBox="0 0 24 24"
-            width="15"
-            height="15"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m10 7 5 5-5 5" />
-          </svg>
+          <Icon name="right" size={15} />
         </span>
 
-        {/* Route info card — same as RouteInfoCard in map-panel.tsx */}
+        {/* Route info card */}
         <div className="glass-neu-compact absolute top-3 right-3 flex items-center gap-2 rounded-lg px-3 py-2">
           <span className="bg-secondary-container text-on-secondary-container flex size-8 items-center justify-center rounded-lg">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
-              <path d="M13.5 5.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4ZM9.9 19.6l-1.8 3-1.7-1 2.4-4.1.9-3.1-2 1.1V19H5.7v-4.6l4.6-2.6a2 2 0 0 1 2.7.8l1 1.8a4.9 4.9 0 0 0 3.4 2.3v2a6.9 6.9 0 0 1-4.7-2.4l-.7 2.7 2 2.1V23h-2v-2.2l-2.1-1.2Z" />
-            </svg>
+            <Icon name="walk" size={16} />
           </span>
           <span>
             <span className="text-on-surface block text-base leading-tight font-medium">8 min</span>
