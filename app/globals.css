@@ -474,9 +474,9 @@ html.vt-active *::after {
 .app-shell-canvas {
   background: linear-gradient(
     135deg,
-    var(--surface-bright) 0%,
+    color-mix(in srgb, var(--surface-bright) 30%, var(--background)) 0%,
     var(--background) 50%,
-    var(--surface-container-low) 100%
+    color-mix(in srgb, var(--surface-container-low) 30%, var(--background)) 100%
   );
 }
 
