@@ -348,7 +348,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
               <Icon name="school" size={30} />
             </span>
             <h2 className="text-on-surface mt-6 text-xl font-medium tracking-[-0.025em]">
-              {GREETINGS[Math.floor(Date.now() / 86400000) % GREETINGS.length]}
+              {GREETINGS[Math.floor(Math.random() * GREETINGS.length)]}
             </h2>
             <p className="text-on-surface-variant mt-2 max-w-80 text-sm leading-relaxed">
               Courses, prerequisites, tuition, walking routes, study spaces, grades — I look it up in real UBC data so
