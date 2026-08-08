@@ -146,7 +146,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               href="/"
               aria-label="Go to Reogent homepage"
-              className="group flex min-w-0 items-center gap-2.5 rounded-xl py-1 pr-2 focus-visible:outline-offset-4"
+              className="group flex min-w-0 items-center gap-2 rounded-xl py-1 pr-2 focus-visible:outline-offset-4"
             >
               <span className="bg-surface-container-low text-primary hidden size-8 shrink-0 items-center justify-center rounded-lg transition-transform duration-150 group-hover:-translate-y-0.5 sm:flex">
                 <Icon name="school" size={17} />

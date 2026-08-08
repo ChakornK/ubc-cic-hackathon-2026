@@ -224,7 +224,7 @@ export function TypingIndicator({ slow }: { slow: boolean }) {
         </span>
         <span className="text-muted text-xs font-medium">Reogent</span>
       </div>
-      <div className="bg-surface inline-flex items-center gap-3 rounded-[16px_16px_16px_5px] px-3.5 py-3">
+      <div className="bg-surface inline-flex items-center gap-3 rounded-[16px_16px_16px_5px] px-4 py-3">
         <span className="thinking-orb" aria-hidden="true" />
         <span className="text-on-surface text-sm font-medium">{slow ? "Still working" : "Thinking"}</span>
       </div>

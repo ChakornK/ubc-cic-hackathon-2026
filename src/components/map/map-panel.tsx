@@ -216,7 +216,7 @@ export function MapPanel() {
         inert={mapOpen}
         aria-hidden={mapOpen}
         aria-label="Collapsed campus map"
-        className={`map-tab-layer glass-neu text-on-surface-variant absolute inset-y-0 right-0 flex w-[3.75rem] cursor-default flex-col items-center rounded-2xl py-2.5 ${
+        className={`map-tab-layer glass-neu text-on-surface-variant absolute inset-y-0 right-0 flex w-[3.75rem] cursor-default flex-col items-center rounded-2xl py-3 ${
           mapOpen ? "pointer-events-none translate-x-2 opacity-0" : "translate-x-0 opacity-100"
         }`}
       >
