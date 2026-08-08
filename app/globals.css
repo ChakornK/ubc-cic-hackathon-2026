@@ -414,7 +414,8 @@ html.vt-active *::after {
 .glass-neu {
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  background-color: color-mix(in srgb, var(--surface) 85%, transparent);
+  background-color: color-mix(in srgb, var(--surface) 50%, transparent);
+  border: 1px solid var(--border-subtle);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
