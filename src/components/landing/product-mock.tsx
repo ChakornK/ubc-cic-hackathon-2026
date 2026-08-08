@@ -1,7 +1,6 @@
 // Product mock for the landing page. Mirrors the actual app-shell structure:
 // neu-panel chat panel + neu-panel map panel, same bubble radii, same composer.
 // Accepts motion values from parent for scroll-driven animations:
-// - routeProgress: drives SVG path draw
 // - inView: triggers staggered message entrance
 // - chatZ/mapZ: drives Z-depth separation
 
@@ -9,9 +8,9 @@
 
 import { Icon } from "@/src/components/icons";
 import { motion, type MotionValue } from "motion/react";
+import Image from "next/image";
 
 interface ProductMockProps {
-  routeProgress?: MotionValue<number>;
   inView: boolean;
   chatZ?: MotionValue<number>;
   mapZ?: MotionValue<number>;
@@ -22,7 +21,7 @@ const msgVariant = {
   visible: { opacity: 1, y: 0 },
 };
 
-export function ProductMock({ routeProgress, inView, chatZ, mapZ }: ProductMockProps) {
+export function ProductMock({ inView, chatZ, mapZ }: ProductMockProps) {
   return (
     <div
       aria-hidden="true"
@@ -67,8 +66,8 @@ export function ProductMock({ routeProgress, inView, chatZ, mapZ }: ProductMockP
             </div>
             <div className="bg-surface max-w-[88%] rounded-[16px_16px_16px_5px] px-4 py-3">
               <p className="text-on-surface text-sm leading-relaxed">
-                ICCS to the AMS Nest is about <span className="font-mono">650 m</span>, roughly an{" "}
-                <span className="font-medium">8 minute walk</span> heading north through campus.
+                ICCS to the AMS Nest is about <span className="font-mono">680 m</span>, roughly a{" "}
+                <span className="font-medium">9 minute walk</span> heading north through campus.
               </p>
               {/* Walking distance card */}
               <div className="bg-surface-container-low mt-3 flex items-center gap-3 rounded-lg p-3">
@@ -76,8 +75,8 @@ export function ProductMock({ routeProgress, inView, chatZ, mapZ }: ProductMockP
                   <Icon name="walk" size={18} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="text-on-surface block text-base font-medium">8 min walk</span>
-                  <span className="text-on-surface-variant block truncate text-xs">650 m · ICCS → Nest</span>
+                  <span className="text-on-surface block text-base font-medium">9 min walk</span>
+                  <span className="text-on-surface-variant block truncate text-xs">680 m · ICCS → Nest</span>
                 </span>
                 <span className="border-primary text-primary shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium">
                   Show on map
@@ -105,52 +104,20 @@ export function ProductMock({ routeProgress, inView, chatZ, mapZ }: ProductMockP
       <motion.div
         className="neu-panel relative hidden flex-1 overflow-hidden rounded-2xl sm:flex"
         style={mapZ ? { z: mapZ } : undefined}
+        initial={{ opacity: 0 }}
+        animate={inView ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
-        {/* Map illustration with animated route */}
-        <svg viewBox="0 0 400 400" className="h-full w-full" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <g fill="var(--surface-container-high)" stroke="var(--border)" strokeWidth="0.8">
-            <rect x="40" y="50" width="70" height="45" rx="4" transform="rotate(5 75 72)" />
-            <rect x="240" y="70" width="85" height="50" rx="4" transform="rotate(5 282 95)" />
-            <rect x="60" y="180" width="55" height="65" rx="4" transform="rotate(5 87 212)" />
-            <rect x="260" y="240" width="65" height="45" rx="4" transform="rotate(5 292 262)" />
-            <rect x="150" y="140" width="50" height="38" rx="4" transform="rotate(5 175 159)" />
-            <rect x="320" y="150" width="40" height="55" rx="4" transform="rotate(5 340 177)" />
-          </g>
-          {/* Animated route path */}
-          <motion.path
-            d="M 90 310 C 120 270 160 220 200 170 C 230 130 270 110 300 90"
-            fill="none"
-            stroke="var(--primary)"
-            strokeWidth="4"
-            strokeLinecap="round"
-            opacity="0.85"
-            style={routeProgress ? { pathLength: routeProgress } : undefined}
-            strokeDasharray={routeProgress ? undefined : "10 6"}
-          />
-          <circle cx="90" cy="310" r="8" fill="var(--primary)" stroke="var(--surface-bright)" strokeWidth="3" />
-          <circle cx="300" cy="90" r="8" fill="var(--primary)" stroke="var(--surface-bright)" strokeWidth="3" />
-          <circle cx="300" cy="90" r="3" fill="var(--surface-bright)" />
-          <text
-            x="108"
-            y="326"
-            fontSize="12"
-            fontWeight="500"
-            fontFamily="var(--font-mono)"
-            fill="var(--on-surface-variant)"
-          >
-            ICCS
-          </text>
-          <text
-            x="314"
-            y="86"
-            fontSize="12"
-            fontWeight="500"
-            fontFamily="var(--font-mono)"
-            fill="var(--on-surface-variant)"
-          >
-            Nest
-          </text>
-        </svg>
+        {/* Map preview screenshot */}
+        <Image
+          src="/map-preview.png"
+          alt=""
+          fill
+          className="object-cover"
+          sizes="(min-width: 640px) 50vw, 0px"
+          draggable={false}
+          priority
+        />
 
         {/* Collapse button */}
         <span className="neu-panel text-on-surface-variant absolute top-3 left-3 flex size-9 items-center justify-center rounded-xl">
@@ -163,8 +130,8 @@ export function ProductMock({ routeProgress, inView, chatZ, mapZ }: ProductMockP
             <Icon name="walk" size={16} />
           </span>
           <span>
-            <span className="text-on-surface block text-base leading-tight font-medium">8 min</span>
-            <span className="text-on-surface-variant block text-xs">650 m</span>
+            <span className="text-on-surface block text-base leading-tight font-medium">9 min</span>
+            <span className="text-on-surface-variant block text-xs">680 m</span>
           </span>
         </div>
       </motion.div>

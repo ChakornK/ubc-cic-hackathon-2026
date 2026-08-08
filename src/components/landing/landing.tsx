@@ -79,14 +79,11 @@ function LandingContent() {
   const mockInView = useInView(productMockRef, { once: true, amount: 0.15 });
   const ctaInView = useInView(ctaSectionRef, { once: true, amount: 0.4 });
 
-  // Scroll progress for product mock route draw
+  // Scroll progress for product mock panel depth
   const { scrollYProgress: productProgress } = useScroll({
     target: productSectionRef,
     offset: ["start end", "end start"],
   });
-
-  // Route draws from scroll progress 0.15 to 0.65
-  const routeProgress = useTransform(productProgress, [0.15, 0.65], [0, 1]);
 
   // Z-depth separation on panels
   const chatZ = useTransform(productProgress, [0.1, 0.5], [0, 20]);
@@ -243,7 +240,6 @@ function LandingContent() {
             </div>
             <div ref={productMockRef}>
               <ProductMock
-                routeProgress={skipAnim ? undefined : routeProgress}
                 inView={mockInView || skipAnim}
                 chatZ={skipAnim ? undefined : chatZ}
                 mapZ={skipAnim ? undefined : mapZ}
