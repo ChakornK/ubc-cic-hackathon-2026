@@ -77,6 +77,7 @@ export function SessionSidebar({ onCollapse }: SessionSidebarProps = {}) {
       <nav
         aria-label="Chat sessions"
         aria-busy={sessionsLoading}
+        aria-live="polite"
         className="bg-surface-container-low/60 min-h-0 flex-1 overflow-y-auto rounded-xl p-2"
       >
         {sessionsLoading && (

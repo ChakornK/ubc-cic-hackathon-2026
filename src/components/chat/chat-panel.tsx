@@ -315,9 +315,25 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         })
         .catch((error: unknown) => {
           if (!alive.current) return;
-          // Abort is not an error — keep whatever text has streamed
-          if (error instanceof DOMException && error.name === "AbortError") return;
+          // Abort is not an error — mark the partial message as stopped so the user
+          // knows the response was intentionally cut short.
+          if (error instanceof DOMException && error.name === "AbortError") {
+            if (streamedText) {
+              updateMessage({ content: streamedText, stopped: true });
+            } else {
+              // No content streamed — remove the empty placeholder
+              setMessages((current) => current.filter((m) => m.id !== streamId));
+            }
+            return;
+          }
           pendingRetry.current = { conversation };
+          // Remove the empty placeholder on error — the error banner communicates the failure
+          if (!streamedText && !interstitialBlocks.length) {
+            setMessages((current) => current.filter((m) => m.id !== streamId));
+          } else {
+            // Partial content exists — mark it as failed
+            updateMessage({ content: streamedText, stopped: true });
+          }
           const message =
             error instanceof ApiError && error.status !== 500
               ? error.message
@@ -349,7 +365,14 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
 
   const retry = useCallback(() => {
     const pending = pendingRetry.current;
-    if (pending) runExchange(pending.conversation);
+    if (!pending) return;
+    // Remove any stopped/empty assistant message left from the failed attempt
+    setMessages((current) => {
+      const last = current[current.length - 1];
+      if (last?.role === "assistant" && last.stopped) return current.slice(0, -1);
+      return current;
+    });
+    runExchange(pending.conversation);
   }, [runExchange]);
 
   const stopGenerating = useCallback(() => {
@@ -375,10 +398,10 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
         className="chat-message-well min-h-0 flex-1 overflow-y-auto p-4 sm:p-6"
       >
         {historyState === "loading" && (
-          <output aria-label="Loading conversation" className="flex flex-col gap-6">
+          <div role="status" aria-label="Loading conversation" className="flex flex-col gap-6">
             <div className="neu-inset bg-surface-container h-12 w-3/5 animate-pulse self-end rounded-[16px_16px_5px_16px]" />
             <div className="neu-inset bg-surface-container h-20 w-4/5 animate-pulse rounded-[16px_16px_16px_5px]" />
-          </output>
+          </div>
         )}
 
         {historyState === "failed" && (
@@ -428,7 +451,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                 Courses, prerequisites, tuition, walking routes, study spaces, grades — I look it up in real UBC data so
                 you don't have to.
               </p>
-              <div className="mt-6 flex max-w-xl flex-wrap justify-center gap-3">
+              <nav aria-label="Suggested questions" className="mt-6 flex max-w-xl flex-wrap justify-center gap-3">
                 {randomSuggestions.map((suggestion, i) => (
                   <button
                     key={suggestion}
@@ -441,7 +464,7 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                     {suggestion}
                   </button>
                 ))}
-              </div>
+              </nav>
             </motion.div>
           )}
         </AnimatePresence>
@@ -485,16 +508,26 @@ export function ChatPanel({ sessionId }: { sessionId: string }) {
                   <Icon name="alert" size={16} className="text-error shrink-0" />
                   {sendError}
                 </p>
-                <button
-                  type="button"
-                  onClick={retry}
-                  disabled={sending}
-                  aria-describedby="send-error-msg"
-                  className="neu-button bg-surface text-on-surface flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-medium disabled:pointer-events-none disabled:opacity-60"
-                >
-                  <Icon name="refresh2" size={14} />
-                  Retry
-                </button>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="button"
+                    onClick={retry}
+                    disabled={sending}
+                    aria-describedby="send-error-msg"
+                    className="neu-button bg-surface text-on-surface flex h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-medium disabled:pointer-events-none disabled:opacity-60"
+                  >
+                    <Icon name="refresh2" size={14} />
+                    Retry
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSendError(null)}
+                    aria-label="Dismiss error"
+                    className="text-on-surface-variant hover:text-on-surface flex size-9 items-center justify-center rounded-xl transition-colors"
+                  >
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
               </div>
             )}
           </div>

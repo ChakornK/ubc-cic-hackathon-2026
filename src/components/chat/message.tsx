@@ -17,6 +17,8 @@ export interface DisplayMessage {
   content: string;
   toolCalls?: ToolCall[];
   warning?: string;
+  /** True when generation was stopped or errored with partial content. */
+  stopped?: boolean;
   /** Interstitial blocks shown before the final answer (thinking + tool calls). */
   interstitial?: InterstitialBlock[];
 }
@@ -227,6 +229,12 @@ export const AssistantMessage = memo(function AssistantMessage({
           </div>
         )}
         {message.content && <AssistantMarkdown content={message.content} />}
+        {message.stopped && (
+          <p className="text-muted mt-2 flex items-center gap-1.5 text-xs">
+            <Icon name="stop" size={12} className="shrink-0" />
+            Response stopped
+          </p>
+        )}
         {!interstitial.length && <ToolCallsView calls={tools} isLatest={isLatest} />}
       </div>
     </div>

@@ -233,7 +233,7 @@ export function MapPanel() {
           onClick={() => setMapOpen(true)}
           tabIndex={mapOpen ? -1 : 0}
           aria-label="Expand campus map"
-          aria-expanded={false}
+          aria-expanded={!mapOpen}
           title="Expand campus map"
           className="neu-panel text-primary hover:text-on-surface flex size-9 items-center justify-center rounded-xl transition-colors duration-150"
         >
@@ -269,7 +269,7 @@ export function MapBottomSheet() {
 
   function onPointerDown(event: React.PointerEvent) {
     drag.current = { startY: event.clientY, delta: 0 };
-    (event.target as HTMLElement).setPointerCapture(event.pointerId);
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
   }
 
   function onPointerMove(event: React.PointerEvent) {

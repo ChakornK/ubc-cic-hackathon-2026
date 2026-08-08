@@ -3,7 +3,10 @@
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <div className="bg-background flex min-h-svh items-center justify-center px-4">
-      <div className="neu-panel bg-surface flex w-full max-w-sm flex-col items-center rounded-2xl p-8 text-center">
+      <div
+        role="alert"
+        className="neu-panel bg-surface flex w-full max-w-sm flex-col items-center rounded-2xl p-8 text-center"
+      >
         <h1 className="text-on-surface mb-2 text-2xl font-medium tracking-[-0.02em]">Something went wrong</h1>
         <p className="text-muted mb-6 text-sm">
           {error.message ? error.message.slice(0, 200) : "An unexpected error occurred."}

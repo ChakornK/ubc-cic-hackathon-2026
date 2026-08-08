@@ -524,6 +524,7 @@ html.vt-active *::after {
   box-shadow:
     inset 0 10px 24px -22px var(--neu-shadow-deep),
     inset 0 -10px 24px -22px var(--neu-shadow-deep);
+  overscroll-behavior: contain;
 }
 
 .shell-body {

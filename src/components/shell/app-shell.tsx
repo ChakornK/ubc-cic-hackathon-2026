@@ -84,7 +84,7 @@ function SidebarDrawer() {
       <button
         type="button"
         tabIndex={-1}
-        aria-label="Close sessions"
+        aria-hidden="true"
         onClick={() => setSidebarOpen(false)}
         className={`bg-scrim fixed inset-0 z-40 transition-opacity duration-250 ${sidebarOpen ? "opacity-100" : "opacity-0"}`}
       />
